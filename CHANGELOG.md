@@ -7,6 +7,9 @@
 ## [0.1.1]
 ### 추가
 - `docs/DOMAIN-MODEL.md` 문서 추가
+- `docs/PACKAGE-STRUCTURE.md` 문서 추가
+- `Auth` 도메인 및 패키지 기준 추가
+- 인증 관련 이력을 `auth` 기준으로 재배치
 
 ## [0.1.0]
 ### 추가
