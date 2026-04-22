@@ -25,6 +25,11 @@ com.hyeon.guardrail
 - 하나의 도메인 안에서 필요한 역할은 하위 패키지로 구분한다.
 - 도메인 간 객체 참조는 연관관계 매핑 대신 식별자 값으로만 다룬다.
 - 특정 도메인 내부 구현을 다른 도메인이 직접 참조하지 않는다.
+- controller 계층에서는 비즈니스 로직을 수행하지 않는다.
+- service 계층에서만 비즈니스 로직을 수행한다.
+- repository 계층은 데이터 저장 및 조회 책임만 가진다.
+- dto는 계층 간 데이터 전달 목적 외 사용하지 않는다.
+- entity를 controller 응답으로 직접 반환하지 않는다.
 
 ## 4. 도메인별 기본 구조
 각 도메인은 아래 구조를 기본으로 한다.
@@ -39,11 +44,15 @@ com.hyeon.guardrail
 ```
 
 ### domain
-핵심 도메인 모델을 둔다.
+핵심 영속 도메인 모델을 둔다.
 
 구성:
 - entity
 - enum
+
+제약:
+- entity는 자기 상태를 변경하는 핵심 규칙과 자기 검증을 가질 수 있다.
+- 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
 
 예:
 - User
@@ -54,28 +63,43 @@ com.hyeon.guardrail
 영속성 관련 코드를 둔다.
 
 하위 구성:
-- repository
-- Querydsl 구현체 (`~RepositoryQuery`)
+- Spring Data JPA Repository (`~Repository`)
+- Querydsl 전용 단일 조회 클래스 (`~RepositoryQuery`)
+
+제약:
+- repository는 비즈니스 로직을 포함하지 않는다.
+- 조회 로직은 `~RepositoryQuery` 단일 클래스로 분리한다.
+- 네이밍 규칙을 반드시 준수한다.
+- service는 필요에 따라 `~Repository`와 `~RepositoryQuery`를 함께 호출한다.
 
 ### service
 도메인 서비스와 비즈니스 로직을 둔다.
 
-하위 구성:
-- service
+제약:
+- 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
+- controller 또는 repository에서 비즈니스 로직을 수행하지 않는다.
 
 ### dto
-계층 간 데이터 전달 객체를 둔다.
+dto는 계층 간 데이터 전달을 위한 객체를 둔다.
 
 하위 구성:
-- request dto
-- response dto
-- command/query dto
+- request
+- response
+
+제약:
+- dto는 외부 입출력 또는 계층 간 전달 목적으로만 사용한다.
+- entity를 직접 노출하지 않고 dto를 통해 변환한다.
 
 ### controller
 API 입출력 코드를 둔다.
 
 하위 구성:
 - controller
+
+제약:
+- controller는 request/response 처리만 담당한다.
+- 비즈니스 로직을 포함하지 않는다.
+- service 계층만 호출한다.
 
 ## 5. 예시 구조
 예시로 `user` 도메인은 아래와 같이 구성한다.
@@ -110,6 +134,11 @@ com.hyeon.guardrail.user
 - 공통 유틸
 - 보안 관련 공통 기능
 
+제약:
+- 특정 도메인에만 필요한 로직은 common에 두지 않는다.
+- 두 개 이상의 도메인에서 재사용 근거가 명확할 때만 common으로 이동한다.
+- 공통화보다 도메인 응집도를 우선한다.
+
 ## 7. 현재 도메인 기준 매핑
 현재 정의된 도메인은 아래 패키지에 배치한다.
 
@@ -118,6 +147,8 @@ com.hyeon.guardrail.user
 - `Product`, `ProductHistory` -> `product`
 - `Category` -> `category`
 - `FileAttachment` -> `file`
+
+인증 및 세션 관련 도메인은 사용자 도메인과 분리하여 인증 경계 기준으로 auth 패키지에 배치한다.
 
 ## 8. 문서 위치 기준
 도메인별 문서는 `src` 하위가 아니라 `docs` 하위에서 관리한다.
