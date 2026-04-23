@@ -4,6 +4,12 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.7]
+### 추가
+- `docs/API-SPEC.md` 문서 추가
+- API 에러 코드, 정렬 파라미터, 날짜/시간 포맷, success message 기준 추가
+- API prefix, 컬렉션 응답, 응답 구조 일관성, Swagger/OpenAPI 기준 추가
+
 ## [0.1.6]
 ### 추가
 - `docs/domains/FILE-ATTACHMENT.md` 문서 추가
