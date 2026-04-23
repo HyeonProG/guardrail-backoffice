@@ -4,6 +4,12 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.8]
+### 추가
+- `docs/CODE-CONVENTIONS.md` 문서 추가
+- DTO validation, entity 생성 방식, Javadoc 작성 기준 추가
+- Service 트랜잭션, Optional, 컬렉션, 로그, equals/hashCode 기준 추가
+
 ## [0.1.7]
 ### 추가
 - `docs/API-SPEC.md` 문서 추가
