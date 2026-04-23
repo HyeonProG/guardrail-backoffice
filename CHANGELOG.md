@@ -4,6 +4,11 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.5]
+### 추가
+- `docs/domains/CATEGORY.md` 문서 추가
+- 카테고리 계층 및 soft delete 판단 기준 추가
+
 ## [0.1.4]
 ### 추가
 - `docs/domains/PRODUCT.md` 문서 추가
