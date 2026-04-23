@@ -4,6 +4,13 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.3]
+### 추가
+- `docs/domains/AUTH.md` 문서 추가
+- 인증 토큰과 비밀번호 저장 기준 추가
+- `BaseEntity`와 `SoftDeleteEntity` 분리 기준 추가
+- Auth 도메인 soft delete 제외 기준 추가
+
 ## [0.1.2]
 ### 추가
 - `docs/domains/USER.md` 문서 추가

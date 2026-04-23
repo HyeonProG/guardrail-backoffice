@@ -42,13 +42,13 @@
 | `name` | 사용자 이름 |
 | `role` | 사용자 역할 |
 | `status` | 사용자 사용 상태 |
-| `createdAt` | 생성일시, `BaseEntity` 상속 |
-| `updatedAt` | 수정일시, `BaseEntity` 상속 |
-| `deleted` | soft delete 여부, `BaseEntity` 상속 |
+| `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
+| `updatedAt` | 수정일시, `SoftDeleteEntity` 상속 |
+| `deleted` | soft delete 여부, `SoftDeleteEntity` 상속 |
 
 ## 5. 설계 규칙
 - PK는 UUID를 사용한다.
-- 모든 엔티티는 `BaseEntity`를 상속한다.
+- `User`는 `SoftDeleteEntity`를 상속한다.
 - 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
 - `email`은 unique 제약을 가진다.
 - 다른 도메인에서 사용자를 참조할 때 객체 연관관계를 사용하지 않는다.

@@ -128,6 +128,7 @@ com.hyeon.guardrail.user
 
 예:
 - BaseEntity
+- SoftDeleteEntity
 - 공통 응답 구조
 - 공통 예외
 - 공통 설정
@@ -135,9 +136,10 @@ com.hyeon.guardrail.user
 - 보안 관련 공통 기능
 
 BaseEntity 기준:
-- 모든 엔티티는 `BaseEntity`를 상속한다.
-- `BaseEntity`는 `createdAt`, `updatedAt`, `deleted`를 가진다.
-- 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
+- 모든 엔티티는 `BaseEntity` 또는 `SoftDeleteEntity`를 상속한다.
+- `BaseEntity`는 `createdAt`, `updatedAt`을 가진다.
+- `SoftDeleteEntity`는 `BaseEntity`를 상속하고 `deleted`를 가진다.
+- soft delete가 필요한 엔티티만 `SoftDeleteEntity`를 사용한다.
 
 제약:
 - 특정 도메인에만 필요한 로직은 common에 두지 않는다.
