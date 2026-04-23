@@ -26,7 +26,7 @@ com.hyeon.guardrail
 - 도메인 간 객체 참조는 연관관계 매핑 대신 식별자 값으로만 다룬다.
 - 특정 도메인 내부 구현을 다른 도메인이 직접 참조하지 않는다.
 - controller 계층에서는 비즈니스 로직을 수행하지 않는다.
-- service 계층에서만 비즈니스 로직을 수행한다.
+- 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
 - repository 계층은 데이터 저장 및 조회 책임만 가진다.
 - dto는 계층 간 데이터 전달 목적 외 사용하지 않는다.
 - entity를 controller 응답으로 직접 반환하지 않는다.
@@ -133,6 +133,11 @@ com.hyeon.guardrail.user
 - 공통 설정
 - 공통 유틸
 - 보안 관련 공통 기능
+
+BaseEntity 기준:
+- 모든 엔티티는 `BaseEntity`를 상속한다.
+- `BaseEntity`는 `createdAt`, `updatedAt`, `deleted`를 가진다.
+- 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
 
 제약:
 - 특정 도메인에만 필요한 로직은 common에 두지 않는다.

@@ -4,6 +4,15 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.2]
+### 추가
+- `docs/domains/USER.md` 문서 추가
+- UUID PK 기준 추가
+- `BaseEntity` 공통 필드 기준 추가
+- soft delete 기준 추가
+- `User.email` unique 제약 기준 추가
+- 패키지 구조의 책임 분리 기준 보강
+
 ## [0.1.1]
 ### 추가
 - `docs/DOMAIN-MODEL.md` 문서 추가
