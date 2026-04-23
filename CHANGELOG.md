@@ -8,6 +8,8 @@
 ### 추가
 - `docs/HARNESS-RULES.md` 문서 추가
 - 하네스 응답 구조, Querydsl 책임, 수동 예외 기록 기준 추가
+- Spotless, Checkstyle, ArchUnit, JUnit 역할 분리 기준 추가
+- build/test/hooks/CI 단계별 하네스 실행 기준 추가
 
 ## [0.1.8]
 ### 추가

@@ -66,19 +66,46 @@
 - Auth 도메인 엔티티는 soft delete 대신 상태/만료 정책을 우선한다.
 
 ## 5. 자동 검증 도구 후보
+### 도구별 책임 분리
+| 도구 | 역할 | 검증 대상 |
+|------|------|-----------|
+| `Spotless` | 코드 포맷 통일 | 포맷, import 정리 |
+| `Checkstyle` | 코드 스타일 및 기본 규칙 검증 | 네이밍, Javadoc, import, 스타일 |
+| `ArchUnit` | 구조 및 의존 방향 검증 | 패키지 구조, 계층 책임, 네이밍, 엔티티 규칙 |
+| `JUnit` | 도메인 및 비즈니스 규칙 검증 | 상태 전이, 이력 규칙, soft delete, 서비스 규칙 |
+
+### 실행 단계 기준
+- `Spotless`, `Checkstyle`는 build 단계에서 실패를 발생시킨다.
+- `ArchUnit`, `JUnit`은 test 단계에서 실패를 발생시킨다.
+- commit/push 단계에서는 Git Hooks로 1차 차단한다.
+- CI에서는 모든 규칙을 다시 검증하고, 실패 시 병합을 차단한다.
+- 구조 위반은 `ArchUnit`으로 검증한다.
+- 비즈니스 규칙은 `JUnit`으로 검증한다.
+
 ### Spotless
 - 코드 포맷 검증
+- import 정렬
+- 줄바꿈, 공백, 포맷 일관성 검증
 
 ### Checkstyle
 - 네이밍, import, 스타일 규칙 검증
+- Javadoc 작성 여부 검증
+- `@Data` 사용 금지 같은 기본 제한 규칙 검증
 
 ### ArchUnit
 - 패키지 구조 및 계층 의존 규칙 검증
 - controller -> service -> repository 방향 검증
 - entity 직접 노출 금지 같은 구조 규칙 검증
+- JPA 연관관계 금지 규칙 검증
+- `~Repository`, `~RepositoryQuery`, `Request`, `Response` 네이밍 검증
 
 ### JUnit
 - 상태 전이, 도메인 규칙, 비즈니스 검증 테스트
+- 상품 상태 전이 검증
+- 상품 이력 reason 규칙 검증
+- 카테고리 parentId 규칙 검증
+- 파일 sortOrder 규칙 검증
+- Auth 상태/만료 규칙 검증
 
 ### Git Hooks
 - commit 전 포맷/정적 검증 차단
