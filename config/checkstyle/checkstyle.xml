@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <!-- 파일 인코딩 고정 -->
+    <property name="charset" value="UTF-8"/>
+
+    <!-- 한 줄 최대 길이 제한. import/package 문은 예외 처리 -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^(package|import) .*"/>
+    </module>
+
+    <!-- 파일 끝 개행 강제 -->
+    <module name="NewlineAtEndOfFile"/>
+
+    <!-- package 이름은 소문자와 점만 허용 -->
+    <module name="TreeWalker">
+        <!-- import 순서 강제 -->
+        <module name="CustomImportOrder">
+            <property name="sortImportsInGroupAlphabetically" value="true"/>
+            <property name="separateLineBetweenGroups" value="true"/>
+            <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS"/>
+            <property name="specialImportsRegExp" value="^(org|com)\.hyeon\.guardrail\..*$"/>
+        </module>
+
+        <!-- 파일명과 최상위 타입명 일치 강제 -->
+        <module name="OuterTypeFilename"/>
+
+        <!-- 와일드카드 import 금지 -->
+        <module name="AvoidStarImport"/>
+
+        <!-- 사용하지 않는 import 금지 -->
+        <module name="UnusedImports"/>
+
+        <!-- 패키지명 규칙: 모두 소문자 -->
+        <module name="PackageName"/>
+
+        <!-- 클래스/인터페이스/enum/record 이름 규칙 -->
+        <module name="TypeName"/>
+
+        <!-- 메서드명 camelCase 강제 -->
+        <module name="MethodName"/>
+
+        <!-- 파라미터명 camelCase 강제 -->
+        <module name="ParameterName"/>
+
+        <!-- 지역변수명 camelCase 강제 -->
+        <module name="LocalVariableName"/>
+
+        <!-- 멤버변수명 camelCase 강제 -->
+        <module name="MemberName"/>
+
+        <!-- 상수명 UPPER_SNAKE_CASE 강제 -->
+        <module name="ConstantName"/>
+
+        <!-- if/for/while/do는 항상 중괄호 사용 -->
+        <module name="NeedBraces"/>
+
+        <!-- 연산자/키워드 주변 공백 강제 -->
+        <module name="WhitespaceAround"/>
+
+        <!-- 쉼표 뒤 공백 강제 -->
+        <module name="WhitespaceAfter"/>
+
+        <!-- 잘못된 줄바꿈 방지 -->
+        <module name="NoLineWrap">
+            <property name="tokens" value="PACKAGE_DEF, IMPORT, STATIC_IMPORT"/>
+        </module>
+
+        <!-- Lombok @Data import 금지 -->
+        <module name="IllegalImport">
+            <property name="illegalClasses" value="lombok.Data"/>
+        </module>
+
+        <!-- Lombok @Data annotation 사용 금지 -->
+        <module name="IllegalTokenText">
+            <property name="tokens" value="ANNOTATION"/>
+            <property name="format" value="^@Data$"/>
+            <property name="message" value="Lombok @Data 사용은 금지한다. 필요한 경우 @Getter 와 명시적 생성자/메서드를 사용한다."/>
+        </module>
+    </module>
+</module>

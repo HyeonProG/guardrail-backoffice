@@ -4,6 +4,11 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.10]
+### 추가
+- `build.gradle`에 Spotless, Checkstyle, ArchUnit 최소 설정 추가
+- `config/checkstyle/checkstyle.xml` 설정 파일 추가
+
 ## [0.1.9]
 ### 추가
 - `docs/HARNESS-RULES.md` 문서 추가

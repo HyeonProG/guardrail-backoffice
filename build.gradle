@@ -1,6 +1,8 @@
 plugins {
     // Core build plugins
     id 'java'
+    id 'checkstyle'
+    id 'com.diffplug.spotless' version '7.2.1'
     id 'org.springframework.boot' version '3.5.13'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -57,6 +59,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // Test dependencies
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testCompileOnly 'org.projectlombok:lombok'
@@ -64,10 +67,28 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+checkstyle {
+    toolVersion = '10.26.1'
+    configFile = file('config/checkstyle/checkstyle.xml')
+}
+
+spotless {
+    java {
+        googleJavaFormat('1.28.0')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
 // Java compiler options
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.compilerArgs += ['-parameters']
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('spotlessCheck')
 }
 
 // Test configuration
