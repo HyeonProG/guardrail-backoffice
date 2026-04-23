@@ -109,7 +109,7 @@ AI 활용 개발의 불안정성을 줄이고, 재작업 비용을 낮춰 결과
 - `docs/DOMAIN-MODEL.md`
 - `docs/PACKAGE-STRUCTURE.md`
 - `docs/ARCHITECTURE.md`
-- `docs/CODING-CONVENTIONS.md`
+- `docs/CODE-CONVENTIONS.md`
 - `docs/HARNESS-RULES.md`
 - `CHANGELOG.md`
 
