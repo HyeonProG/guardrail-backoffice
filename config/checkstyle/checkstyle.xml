@@ -15,7 +15,14 @@
     <!-- 파일 끝 개행 강제 -->
     <module name="NewlineAtEndOfFile"/>
 
-    <!-- package 이름은 소문자와 점만 허용 -->
+    <!-- Lombok @Data annotation 사용 금지 -->
+    <module name="RegexpSinglelineJava">
+        <property name="format" value="^\s*@(?:lombok\.)?Data\b"/>
+        <property name="ignoreComments" value="true"/>
+        <property name="message" value="Lombok @Data 사용은 금지한다. 필요한 경우 @Getter 와 명시적 생성자/메서드를 사용한다."/>
+    </module>
+
+    <!-- Java AST 기반 규칙 -->
     <module name="TreeWalker">
         <!-- import 순서 강제 -->
         <module name="CustomImportOrder">
@@ -74,11 +81,5 @@
             <property name="illegalClasses" value="lombok.Data"/>
         </module>
 
-        <!-- Lombok @Data annotation 사용 금지 -->
-        <module name="IllegalTokenText">
-            <property name="tokens" value="ANNOTATION"/>
-            <property name="format" value="^@Data$"/>
-            <property name="message" value="Lombok @Data 사용은 금지한다. 필요한 경우 @Getter 와 명시적 생성자/메서드를 사용한다."/>
-        </module>
     </module>
 </module>
