@@ -1,0 +1,30 @@
+# 테스트 환경 전용 설정
+spring:
+  # 테스트에서는 실제 PostgreSQL 대신 인메모리 H2를 사용한다.
+  datasource:
+    url: jdbc:h2:mem:guardrail-test;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # 테스트 컨텍스트 로딩 안정성을 위한 JPA 설정
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  # 테스트에서는 SQL 로그를 최소화한다.
+  sql:
+    init:
+      mode: never
+
+# 테스트 로그 기본 설정
+logging:
+  level:
+    root: warn
+    com.hyeon.guardrail: info
+    org.hibernate.SQL: off
+    org.hibernate.orm.jdbc.bind: off
