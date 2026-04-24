@@ -9,5 +9,4 @@ public class GuardrailApplication {
   public static void main(String[] args) {
     SpringApplication.run(GuardrailApplication.class, args);
   }
-
 }

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "[pre-push] 전체 하네스 검증을 시작합니다."
+./scripts/verify.sh all
+echo "[pre-push] 검증이 완료되었습니다."

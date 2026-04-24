@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "[pre-commit] 포맷 및 정적 규칙 검증을 시작합니다."
+./scripts/verify.sh static
+echo "[pre-commit] 검증이 완료되었습니다."

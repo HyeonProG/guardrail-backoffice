@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "[commit-msg] 커밋 메시지 규칙을 검증합니다."
+./scripts/validate-commit-message.sh "$1"
+echo "[commit-msg] 커밋 메시지 검증이 완료되었습니다."

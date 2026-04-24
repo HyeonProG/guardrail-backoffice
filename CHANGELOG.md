@@ -4,6 +4,13 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.11]
+### 추가
+- 하네스 검증 공통 스크립트 추가
+- Git Hook 설치 스크립트 추가
+- commit-msg, pre-commit, pre-push 검증 훅 추가
+- 커밋 메시지 검증 스크립트 추가
+
 ## [0.1.10]
 ### 추가
 - `build.gradle`에 Spotless, Checkstyle, ArchUnit 최소 설정 추가
