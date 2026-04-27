@@ -17,14 +17,6 @@
 
     <!-- Java AST 기반 규칙 -->
     <module name="TreeWalker">
-        <!-- import 순서 강제 -->
-        <module name="CustomImportOrder">
-            <property name="sortImportsInGroupAlphabetically" value="true"/>
-            <property name="separateLineBetweenGroups" value="true"/>
-            <property name="customImportOrderRules" value="STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS"/>
-            <property name="specialImportsRegExp" value="^(org|com)\.hyeon\.guardrail\..*$"/>
-        </module>
-
         <!-- 파일명과 최상위 타입명 일치 강제 -->
         <module name="OuterTypeFilename"/>
 
@@ -60,7 +52,9 @@
 
         <!-- 연산자/키워드 주변 공백 강제 -->
         <module name="WhitespaceAround">
+            <property name="allowEmptyConstructors" value="true"/>
             <property name="allowEmptyMethods" value="true"/>
+            <property name="allowEmptyTypes" value="true"/>
         </module>
 
         <!-- 쉼표 뒤 공백 강제 -->

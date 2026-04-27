@@ -37,7 +37,7 @@
 - 다른 Entity를 객체 연관관계로 참조하지 않는다.
 - 다른 Entity 참조가 필요한 경우 `{domain}Id` 형태의 UUID 필드로 관리한다.
 - Entity를 API 응답으로 직접 반환하지 않는다.
-- Entity의 equals/hashCode는 id 기준으로 구현한다.
+- Entity의 equals/hashCode는 기본적으로 직접 구현하지 않는다.
 
 예:
 - `User`
@@ -136,8 +136,9 @@
 
 ## 12. 주석 작성 기준
 - 모든 클래스에는 한 줄 Javadoc을 작성한다.
-- 모든 메서드에는 한 줄 Javadoc을 작성한다.
-- Javadoc은 역할과 의도를 간단하게 설명한다.
+- 단순 getter, 생성자에는 Javadoc을 작성하지 않는다.
+- 메서드 Javadoc은 복잡한 정책, 상태 전이, 보안 판단, 외부 공개 API에만 작성한다.
+- Javadoc은 역할과 의도를 간단한 명사형으로 작성한다.
 - 복잡한 정책, 상태 전이, 보안 판단에는 필요한 경우 추가 설명을 작성한다.
 
 ## 13. Optional 및 컬렉션 사용 기준

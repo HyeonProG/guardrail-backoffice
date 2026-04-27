@@ -4,6 +4,13 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.14]
+### 추가
+- `BaseEntity`, `SoftDeleteEntity` 공통 엔티티 기반 추가
+- JPA Auditing 설정 추가
+- ArchUnit 엔티티 상속 규칙 검증 테스트 추가
+- Spotless와 Checkstyle import 정렬 책임 충돌 방지 설정 추가
+
 ## [0.1.13]
 ### 추가
 - ArchUnit 패키지 구조 및 계층 의존성 검증 테스트 추가

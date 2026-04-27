@@ -1,5 +1,6 @@
 package com.hyeon.guardrail.architecture;
 
+import com.hyeon.guardrail.common.domain.BaseEntity;
 import com.tngtech.archunit.ArchConfiguration;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
@@ -10,6 +11,7 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
+import jakarta.persistence.Entity;
 
 @AnalyzeClasses(
     packages = "com.hyeon.guardrail",
@@ -105,6 +107,16 @@ class PackageArchitectureTest {
           .resideInAPackage("..dto..")
           .should(simpleNameEndingWithRequestOrResponse())
           .as("dto 패키지 클래스명은 Request 또는 Response로 끝나야 한다");
+
+  // JPA entity는 공통 식별자와 감사 필드를 사용하기 위해 BaseEntity를 상속한다.
+  @ArchTest
+  static final ArchRule ENTITY_SHOULD_EXTEND_BASE_ENTITY =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should()
+          .beAssignableTo(BaseEntity.class)
+          .as("JPA entity는 BaseEntity 또는 SoftDeleteEntity를 상속해야 한다");
 
   private static ArchCondition<JavaClass> simpleNameEndingWithRequestOrResponse() {
     return new ArchCondition<>("클래스명이 Request 또는 Response로 끝나야 한다") {
