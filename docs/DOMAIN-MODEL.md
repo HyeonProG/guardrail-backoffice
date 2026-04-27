@@ -23,18 +23,22 @@
 
 ### Auth
 로그인, 로그아웃, 토큰 재발급 등 인증 흐름을 관리한다.
+`Auth`는 `User`를 객체 연관관계 없이 `userId`로 참조한다.
 
 ### Product
 상품의 기본 정보와 상태를 관리한다.
+`Product`는 `Category`를 객체 연관관계 없이 `categoryId`로 참조한다.
 
 ### FileAttachment
 상품 이미지 포함 파일 자원을 관리한다.
+`FileAttachment`는 대상 도메인을 `targetType`, `targetId`로 참조한다.
 
 ### Category
 상품 분류 체계를 관리한다.
 
 ### ProductHistory
 상품 등록, 승인, 반려 이력을 관리한다.
+`ProductHistory`는 `Product`와 처리자 `User`를 각각 `productId`, `actorId`로 참조한다.
 
 ## 4. 보조 개념
 ### Auth 하위 개념

@@ -58,7 +58,7 @@
 | `categoryId` | 카테고리 UUID |
 | `name` | 상품명 |
 | `description` | 상품 설명 |
-| `quantity` | 수량 |
+| `quantity` | 판매 가능 수량 |
 | `status` | 상품 상태 |
 | `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
 | `updatedAt` | 수정일시, `SoftDeleteEntity` 상속 |
@@ -82,6 +82,7 @@
 - 상품 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
 - `Category`는 객체 연관관계로 참조하지 않는다.
 - 카테고리 참조는 `categoryId`로 카테고리 UUID 값을 저장한다.
+- `quantity`는 운영상 판매 가능 수량 기준으로 관리한다.
 - 처리자 사용자는 객체 연관관계로 참조하지 않는다.
 - 처리자 참조는 `actorId`로 사용자 UUID 값을 저장한다.
 - 상품 승인과 반려 흐름은 `ProductHistory`에 기록한다.

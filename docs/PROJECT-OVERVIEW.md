@@ -95,7 +95,7 @@ AI 활용 개발의 불안정성을 줄이고, 재작업 비용을 낮춰 결과
 ## 10. 진행 원칙
 이 프로젝트는 구현보다 기준 정의를 먼저 진행한다.
 
-초기 진행 순서는 아래와 같다.
+진행 순서는 아래와 같다.
 
 1. 프로젝트 개요와 범위를 문서로 확정한다.
 2. 도메인 모델과 패키지 구조를 문서로 정리한다.
@@ -103,14 +103,20 @@ AI 활용 개발의 불안정성을 줄이고, 재작업 비용을 낮춰 결과
 4. 엔티티와 기능 구현을 단계적으로 진행한다.
 5. 마지막에 하네스 규칙을 자동화로 연결한다.
 
-## 11. 다음 문서 작성 예정
-다음 단계에서 아래 문서를 순차적으로 작성한다.
+## 11. 문서 구성
+현재 프로젝트는 아래 문서를 기준으로 관리한다.
 
+- `docs/PROJECT-OVERVIEW.md`
 - `docs/DOMAIN-MODEL.md`
 - `docs/PACKAGE-STRUCTURE.md`
-- `docs/ARCHITECTURE.md`
+- `docs/API-SPEC.md`
 - `docs/CODE-CONVENTIONS.md`
 - `docs/HARNESS-RULES.md`
+- `docs/VERSION-POLICY.md`
+- `docs/CHANGELOG-CONVENTION.md`
+- `docs/COMMIT-MESSAGE.md`
+- `docs/domains/*.md`
+- `AGENT.md`
 - `CHANGELOG.md`
 
 ## 12. 요약

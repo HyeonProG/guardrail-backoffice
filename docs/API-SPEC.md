@@ -114,6 +114,7 @@ return new BaseResponseEntity<>(BaseResponseStatus.CREATED, response, "사용자
 | `400 Bad Request` | 요청 값 검증 실패 |
 | `401 Unauthorized` | 인증 실패 |
 | `403 Forbidden` | 권한 없음 |
+| `405 Method Not Allowed` | 허용되지 않은 HTTP 메서드 |
 | `404 Not Found` | 리소스 없음 |
 | `409 Conflict` | 중복 또는 상태 충돌 |
 | `500 Internal Server Error` | 서버 내부 오류 |
@@ -161,8 +162,7 @@ GET /api/v1/categories/{categoryId}
     "size": 20,
     "totalElements": 100,
     "totalPages": 5
-  },
-  "message": null
+  }
 }
 ```
 

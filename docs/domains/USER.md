@@ -49,7 +49,9 @@
 ## 5. 설계 규칙
 - PK는 UUID를 사용한다.
 - `User`는 `SoftDeleteEntity`를 상속한다.
+- `status`는 운영상 사용 상태를 의미한다.
 - 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
+- `deleted = true`는 soft delete 상태를 의미한다.
 - `email`은 unique 제약을 가진다.
 - 다른 도메인에서 사용자를 참조할 때 객체 연관관계를 사용하지 않는다.
 - 다른 도메인에서는 `userId`로 사용자 UUID 값을 참조한다.
