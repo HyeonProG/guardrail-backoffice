@@ -21,6 +21,8 @@
 - entity 생성 흐름은 service, 상태 전이와 soft delete는 entity 허용 기준으로 정리
 - 공통 응답 상태에 `404 Not Found`, `409 Conflict` 추가
 - 백오피스 사용자 생성 시 비밀번호 자동 생성과 범용 update 금지 기준 반영
+- 사용자 생성 완료 조건에 초기 비밀번호 해시 저장과 1회 전달용 정보 반환 기준 반영
+- entity 기본 정보 변경 메서드 금지와 작업 범위 외 도메인 생성 금지 기준 반영
 ### 삭제
 - `ErrorCode`, `ErrorResponse`, `BusinessException`, `GlobalExceptionHandler` 제거
 

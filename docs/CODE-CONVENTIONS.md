@@ -39,10 +39,11 @@
 - 다른 Entity 참조가 필요한 경우 `{domain}Id` 형태의 UUID 필드로 관리한다.
 - Entity를 API 응답으로 직접 반환하지 않는다.
 - Entity의 equals/hashCode는 기본적으로 직접 구현하지 않는다.
-- Entity 생성은 all-args 생성자를 사용한다.
+- Entity 생성은 `@AllArgsConstructor`를 사용한다.
 - Entity 생성 흐름과 유스케이스 판단은 Service가 담당한다.
 - Entity는 상태 전이와 soft delete 같은 자기 상태 변경 메서드만 둘 수 있다.
 - Entity에 범용적인 전체 수정 메서드를 두지 않는다.
+- Entity에 `email`, `name`, `role` 같은 기본 정보 변경 메서드를 두지 않는다.
 
 예:
 - `User`
@@ -83,6 +84,8 @@
 - Service 메서드는 기본적으로 `@Transactional`을 사용한다.
 - 트랜잭션 경계는 Service에서 관리한다.
 - 조회 전용 메서드는 가능한 읽기 전용 트랜잭션을 사용한다.
+- 사용자 생성처럼 다른 도메인을 함께 조합하는 흐름은 Service에서 명시적으로 처리한다.
+- 작업 범위에 없는 다른 도메인 클래스는 임의 생성하지 않는다.
 
 예:
 - `UserService`
@@ -115,6 +118,8 @@
 - request DTO는 controller 진입 시점의 기본 입력 검증을 담당한다.
 - service 계층은 도메인 상태, 중복, 권한 등 비즈니스 검증을 담당한다.
 - 자동 생성 값은 request DTO로 직접 받지 않는다.
+- 초기 비밀번호 같은 1회 자동 생성 값은 request DTO에 포함하지 않는다.
+- 자동 생성 값이 필요한 유스케이스는 service에서 생성하고 응답 또는 후속 전달 흐름으로만 노출한다.
 
 예:
 - `UserCreateRequest`

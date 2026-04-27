@@ -54,7 +54,7 @@ com.hyeon.guardrail
 - entity는 상태 전이와 soft delete 같은 자기 상태 변경 메서드만 가질 수 있다.
 - 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
 - entity 선언 필드는 `@Column(name = "...")`을 명시한다.
-- entity 생성은 all-args 생성자를 사용한다.
+- entity 생성은 `@AllArgsConstructor`를 사용한다.
 - entity에 정적 `create` 메서드를 두지 않는다.
 - entity에 범용적인 전체 수정 메서드를 두지 않는다.
 
