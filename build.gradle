@@ -88,6 +88,13 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += ['-parameters']
 }
 
+tasks.named('compileJava') {
+    options.compilerArgs += [
+            '-processor',
+            'com.querydsl.apt.jpa.JPAAnnotationProcessor,lombok.launch.AnnotationProcessorHider$AnnotationProcessor'
+    ]
+}
+
 tasks.named('check') {
     dependsOn tasks.named('spotlessCheck')
 }

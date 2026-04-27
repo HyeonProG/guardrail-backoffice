@@ -52,6 +52,7 @@
 - entity 선언 필드는 `@Column(name = "...")`을 명시해야 한다.
 - entity는 정적 `create` 메서드를 가질 수 없다.
 - entity는 선언 필드 기준 all-args 생성자를 가져야 한다.
+- entity는 범용적인 전체 수정 메서드를 가질 수 없다.
 - JPA 연관관계 매핑은 사용하지 않는다.
 - 다른 도메인 참조는 `{domain}Id` 필드로만 표현한다.
 

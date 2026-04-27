@@ -42,6 +42,7 @@
 - Entity 생성은 all-args 생성자를 사용한다.
 - Entity 생성 흐름과 유스케이스 판단은 Service가 담당한다.
 - Entity는 상태 전이와 soft delete 같은 자기 상태 변경 메서드만 둘 수 있다.
+- Entity에 범용적인 전체 수정 메서드를 두지 않는다.
 
 예:
 - `User`
@@ -113,6 +114,7 @@
 - request DTO에는 필요한 validation annotation을 작성한다.
 - request DTO는 controller 진입 시점의 기본 입력 검증을 담당한다.
 - service 계층은 도메인 상태, 중복, 권한 등 비즈니스 검증을 담당한다.
+- 자동 생성 값은 request DTO로 직접 받지 않는다.
 
 예:
 - `UserCreateRequest`

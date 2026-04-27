@@ -19,6 +19,8 @@
 - controller `ResponseEntity` 직접 반환 금지 기준 반영
 - ArchUnit 기반 DTO `record` 금지와 entity/controller 규칙 검증 보강
 - entity 생성 흐름은 service, 상태 전이와 soft delete는 entity 허용 기준으로 정리
+- 공통 응답 상태에 `404 Not Found`, `409 Conflict` 추가
+- 백오피스 사용자 생성 시 비밀번호 자동 생성과 범용 update 금지 기준 반영
 ### 삭제
 - `ErrorCode`, `ErrorResponse`, `BusinessException`, `GlobalExceptionHandler` 제거
 
