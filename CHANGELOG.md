@@ -15,6 +15,10 @@
 - `BaseResponseEntity` 필드 구조를 상태 코드, 성공 여부, 메시지, 코드, 결과값 기준으로 정리
 - 성공 상태, 메시지, 코드 관리 기준을 `BaseResponseStatus`로 통일
 - 예외 응답 구조를 `BaseResponseStatus`와 `BaseResponseEntity` 기준으로 통일
+- entity `@Column(name = "...")`, all-args 생성자 기준 반영
+- controller `ResponseEntity` 직접 반환 금지 기준 반영
+- ArchUnit 기반 DTO `record` 금지와 entity/controller 규칙 검증 보강
+- entity 생성 흐름은 service, 상태 전이와 soft delete는 entity 허용 기준으로 정리
 ### 삭제
 - `ErrorCode`, `ErrorResponse`, `BusinessException`, `GlobalExceptionHandler` 제거
 

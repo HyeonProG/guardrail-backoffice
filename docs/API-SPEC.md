@@ -282,4 +282,5 @@ soft delete가 적용되는 데이터는 기본 조회에서 제외한다.
 - 필수 값은 `@NotNull`, `@NotBlank` 등으로 검증한다.
 - 길이 제한은 `@Size`로 검증한다.
 - 형식 검증은 DTO 또는 service에서 수행한다.
+- 도메인 생성 흐름과 유스케이스 판단은 service에서 수행한다.
 - 도메인 상태 전이 검증은 service 또는 entity에서 수행한다.

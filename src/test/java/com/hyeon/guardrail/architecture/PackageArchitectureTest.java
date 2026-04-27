@@ -2,6 +2,10 @@ package com.hyeon.guardrail.architecture;
 
 import com.hyeon.guardrail.common.domain.BaseEntity;
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaConstructor;
+import com.tngtech.archunit.core.domain.JavaField;
+import com.tngtech.archunit.core.domain.JavaMethod;
+import com.tngtech.archunit.core.domain.JavaModifier;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -10,7 +14,10 @@ import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
 
 @AnalyzeClasses(
     packages = "com.hyeon.guardrail",
@@ -111,6 +118,16 @@ class PackageArchitectureTest {
           .as("dto 패키지 클래스명은 Request 또는 Response로 끝나야 한다")
           .allowEmptyShould(true);
 
+  // dto는 record를 사용하지 않고 일반 클래스로 작성한다.
+  @ArchTest
+  static final ArchRule DTO_SHOULD_NOT_BE_RECORD =
+      ArchRuleDefinition.classes()
+          .that()
+          .resideInAPackage("..dto..")
+          .should(notBeRecordType())
+          .as("dto 패키지 클래스는 record를 사용할 수 없다")
+          .allowEmptyShould(true);
+
   // JPA entity는 공통 식별자와 감사 필드를 사용하기 위해 BaseEntity를 상속한다.
   @ArchTest
   static final ArchRule ENTITY_SHOULD_EXTEND_BASE_ENTITY =
@@ -120,6 +137,36 @@ class PackageArchitectureTest {
           .should()
           .beAssignableTo(BaseEntity.class)
           .as("JPA entity는 BaseEntity 또는 SoftDeleteEntity를 상속해야 한다")
+          .allowEmptyShould(true);
+
+  // controller public 메서드는 BaseResponseEntity만 반환하고 ResponseEntity를 직접 사용하지 않는다.
+  @ArchTest
+  static final ArchRule CONTROLLER_SHOULD_NOT_RETURN_RESPONSE_ENTITY =
+      ArchRuleDefinition.classes()
+          .that()
+          .resideInAPackage("..controller..")
+          .should(notDeclareResponseEntityReturnType())
+          .as("controller public 메서드는 ResponseEntity를 직접 반환할 수 없다")
+          .allowEmptyShould(true);
+
+  // entity 필드는 명시적인 컬럼명을 가진 @Column을 사용한다.
+  @ArchTest
+  static final ArchRule ENTITY_FIELDS_SHOULD_DECLARE_COLUMN_NAME =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should(haveExplicitColumnName())
+          .as("entity 선언 필드는 @Column(name = ...)을 명시해야 한다")
+          .allowEmptyShould(true);
+
+  // entity는 선언 필드 기준 all-args 생성자를 제공한다.
+  @ArchTest
+  static final ArchRule ENTITY_SHOULD_HAVE_ALL_ARGS_CONSTRUCTOR =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should(haveAllArgsConstructor())
+          .as("entity는 선언 필드 기준 all-args 생성자를 가져야 한다")
           .allowEmptyShould(true);
 
   private static ArchCondition<JavaClass> simpleNameEndingWithRequestOrResponse() {
@@ -134,5 +181,89 @@ class PackageArchitectureTest {
                 item, matches, item.getName() + " 클래스명은 Request 또는 Response로 끝나야 한다"));
       }
     };
+  }
+
+  private static ArchCondition<JavaClass> notBeRecordType() {
+    return new ArchCondition<>("record 타입이면 안 된다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        boolean isRecord = item.reflect().isRecord();
+        events.add(
+            new SimpleConditionEvent(item, !isRecord, item.getName() + " 클래스는 record를 사용할 수 없다"));
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notDeclareResponseEntityReturnType() {
+    return new ArchCondition<>("ResponseEntity 반환 메서드를 가지면 안 된다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        List<JavaMethod> methods =
+            item.getMethods().stream()
+                .filter(method -> method.getOwner().equals(item))
+                .filter(method -> method.getModifiers().contains(JavaModifier.PUBLIC))
+                .toList();
+
+        boolean valid =
+            methods.stream()
+                .noneMatch(
+                    method -> method.getRawReturnType().isEquivalentTo(ResponseEntity.class));
+
+        events.add(
+            new SimpleConditionEvent(
+                item, valid, item.getName() + " controller는 ResponseEntity를 직접 반환할 수 없다"));
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> haveExplicitColumnName() {
+    return new ArchCondition<>("선언 필드에 @Column(name = ...)이 있어야 한다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        List<JavaField> fields =
+            item.getFields().stream()
+                .filter(field -> field.getOwner().equals(item))
+                .filter(field -> !field.getModifiers().contains(JavaModifier.STATIC))
+                .toList();
+
+        boolean valid =
+            fields.stream()
+                .allMatch(
+                    field -> {
+                      Column column = field.reflect().getAnnotation(Column.class);
+                      return column != null && !column.name().isBlank();
+                    });
+
+        events.add(
+            new SimpleConditionEvent(
+                item, valid, item.getName() + " entity 필드는 @Column(name = ...)을 명시해야 한다"));
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> haveAllArgsConstructor() {
+    return new ArchCondition<>("선언 필드 수와 일치하는 생성자가 있어야 한다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        long fieldCount =
+            item.getFields().stream()
+                .filter(field -> field.getOwner().equals(item))
+                .filter(field -> !field.getModifiers().contains(JavaModifier.STATIC))
+                .count();
+
+        boolean hasAllArgsConstructor =
+            item.getConstructors().stream()
+                .filter(constructor -> constructor.getOwner().equals(item))
+                .anyMatch(constructor -> hasFieldSizedParameters(constructor, fieldCount));
+
+        events.add(
+            new SimpleConditionEvent(
+                item, hasAllArgsConstructor, item.getName() + " entity는 all-args 생성자를 가져야 한다"));
+      }
+    };
+  }
+
+  private static boolean hasFieldSizedParameters(JavaConstructor constructor, long fieldCount) {
+    return constructor.getRawParameterTypes().size() == fieldCount;
   }
 }

@@ -11,7 +11,7 @@
 - DTO는 외부 입출력 또는 계층 간 전달 목적으로만 사용한다.
 - Repository는 데이터 저장 및 조회 책임만 가진다.
 - Service는 유스케이스 흐름 조합과 비즈니스 처리를 담당한다.
-- Entity는 자기 상태 변경과 자기 검증에 필요한 규칙을 가질 수 있다.
+- Entity는 자기 상태 변경에 필요한 최소 규칙만 가질 수 있다.
 - 모든 엔티티의 PK는 UUID를 사용한다.
 - 테이블 간 객체 연관관계 매핑은 사용하지 않는다.
 - 컬렉션은 null 대신 빈 컬렉션을 사용한다.
@@ -34,10 +34,14 @@
 - PK 타입은 UUID를 사용한다.
 - soft delete가 필요한 Entity는 `SoftDeleteEntity`를 상속한다.
 - soft delete가 필요 없는 Entity는 `BaseEntity`를 상속한다.
+- Entity 선언 필드는 `@Column(name = "...")`을 명시한다.
 - 다른 Entity를 객체 연관관계로 참조하지 않는다.
 - 다른 Entity 참조가 필요한 경우 `{domain}Id` 형태의 UUID 필드로 관리한다.
 - Entity를 API 응답으로 직접 반환하지 않는다.
 - Entity의 equals/hashCode는 기본적으로 직접 구현하지 않는다.
+- Entity 생성은 all-args 생성자를 사용한다.
+- Entity 생성 흐름과 유스케이스 판단은 Service가 담당한다.
+- Entity는 상태 전이와 soft delete 같은 자기 상태 변경 메서드만 둘 수 있다.
 
 예:
 - `User`
@@ -92,6 +96,7 @@
 - Entity를 응답으로 직접 반환하지 않는다.
 - API 경로는 `/api/v1` prefix를 사용한다.
 - 성공 응답은 기본적으로 `BaseResponseEntity<T>`를 사용한다.
+- Controller는 `ResponseEntity`를 직접 반환하지 않는다.
 - 성공 상태, 메시지, 코드는 `BaseResponseStatus`를 통해 관리한다.
 
 예:

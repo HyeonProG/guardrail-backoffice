@@ -51,8 +51,11 @@ com.hyeon.guardrail
 - enum
 
 제약:
-- entity는 자기 상태를 변경하는 핵심 규칙과 자기 검증을 가질 수 있다.
+- entity는 상태 전이와 soft delete 같은 자기 상태 변경 메서드만 가질 수 있다.
 - 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
+- entity 선언 필드는 `@Column(name = "...")`을 명시한다.
+- entity 생성은 all-args 생성자를 사용한다.
+- entity에 정적 `create` 메서드를 두지 않는다.
 
 예:
 - User
@@ -100,6 +103,8 @@ API 입출력 코드를 둔다.
 - controller는 request/response 처리만 담당한다.
 - 비즈니스 로직을 포함하지 않는다.
 - service 계층만 호출한다.
+- controller 응답은 `BaseResponseEntity<T>`만 사용한다.
+- controller는 `ResponseEntity`를 직접 반환하지 않는다.
 
 ## 5. 예시 구조
 예시로 `user` 도메인은 아래와 같이 구성한다.

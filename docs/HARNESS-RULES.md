@@ -49,6 +49,9 @@
 - PK 타입은 UUID여야 한다.
 - soft delete 대상 엔티티는 `SoftDeleteEntity`를 상속한다.
 - soft delete 미적용 엔티티는 `BaseEntity`를 상속한다.
+- entity 선언 필드는 `@Column(name = "...")`을 명시해야 한다.
+- entity는 정적 `create` 메서드를 가질 수 없다.
+- entity는 선언 필드 기준 all-args 생성자를 가져야 한다.
 - JPA 연관관계 매핑은 사용하지 않는다.
 - 다른 도메인 참조는 `{domain}Id` 필드로만 표현한다.
 
@@ -56,6 +59,8 @@
 - 모든 API 경로는 `/api/v1` prefix를 사용한다.
 - 모든 성공 응답은 공통 응답 구조를 따른다.
 - 모든 에러 응답은 공통 에러 응답 구조를 따른다.
+- controller는 `BaseResponseEntity<T>`만 반환한다.
+- controller는 `ResponseEntity`를 직접 반환하지 않는다.
 - 컬렉션 응답은 null 대신 빈 배열을 반환한다.
 - 같은 요청에 대해 동일한 조건에서는 항상 동일한 응답 구조를 반환한다.
 - enum은 문자열로 응답한다.
@@ -126,12 +131,16 @@
 - ArchUnit 기반 계층 의존 방향 검증
 - ArchUnit 기반 클래스 네이밍 검증
 - ArchUnit 기반 엔티티 상속 규칙 검증
+- ArchUnit 기반 DTO `record` 사용 금지 검증
+- ArchUnit 기반 controller `ResponseEntity` 반환 금지 검증
+- ArchUnit 기반 entity `@Column(name = "...")` 명시 검증
+- ArchUnit 기반 entity 정적 `create` 메서드 금지 검증
+- ArchUnit 기반 entity all-args 생성자 검증
 - Git Hook 기반 commit 메시지 형식 검증
 - Git Hook 기반 pre-commit, pre-push 검증 실행
 
 ### 문서 기준은 존재하지만 자동화가 남아 있는 항목
 - API 경로 `/api/v1` prefix 검증
-- controller 응답 구조 직접 검증
 - JPA 연관관계 금지 규칙 검증
 - PK 필드명과 UUID 타입 직접 검증
 - soft delete 적용 대상 검증
