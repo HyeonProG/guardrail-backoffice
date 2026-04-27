@@ -4,6 +4,14 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.17]
+### 추가
+- OpenAPI 메타데이터 및 Bearer 보안 스키마 설정 추가
+### 수정
+- Springdoc 의존성을 Swagger UI 포함 모듈로 변경
+- Swagger UI 경로와 문서 버전 기준 추가
+- 인증 구현 전 Spring Security 기본 로그인 비활성화
+
 ## [0.1.16]
 ### 수정
 - `build.gradle` 프로젝트 버전을 changelog 기준과 일치하도록 정리

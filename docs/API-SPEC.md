@@ -231,9 +231,11 @@ API 문서는 Swagger/OpenAPI로 제공한다.
 
 규칙:
 - OpenAPI 문서 경로는 `/api-docs`를 사용한다.
+- Swagger UI 경로는 `/swagger-ui.html`을 사용한다.
 - API 문서는 controller와 DTO 기준으로 작성한다.
 - Entity는 Swagger 문서에 직접 노출하지 않는다.
 - 인증이 필요한 API에는 Bearer token 보안 스키마를 명시한다.
+- 문서 버전은 애플리케이션 버전과 동일하게 관리한다.
 - API 설명은 실제 동작과 다르지 않게 유지한다.
 
 ## 16. Soft Delete 조회 기준
