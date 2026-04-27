@@ -15,6 +15,7 @@ public class OpenApiConfig {
 
   private static final String BEARER_SCHEME_NAME = "bearerAuth";
 
+  /** Guardrail OpenAPI 문서 설정 생성 */
   @Bean
   public OpenAPI guardrailOpenApi(@Value("${app.api.version}") String appVersion) {
     return new OpenAPI()

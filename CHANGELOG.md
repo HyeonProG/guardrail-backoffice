@@ -4,6 +4,20 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.1.20]
+### 추가
+- `BaseResponseEntity`, `BaseResponseStatus` 공통 응답 구조 추가
+- `BaseException`, `BaseExceptionHandler`, `BaseExceptionHandlerFilter`, `AsyncExceptionHandler` 공통 예외 구조 추가
+### 수정
+- DTO와 공통 응답 구조의 record 사용 금지 기준 반영
+- Swagger 설명 최소 기준 문서화
+- 공통 성공/실패 응답 구조를 `BaseResponseEntity` 기준으로 통일
+- `BaseResponseEntity` 필드 구조를 상태 코드, 성공 여부, 메시지, 코드, 결과값 기준으로 정리
+- 성공 상태, 메시지, 코드 관리 기준을 `BaseResponseStatus`로 통일
+- 예외 응답 구조를 `BaseResponseStatus`와 `BaseResponseEntity` 기준으로 통일
+### 삭제
+- `ErrorCode`, `ErrorResponse`, `BusinessException`, `GlobalExceptionHandler` 제거
+
 ## [0.1.19]
 ### 추가
 - 공통 성공 응답 구조 추가

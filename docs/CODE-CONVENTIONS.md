@@ -91,6 +91,8 @@
 - Controller에는 비즈니스 로직을 작성하지 않는다.
 - Entity를 응답으로 직접 반환하지 않는다.
 - API 경로는 `/api/v1` prefix를 사용한다.
+- 성공 응답은 기본적으로 `BaseResponseEntity<T>`를 사용한다.
+- 성공 상태, 메시지, 코드는 `BaseResponseStatus`를 통해 관리한다.
 
 예:
 - `UserController`
@@ -116,15 +118,15 @@
 
 ## 10. 예외 처리 규칙
 - 예외는 공통 예외 구조를 사용한다.
-- 에러 코드는 enum으로 관리한다.
-- 에러 코드는 대문자 스네이크 케이스를 사용한다.
+- 비즈니스 예외는 `BaseException`을 사용한다.
+- 예외 상태, 메시지, 코드는 `BaseResponseStatus`로 관리한다.
 - Controller에서 예외 응답을 직접 만들지 않는다.
-- 공통 예외 핸들러에서 에러 응답을 생성한다.
+- 공통 예외 핸들러와 필터에서 에러 응답을 생성한다.
 
 예:
-- `USER_NOT_FOUND`
-- `DUPLICATED_EMAIL`
-- `INVALID_PRODUCT_STATUS`
+- `BaseException`
+- `BaseExceptionHandler`
+- `BaseExceptionHandlerFilter`
 
 ## 11. Lombok 사용 기준
 - Lombok은 필요한 범위에서만 사용한다.
@@ -132,10 +134,11 @@
 - Entity 생성은 정적 팩터리 메서드, 생성자, builder 중 도메인에 적합한 방식을 선택한다.
 - builder 사용은 필수가 아니며, 필드가 많거나 생성 의도를 명확히 드러내야 할 때 사용한다.
 - `@Data`는 사용하지 않는다.
-- DTO에는 필요 시 record 사용을 우선 검토한다.
+- DTO와 공통 응답 구조에는 `record`를 사용하지 않는다.
 
 ## 12. 주석 작성 기준
 - 모든 클래스에는 한 줄 Javadoc을 작성한다.
+- public 메서드 중 외부 계약, 설정 진입점, 공통 응답/예외 유틸에는 한 줄 Javadoc을 작성한다.
 - 단순 getter, 생성자에는 Javadoc을 작성하지 않는다.
 - 메서드 Javadoc은 복잡한 정책, 상태 전이, 보안 판단, 외부 공개 API에만 작성한다.
 - Javadoc은 역할과 의도를 간단한 명사형으로 작성한다.

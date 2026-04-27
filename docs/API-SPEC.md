@@ -32,9 +32,10 @@ GET /api/v1/categories/{categoryId}
 
 ```json
 {
-  "success": true,
-  "data": {},
-  "message": null
+  "isSuccess": true,
+  "message": "요청이 정상 처리되었습니다.",
+  "code": 200,
+  "result": {}
 }
 ```
 
@@ -42,17 +43,29 @@ GET /api/v1/categories/{categoryId}
 
 | 필드 | 설명 |
 |------|------|
-| `success` | 요청 성공 여부 |
-| `data` | 응답 데이터 |
-| `message` | 부가 메시지 |
+| `isSuccess` | 요청 성공 여부 |
+| `message` | 응답 메시지 |
+| `code` | 응답 코드 |
+| `result` | 응답 데이터 |
 
-데이터가 없는 성공 응답은 `data`를 `null`로 반환한다.
+Controller 성공 응답은 기본적으로 `BaseResponseEntity<T>`를 사용한다.
+
+예:
+
+```java
+return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS);
+return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS, response);
+return new BaseResponseEntity<>(BaseResponseStatus.CREATED, response, "사용자가 생성되었습니다.");
+```
+
+데이터가 없는 성공 응답은 `result`를 `null`로 반환한다.
 
 ```json
 {
-  "success": true,
-  "data": null,
-  "message": "요청이 정상 처리되었습니다."
+  "isSuccess": true,
+  "message": "요청이 정상 처리되었습니다.",
+  "code": 200,
+  "result": null
 }
 ```
 
@@ -60,9 +73,10 @@ GET /api/v1/categories/{categoryId}
 
 ```json
 {
-  "success": true,
-  "data": [],
-  "message": null
+  "isSuccess": true,
+  "message": "요청이 정상 처리되었습니다.",
+  "code": 200,
+  "result": []
 }
 ```
 
@@ -71,9 +85,10 @@ GET /api/v1/categories/{categoryId}
 
 ```json
 {
-  "success": false,
-  "code": "USER_NOT_FOUND",
-  "message": "사용자를 찾을 수 없습니다."
+  "isSuccess": false,
+  "message": "잘못된 요청입니다.",
+  "code": 400,
+  "result": null
 }
 ```
 
@@ -81,15 +96,15 @@ GET /api/v1/categories/{categoryId}
 
 | 필드 | 설명 |
 |------|------|
-| `success` | 요청 성공 여부 |
-| `code` | 애플리케이션 에러 코드 |
+| `isSuccess` | 요청 성공 여부 |
 | `message` | 사용자 또는 개발자가 이해할 수 있는 에러 메시지 |
+| `code` | 응답 코드 |
+| `result` | 실패 응답 결과값, 기본적으로 `null` |
 
 에러 코드 규칙:
-- 에러 코드는 enum으로 관리한다.
-- 에러 코드는 대문자 스네이크 케이스를 사용한다.
-- 에러 코드는 도메인 또는 상황을 식별할 수 있어야 한다.
-- 예: `USER_NOT_FOUND`, `DUPLICATED_EMAIL`, `INVALID_PRODUCT_STATUS`
+- 에러 상태는 `BaseResponseStatus` enum으로 관리한다.
+- 기본 공통 실패 상태는 `400`, `401`, `403`, `405`, `500`을 포함한다.
+- 도메인별 실패 상태는 필요 시 `BaseResponseStatus`에 확장한다.
 
 ## 6. HTTP 상태 코드 기준
 | 상태 코드 | 사용 기준 |
@@ -137,8 +152,10 @@ GET /api/v1/categories/{categoryId}
 
 ```json
 {
-  "success": true,
-  "data": {
+  "isSuccess": true,
+  "message": "요청이 정상 처리되었습니다.",
+  "code": 200,
+  "result": {
     "content": [],
     "page": 0,
     "size": 20,
@@ -219,12 +236,21 @@ enum은 문자열로 요청/응답한다.
 - 날짜만 필요한 경우 `yyyy-MM-dd` 형식을 사용한다.
 
 ## 14. Success Message 사용 기준
-성공 응답의 `message`는 기본적으로 `null`을 사용한다.
+성공 응답의 `message`는 기본적으로 상태값의 기본 메시지를 사용한다.
 
 규칙:
-- 조회 API는 `message = null`을 사용한다.
-- 생성, 수정, 삭제처럼 사용자에게 처리 결과를 명확히 알려야 하는 경우에만 message를 사용한다.
+- 기본 성공 메시지는 `BaseResponseStatus`를 따른다.
+- 생성, 수정, 삭제처럼 사용자에게 처리 결과를 더 명확히 알려야 하는 경우 message를 재정의할 수 있다.
 - message는 클라이언트 로직 분기 기준으로 사용하지 않는다.
+- controller 성공 응답 반환 타입은 기본적으로 `BaseResponseEntity<T>`를 사용한다.
+
+## 14.1 Error Message 사용 기준
+실패 응답의 `message`는 기본적으로 상태값의 기본 메시지를 사용한다.
+
+규칙:
+- 실패 메시지는 `BaseResponseStatus`를 따른다.
+- validation, 타입 변환 실패처럼 구체적인 원인이 필요한 경우 message를 재정의할 수 있다.
+- 실패 응답의 반환 구조도 `BaseResponseEntity<T>`를 사용한다.
 
 ## 15. Swagger/OpenAPI 기준
 API 문서는 Swagger/OpenAPI로 제공한다.
@@ -236,6 +262,9 @@ API 문서는 Swagger/OpenAPI로 제공한다.
 - Entity는 Swagger 문서에 직접 노출하지 않는다.
 - 인증이 필요한 API에는 Bearer token 보안 스키마를 명시한다.
 - 문서 버전은 애플리케이션 버전과 동일하게 관리한다.
+- controller에는 `@Tag` 설명을 작성한다.
+- endpoint에는 `@Operation(summary, description)`을 작성한다.
+- request/response DTO와 공통 응답 구조에는 `@Schema(description=...)`를 작성한다.
 - API 설명은 실제 동작과 다르지 않게 유지한다.
 
 ## 16. Soft Delete 조회 기준
