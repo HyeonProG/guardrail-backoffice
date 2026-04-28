@@ -132,6 +132,71 @@ Authorization: Bearer {accessToken}
 - 만료된 access token은 `401 Unauthorized`로 응답한다.
 - 권한이 부족한 사용자는 `403 Forbidden`으로 응답한다.
 
+## 7.1 인증 API 기준
+### 로그인 API
+```http
+POST /api/v1/auth/login
+```
+
+request body:
+- `email`
+- `password`
+- `deviceType`
+
+response result:
+- `accessToken`
+- `refreshToken`
+- `sessionId`
+- `accessTokenExpiredAt`
+- `refreshTokenExpiredAt`
+- `userId`
+- `role`
+
+규칙:
+- 로그인 요청의 IP는 서버 요청 정보에서 추출한다.
+- 로그인 성공 시 로그인 이력 `SUCCESS`, 인증 세션 `ACTIVE`를 저장한다.
+- 로그인 실패 시 로그인 이력 `FAIL`을 저장하고 토큰을 발급하지 않는다.
+- 존재하지 않는 이메일 로그인 실패는 로그인 이력을 저장하지 않고 `401 Unauthorized`로 종료한다.
+
+### 토큰 재발급 API
+```http
+POST /api/v1/auth/token/refresh
+```
+
+request body:
+- `sessionId`
+- `refreshToken`
+
+response result:
+- `accessToken`
+- `refreshToken`
+- `sessionId`
+- `accessTokenExpiredAt`
+- `refreshTokenExpiredAt`
+
+규칙:
+- 세션 상태가 `ACTIVE`여야 한다.
+- 세션 만료 시간이 지나지 않아야 한다.
+- 입력한 refresh token과 저장된 해시 검증이 통과해야 한다.
+- 성공 시 세션의 refresh token hash, refreshedAt, expiredAt을 갱신한다.
+
+### 로그아웃 API
+```http
+POST /api/v1/auth/logout
+```
+
+request:
+- Authorization 헤더의 access token
+- request body의 `sessionId`
+
+response result:
+- `sessionId`
+- `status`
+
+규칙:
+- 로그아웃 시 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
+- `REVOKED` 상태 세션은 토큰 재발급을 허용하지 않는다.
+
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
 

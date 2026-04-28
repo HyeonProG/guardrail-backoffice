@@ -4,10 +4,44 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.3.0]
+### 추가
+- Auth 도메인 엔티티, enum, repository, Querydsl 조회 저장소 추가
+- 초기 비밀번호 해시 저장 service 흐름 추가
+- 비밀번호 이력, 로그인 이력, 세션 저장/조회/상태 변경 API 추가
+- 사용자 조회, 수정, 삭제 API 추가
+- 사용자 상태 변경 API 추가
+- 로그인, 토큰 재발급, 로그아웃 API 추가
+- JWT 발급과 검증 서비스 추가
+- user/auth DDL 문서 추가
+- user/auth/JWT 단위 테스트 추가
+- 임시 메일 발송 로깅 구현 추가
+### 수정
+- 사용자 생성 흐름을 Auth 비밀번호 이력 저장과 연동
+- 초기 임시 비밀번호 만료 기간 7일 정책 반영
+- 로그인 성공/실패 이력, 세션 생성, refresh token 해시 저장 흐름 반영
+- 토큰 재발급 시 세션 상태와 만료, refresh token 해시 검증 흐름 반영
+- 로그아웃 시 세션 `REVOKED` 상태 변경 흐름 반영
+- 프로젝트와 API 문서 노출 버전을 `0.3.0`으로 변경
+- 사용자 상태 변경을 별도 API 정책으로 고정
+- 초기 임시 비밀번호 만료 기간을 7일 정책으로 고정
+- 로그인, 토큰 재발급, 로그아웃 API의 request/response와 토큰 정책 문서화
+- 존재하지 않는 이메일 로그인 실패는 이력 저장 없이 종료하도록 정책 수정
+
+## [0.2.0]
+### 추가
+- `User` 도메인 엔티티, 역할 enum, 사용 상태 enum 추가
+- 사용자 생성 요청/응답 DTO 추가
+- 사용자 저장소와 Querydsl 조회 저장소 추가
+- 사용자 생성 API와 service 흐름 추가
+### 수정
+- 프로젝트 버전을 `0.2.0`으로 변경
+
 ## [0.1.20]
 ### 추가
 - `BaseResponseEntity`, `BaseResponseStatus` 공통 응답 구조 추가
 - `BaseException`, `BaseExceptionHandler`, `BaseExceptionHandlerFilter`, `AsyncExceptionHandler` 공통 예외 구조 추가
+- `guardrail-domain-implementation` repo-local skill 추가
 ### 수정
 - DTO와 공통 응답 구조의 record 사용 금지 기준 반영
 - Swagger 설명 최소 기준 문서화

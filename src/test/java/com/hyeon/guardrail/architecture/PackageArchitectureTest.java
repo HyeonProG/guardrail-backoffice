@@ -1,6 +1,7 @@
 package com.hyeon.guardrail.architecture;
 
 import com.hyeon.guardrail.common.domain.BaseEntity;
+import com.hyeon.guardrail.common.domain.SoftDeleteEntity;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaConstructor;
 import com.tngtech.archunit.core.domain.JavaField;
@@ -16,8 +17,10 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @AnalyzeClasses(
     packages = "com.hyeon.guardrail",
@@ -139,6 +142,19 @@ class PackageArchitectureTest {
           .as("JPA entity는 BaseEntity 또는 SoftDeleteEntity를 상속해야 한다")
           .allowEmptyShould(true);
 
+  // auth 도메인 entity는 soft delete가 아니라 보존/상태 정책을 사용한다.
+  @ArchTest
+  static final ArchRule AUTH_ENTITY_SHOULD_NOT_EXTEND_SOFT_DELETE_ENTITY =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .and()
+          .resideInAPackage("..auth.domain..")
+          .should()
+          .notBeAssignableTo(SoftDeleteEntity.class)
+          .as("auth 도메인 entity는 SoftDeleteEntity를 상속할 수 없다")
+          .allowEmptyShould(true);
+
   // controller public 메서드는 BaseResponseEntity만 반환하고 ResponseEntity를 직접 사용하지 않는다.
   @ArchTest
   static final ArchRule CONTROLLER_SHOULD_NOT_RETURN_RESPONSE_ENTITY =
@@ -147,6 +163,16 @@ class PackageArchitectureTest {
           .resideInAPackage("..controller..")
           .should(notDeclareResponseEntityReturnType())
           .as("controller public 메서드는 ResponseEntity를 직접 반환할 수 없다")
+          .allowEmptyShould(true);
+
+  // controller의 기본 경로는 /api/v1 prefix를 사용한다.
+  @ArchTest
+  static final ArchRule CONTROLLER_SHOULD_USE_API_V1_PREFIX =
+      ArchRuleDefinition.classes()
+          .that()
+          .resideInAPackage("..controller..")
+          .should(haveApiV1RequestMapping())
+          .as("controller 기본 경로는 /api/v1 prefix를 사용해야 한다")
           .allowEmptyShould(true);
 
   // entity 필드는 명시적인 컬럼명을 가진 @Column을 사용한다.
@@ -265,5 +291,26 @@ class PackageArchitectureTest {
 
   private static boolean hasFieldSizedParameters(JavaConstructor constructor, long fieldCount) {
     return constructor.getRawParameterTypes().size() == fieldCount;
+  }
+
+  private static ArchCondition<JavaClass> haveApiV1RequestMapping() {
+    return new ArchCondition<>("기본 RequestMapping 경로가 /api/v1로 시작해야 한다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        RequestMapping requestMapping = getAnnotation(item, RequestMapping.class);
+        boolean valid =
+            requestMapping != null
+                && requestMapping.value().length > 0
+                && requestMapping.value()[0].startsWith("/api/v1");
+
+        events.add(
+            new SimpleConditionEvent(
+                item, valid, item.getName() + " controller 기본 경로는 /api/v1로 시작해야 한다"));
+      }
+    };
+  }
+
+  private static <T extends Annotation> T getAnnotation(JavaClass item, Class<T> annotationType) {
+    return item.reflect().getAnnotation(annotationType);
   }
 }
