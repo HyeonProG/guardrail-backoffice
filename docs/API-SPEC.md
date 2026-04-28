@@ -177,7 +177,7 @@ response result:
 규칙:
 - 세션 상태가 `ACTIVE`여야 한다.
 - 세션 만료 시간이 지나지 않아야 한다.
-- 입력한 refresh token과 저장된 해시 검증이 통과해야 한다.
+- 입력한 refresh token과 저장된 검증용 해시 값의 검증이 통과해야 한다.
 - 성공 시 세션의 refresh token hash, refreshedAt, expiredAt을 갱신한다.
 
 ### 로그아웃 API

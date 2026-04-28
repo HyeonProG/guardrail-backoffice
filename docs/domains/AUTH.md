@@ -129,16 +129,17 @@
 - 초기 임시 비밀번호 이력은 `expiredAt`을 반드시 저장한다.
 - 초기 임시 비밀번호가 만료되면 재로그인에 사용할 수 없고, 재발급 시 새로운 비밀번호 이력을 추가한다.
 - 액세스 토큰은 전체 원문 저장을 피하고 식별 가능한 최소 정보만 저장한다.
-- 리프레시 토큰은 서버 검증을 위해 저장하되 해시로만 저장한다.
+- 리프레시 토큰은 서버 검증을 위해 저장하되 평문으로 저장하지 않는다.
+- 리프레시 토큰은 길이와 검증 정책에 맞는 해시 값으로 저장한다.
 - 로그인 요청은 `email`, `password`, `deviceType`을 사용한다.
 - 로그인 요청의 IP는 request body가 아니라 서버 요청 정보에서 추출해 저장한다.
 - 로그인 성공 응답은 `accessToken`, `refreshToken`, `sessionId`, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `userId`, `role`을 포함한다.
 - access token에는 `userId`, `role`, `sessionId`, `accessTokenId`를 포함한다.
 - refresh token에는 `userId`, `sessionId`를 포함한다.
-- 로그인 성공 시 `UserSession`을 `ACTIVE` 상태로 생성하고 refresh token은 해시로 저장한다.
+- 로그인 성공 시 `UserSession`을 `ACTIVE` 상태로 생성하고 refresh token은 검증 가능한 해시 값으로 저장한다.
 - 토큰 재발급 요청은 `sessionId`, `refreshToken`을 사용한다.
 - 토큰 재발급 성공 시 새로운 access token, refresh token, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `sessionId`를 응답한다.
-- 토큰 재발급 시 세션 상태가 `ACTIVE`이고 세션 만료 시간이 지나지 않았으며 refresh token 해시 검증이 통과해야 한다.
+- 토큰 재발급 시 세션 상태가 `ACTIVE`이고 세션 만료 시간이 지나지 않았으며 저장된 refresh token 해시 검증이 통과해야 한다.
 - 토큰 재발급 성공 시 세션의 refresh token hash, refreshedAt, expiredAt을 갱신한다.
 - 로그아웃 요청은 Authorization 헤더의 access token과 `sessionId`를 함께 사용한다.
 - 로그아웃 성공 응답은 `sessionId`, `status`를 포함한다.
