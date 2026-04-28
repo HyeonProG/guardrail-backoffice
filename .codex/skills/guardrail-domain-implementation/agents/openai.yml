@@ -1,0 +1,4 @@
+interface:
+  display_name: "Guardrail 도메인"
+  short_description: "Guardrail 도메인 구현 규칙 적용"
+  default_prompt: "$guardrail-domain-implementation을 사용해서 AGENT.md와 docs 규칙을 따르는 Guardrail 백엔드 도메인을 구현한다."
