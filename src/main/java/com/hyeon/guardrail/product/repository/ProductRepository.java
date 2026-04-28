@@ -28,4 +28,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
       @Param("name") String name,
       @Param("description") String description,
       @Param("quantity") int quantity);
+
+  /** 승인된 상품 설명 반영 */
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+      """
+      update Product product
+         set product.description = :description
+       where product.id = :productId
+         and product.deleted = false
+      """)
+  int updateDescription(
+      @Param("productId") UUID productId, @Param("description") String description);
 }

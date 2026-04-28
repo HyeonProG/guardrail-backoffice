@@ -4,6 +4,17 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.8.0]
+### 추가
+- ProductContent 도메인 엔티티, 상태/출처/이력 enum, repository, Querydsl 조회 저장소 추가
+- AI 상품 설명 초안 생성, 목록/상세 조회, 수정, 승인 요청, 승인, 반려, 이력 조회, 삭제 API 추가
+- product content DDL 문서 추가
+- 상품 설명 승인 반영, 재생성 신규 초안 생성, AI 생성 결과 저장 흐름 테스트 추가
+### 수정
+- 프로젝트와 API 문서 노출 버전을 `0.8.0`으로 변경
+- 상품 설명 승인 시에만 `Product.description`에 최종 설명이 반영되도록 product repository 연동 추가
+- 승인 완료된 상품 설명 초안은 `productcontent`에서 수정하지 않고 `product` 기본 정보 수정 API로 변경하도록 정책과 테스트 보강
+
 ## [0.7.1]
 ### 추가
 - `common.ai` 기반 OpenAI 상품 설명 생성 공통 연동 구조 추가

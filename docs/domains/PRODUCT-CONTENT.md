@@ -173,6 +173,8 @@ REJECTED -> READY_FOR_APPROVAL
 - 규칙:
   - `content`, `actorId`를 request body로 받는다.
   - 운영자 검수 수정 흐름으로 처리한다.
+  - `APPROVED` 상태 초안은 수정할 수 없다.
+  - 승인 이후 설명 수정은 `Product` 기본 정보 수정 API에서 처리한다.
   - 수정 시 `EDITED` 이력을 함께 저장한다.
 
 ### 설명 승인 요청

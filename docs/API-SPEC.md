@@ -487,6 +487,8 @@ response result:
 
 규칙:
 - 운영자 검수 수정 흐름으로 처리한다.
+- `APPROVED` 상태 초안은 수정할 수 없다.
+- 승인 이후 설명 수정은 `PUT /api/v1/products/{productId}` 기본 정보 수정 API에서 처리한다.
 - 수정 시 `EDITED` 이력을 저장한다.
 
 ### 설명 승인 요청 API
