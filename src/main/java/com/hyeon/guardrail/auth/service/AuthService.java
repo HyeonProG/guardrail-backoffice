@@ -28,7 +28,11 @@ import com.hyeon.guardrail.user.domain.UserStatus;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +46,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
   private static final int INITIAL_PASSWORD_EXPIRATION_DAYS = 7;
+  private static final int BCRYPT_MAX_BYTES = 72;
   private static final String BEARER_PREFIX = "Bearer ";
+  private static final String SHA256_PREFIX = "{sha256}";
   private static final String SESSION_ID_CLAIM = "sessionId";
 
   private final UserPasswordHistoryRepository passwordHistoryRepository;
@@ -97,7 +103,7 @@ public class AuthService {
     TokenIssueResponse accessToken =
         jwtService.issueAccessToken(user.getId(), user.getRole(), sessionId, accessTokenId);
     TokenIssueResponse refreshToken = jwtService.issueRefreshToken(user.getId(), sessionId);
-    String refreshTokenHash = passwordEncoder.encode(refreshToken.getToken());
+    String refreshTokenHash = hashRefreshToken(refreshToken.getToken());
 
     UserSession session =
         new UserSession(
@@ -139,7 +145,7 @@ public class AuthService {
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
     }
 
-    if (!passwordEncoder.matches(request.getRefreshToken(), session.getRefreshTokenHash())) {
+    if (!matchesRefreshToken(request.getRefreshToken(), session.getRefreshTokenHash())) {
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
     }
 
@@ -152,7 +158,7 @@ public class AuthService {
     TokenIssueResponse accessToken =
         jwtService.issueAccessToken(user.getId(), user.getRole(), session.getId(), accessTokenId);
     TokenIssueResponse refreshToken = jwtService.issueRefreshToken(user.getId(), session.getId());
-    String refreshTokenHash = passwordEncoder.encode(refreshToken.getToken());
+    String refreshTokenHash = hashRefreshToken(refreshToken.getToken());
 
     sessionRepository.refreshToken(
         session.getId(),
@@ -218,7 +224,7 @@ public class AuthService {
   /** 인증 세션 저장 */
   @Transactional
   public SessionResponse createSession(SessionCreateRequest request) {
-    String refreshTokenHash = passwordEncoder.encode(request.getRefreshToken());
+    String refreshTokenHash = hashRefreshToken(request.getRefreshToken());
     UserSession session =
         new UserSession(
             request.getUserId(),
@@ -292,5 +298,31 @@ public class AuthService {
     }
 
     return authorizationHeader.substring(BEARER_PREFIX.length());
+  }
+
+  private String hashRefreshToken(String refreshToken) {
+    if (refreshToken.getBytes(StandardCharsets.UTF_8).length <= BCRYPT_MAX_BYTES) {
+      return passwordEncoder.encode(refreshToken);
+    }
+
+    return SHA256_PREFIX + sha256(refreshToken);
+  }
+
+  private boolean matchesRefreshToken(String refreshToken, String refreshTokenHash) {
+    if (refreshTokenHash != null && refreshTokenHash.startsWith(SHA256_PREFIX)) {
+      return refreshTokenHash.equals(SHA256_PREFIX + sha256(refreshToken));
+    }
+
+    return passwordEncoder.matches(refreshToken, refreshTokenHash);
+  }
+
+  private String sha256(String value) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hashed = digest.digest(value.getBytes(StandardCharsets.UTF_8));
+      return Base64.getEncoder().encodeToString(hashed);
+    } catch (NoSuchAlgorithmException exception) {
+      throw new IllegalStateException("SHA-256 algorithm is not available.", exception);
+    }
   }
 }
