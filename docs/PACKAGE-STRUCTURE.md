@@ -14,6 +14,7 @@ com.hyeon.guardrail
 ├── auth
 ├── user
 ├── product
+├── productoption
 ├── category
 └── file
 ```
@@ -158,6 +159,7 @@ BaseEntity 기준:
 - `Auth`, `UserLoginHistory`, `UserSession`, `UserPasswordHistory` -> `auth`
 - `User` -> `user`
 - `Product`, `ProductHistory` -> `product`
+- `ProductOption`, `ProductOptionItem` -> `productoption`
 - `Category` -> `category`
 - `FileAttachment` -> `file`
 
