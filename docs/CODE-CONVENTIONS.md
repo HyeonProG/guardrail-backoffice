@@ -125,7 +125,8 @@
 - `UserCreateRequest`
 - `UserUpdateRequest`
 - `UserResponse`
-- `ProductApprovalRequest`
+- `ProductStatusUpdateRequest`
+- `ProductContentApproveRequest`
 - `ProductResponse`
 
 ## 10. 예외 처리 규칙

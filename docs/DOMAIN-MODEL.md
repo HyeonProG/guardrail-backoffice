@@ -15,7 +15,7 @@
 - soft delete가 필요한 엔티티만 `SoftDeleteEntity`를 사용한다.
 - 모든 테이블 간 연관관계 매핑은 사용하지 않는다.
 - 테이블 간 참조가 필요해도 객체 연관관계 대신 식별자 값으로만 다룬다.
-- AI 응답 데이터는 기본적으로 별도 테이블에 영속 저장하지 않는다.
+- AI 관련 데이터는 기본적으로 별도 테이블에 영속 저장하지 않으며, 별도 도메인 문서에서 명시한 경우에만 영속 저장한다.
 
 ## 3. 핵심 도메인 목록
 ### User
@@ -28,6 +28,11 @@
 ### Product
 상품의 기본 정보와 상태를 관리한다.
 `Product`는 `Category`를 객체 연관관계 없이 `categoryId`로 참조한다.
+
+### ProductContent
+AI 설명 생성, 운영자 검수, 관리자 승인 반영 흐름을 관리한다.
+`ProductContentDraft`와 `ProductContentHistory`는 `Product`를 객체 연관관계 없이 `productId`로 참조한다.
+현재 범위에서 AI는 텍스트 설명만 생성하고, 상품 이미지는 `FileAttachment`로 직접 등록한다.
 
 ### ProductOption
 상품 옵션 그룹과 옵션 선택값을 관리한다.
@@ -54,7 +59,7 @@
 - UserPasswordHistory
 
 ### 설명 생성 결과
-설명 생성 결과는 기능적으로 필요할 수 있지만, 현재 기준에서는 별도 영속 도메인으로 고정하지 않는다.
+설명 생성 결과는 `ProductContentDraft`에 영속 저장한다.
 
 ### 검증 결과
-검증 결과는 우선 상품 등록 흐름 안에서 관리하는 보조 정보로 본다.
+운영자 검수와 관리자 승인 결과는 `ProductContentDraft.status`와 `ProductContentHistory`로 관리한다.

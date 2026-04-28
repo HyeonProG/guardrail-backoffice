@@ -425,6 +425,130 @@ response result:
 규칙:
 - 상품 이력은 생성, 수정, 상태 변경 흐름 기준으로 조회한다.
 
+## 7.4 상품 설명 생성/검수 API 기준
+### 설명 초안 생성 API
+```http
+POST /api/v1/products/{productId}/contents/generate
+```
+
+request body:
+- `actorId`
+- `productName`
+- `categoryName`
+- `optionSummary`
+- `featureKeywords`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- 생성 결과는 `ProductContentDraft`에 저장한다.
+- 생성 직후 상태는 `GENERATED`다.
+- 생성 출처는 `AI`로 저장한다.
+- `featureKeywords`는 설명 생성에 사용할 핵심 특징 목록이다.
+- 상품 이미지는 설명 생성 request에 포함하지 않는다.
+
+### 설명 초안 목록 조회 API
+```http
+GET /api/v1/products/{productId}/contents?status=GENERATED
+```
+
+query:
+- `status`
+
+response result:
+- `List<ProductContentDraftResponse>`
+
+규칙:
+- 목록 조회는 `deleted = false` 기준으로만 수행한다.
+
+### 설명 초안 상세 조회 API
+```http
+GET /api/v1/products/{productId}/contents/{draftId}
+```
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- 삭제되지 않은 초안만 조회할 수 있다.
+
+### 설명 초안 수정 API
+```http
+PUT /api/v1/products/{productId}/contents/{draftId}
+```
+
+request body:
+- `content`
+- `actorId`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- 운영자 검수 수정 흐름으로 처리한다.
+- 수정 시 `EDITED` 이력을 저장한다.
+
+### 설명 승인 요청 API
+```http
+PATCH /api/v1/products/{productId}/contents/{draftId}/submit
+```
+
+request body:
+- `actorId`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- `GENERATED`, `REJECTED` 상태에서만 요청할 수 있다.
+- 요청 시 상태를 `READY_FOR_APPROVAL`로 변경한다.
+- 요청 시 `SUBMITTED` 이력을 저장한다.
+
+### 설명 승인 API
+```http
+PATCH /api/v1/products/{productId}/contents/{draftId}/approve
+```
+
+request body:
+- `actorId`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- `READY_FOR_APPROVAL` 상태에서만 승인할 수 있다.
+- 승인 시 `Product.description`에 최종 설명을 반영한다.
+- 승인 시 `APPROVED` 이력을 저장한다.
+
+### 설명 반려 API
+```http
+PATCH /api/v1/products/{productId}/contents/{draftId}/reject
+```
+
+request body:
+- `actorId`
+- `reason`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- `READY_FOR_APPROVAL` 상태에서만 반려할 수 있다.
+- `reason`은 필수다.
+- 반려 시 `REJECTED` 이력을 저장한다.
+
+### 설명 이력 조회 API
+```http
+GET /api/v1/products/{productId}/contents/{draftId}/histories
+```
+
+response result:
+- `List<ProductContentHistoryResponse>`
+
+규칙:
+- 생성, 수정, 제출, 승인, 반려, 재생성 흐름을 시간순으로 조회한다.
+
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
 
@@ -488,7 +612,8 @@ DTO 이름은 목적이 드러나도록 작성한다.
 - `UserUpdateRequest`
 - `UserResponse`
 - `ProductCreateRequest`
-- `ProductApprovalRequest`
+- `ProductStatusUpdateRequest`
+- `ProductContentApproveRequest`
 - `ProductResponse`
 
 규칙:
