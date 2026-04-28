@@ -48,6 +48,7 @@
 - `SUBMITTED`
 - `APPROVED`
 - `REJECTED`
+- `INACTIVATED`
 - `UPDATED`
 
 ## 4. 필드 초안
@@ -86,8 +87,11 @@
 - 처리자 사용자는 객체 연관관계로 참조하지 않는다.
 - 처리자 참조는 `actorId`로 사용자 UUID 값을 저장한다.
 - 상품 승인과 반려 흐름은 `ProductHistory`에 기록한다.
+- 상품 비활성화 흐름은 `ProductHistory`에 `INACTIVATED` 이력으로 기록한다.
 - 반려 사유는 `REJECTED` 이력에서만 필수로 다룬다.
 - `reason`은 `REJECTED` 이력에서는 필수이며, 그 외 이력에서는 선택 값으로 다룬다.
+- 생성, 기본 정보 수정, 상태 변경 request에는 이력 저장을 위한 `actorId`를 포함한다.
+- 현재 단계에서는 `actorId`를 인증 토큰에서 추출하지 않고 request body 값으로 받는다.
 - AI 응답 원문은 기본적으로 별도 저장하지 않고, 최종 반영된 설명만 `Product.description`에 저장한다.
 
 ## 6. 상태 전이 규칙
@@ -121,16 +125,16 @@ com.hyeon.guardrail.product
 ├── repository
 │   ├── ProductRepository.java
 │   ├── ProductHistoryRepository.java
-│   └── ProductRepositoryQuery.java
+│   ├── ProductRepositoryQuery.java
+│   └── ProductHistoryRepositoryQuery.java
 ├── service
-│   ├── ProductService.java
-│   └── ProductHistoryService.java
+│   └── ProductService.java
 ├── dto
 │   ├── ProductCreateRequest.java
 │   ├── ProductUpdateRequest.java
-│   ├── ProductApprovalRequest.java
-│   ├── ProductRejectRequest.java
-│   └── ProductResponse.java
+│   ├── ProductStatusUpdateRequest.java
+│   ├── ProductResponse.java
+│   └── ProductHistoryResponse.java
 └── controller
     └── ProductController.java
 ```
