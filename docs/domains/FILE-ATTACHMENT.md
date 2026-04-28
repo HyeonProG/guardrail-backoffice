@@ -65,6 +65,10 @@
 - 파일 조회는 기본적으로 `targetType`, `targetId`, `deleted = false`, `status = ACTIVE`를 기준으로 한다.
 - `INACTIVE`는 운영상 비활성 상태를 의미하고, `deleted = true`는 soft delete 상태를 의미한다.
 - 파일 크기와 콘텐츠 타입 검증은 service 계층에서 수행한다.
+- 허용할 콘텐츠 타입은 `image/jpeg`, `image/png`, `image/webp`로 제한한다.
+- 최대 파일 크기는 10MB로 제한한다.
+- 파일 업로드 저장 루트 경로는 `/uploads/products`를 사용한다.
+- `filePath`는 반드시 `/uploads/products` 하위 경로여야 한다.
 - 파일 순서는 `sortOrder`로 관리한다.
 - `sortOrder = 1`인 파일을 대표 파일로 본다.
 - 같은 `targetType`, `targetId` 안에서 `sortOrder`는 중복될 수 없다.

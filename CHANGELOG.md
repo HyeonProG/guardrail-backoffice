@@ -4,6 +4,16 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.5.0]
+### 추가
+- FileAttachment 도메인 엔티티, 상태 enum, 대상 타입 enum, repository, Querydsl 조회 저장소 추가
+- 파일 첨부 생성, 단건 조회, 대상별 목록 조회, 기본 정보 수정, 삭제 API 추가
+- file attachment DDL 문서 추가
+- file attachment sortOrder, 대표 파일, 파일 메타데이터 검증 단위 테스트 추가
+### 수정
+- 프로젝트와 API 문서 노출 버전을 `0.5.0`으로 변경
+- file attachment 허용 MIME 타입, 최대 파일 크기, 저장 경로 루트 정책 반영
+
 ## [0.4.0]
 ### 추가
 - Category 도메인 엔티티, 상태 enum, repository, Querydsl 조회 저장소 추가

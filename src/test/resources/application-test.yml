@@ -28,3 +28,10 @@ logging:
     com.hyeon.guardrail: info
     org.hibernate.SQL: off
     org.hibernate.orm.jdbc.bind: off
+
+# 테스트용 커스텀 업로드 설정
+app:
+  upload:
+    max-file-size-mb: 10
+    storage-root-path: /uploads/products
+    allowed-content-types: image/jpeg,image/png,image/webp

@@ -17,6 +17,10 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -195,6 +199,26 @@ class PackageArchitectureTest {
           .as("entity는 선언 필드 기준 all-args 생성자를 가져야 한다")
           .allowEmptyShould(true);
 
+  // entity는 테이블 간 객체 연관관계 매핑을 사용하지 않는다.
+  @ArchTest
+  static final ArchRule ENTITY_SHOULD_NOT_USE_JPA_RELATIONSHIP_MAPPING =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should(notDeclareJpaRelationshipField())
+          .as("entity는 JPA 연관관계 매핑을 사용할 수 없다")
+          .allowEmptyShould(true);
+
+  // entity 생성 흐름은 service에서 담당하므로 정적 create 메서드를 두지 않는다.
+  @ArchTest
+  static final ArchRule ENTITY_SHOULD_NOT_DECLARE_STATIC_CREATE_METHOD =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should(notDeclareStaticCreateMethod())
+          .as("entity는 정적 create 메서드를 가질 수 없다")
+          .allowEmptyShould(true);
+
   private static ArchCondition<JavaClass> simpleNameEndingWithRequestOrResponse() {
     return new ArchCondition<>("클래스명이 Request 또는 Response로 끝나야 한다") {
       @Override
@@ -291,6 +315,50 @@ class PackageArchitectureTest {
 
   private static boolean hasFieldSizedParameters(JavaConstructor constructor, long fieldCount) {
     return constructor.getRawParameterTypes().size() == fieldCount;
+  }
+
+  private static ArchCondition<JavaClass> notDeclareJpaRelationshipField() {
+    return new ArchCondition<>("JPA 연관관계 필드를 선언하면 안 된다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        List<JavaField> fields =
+            item.getFields().stream()
+                .filter(field -> field.getOwner().equals(item))
+                .filter(field -> !field.getModifiers().contains(JavaModifier.STATIC))
+                .toList();
+
+        boolean valid =
+            fields.stream()
+                .noneMatch(
+                    field ->
+                        field.isAnnotatedWith(ManyToOne.class)
+                            || field.isAnnotatedWith(OneToOne.class)
+                            || field.isAnnotatedWith(OneToMany.class)
+                            || field.isAnnotatedWith(ManyToMany.class));
+
+        events.add(
+            new SimpleConditionEvent(item, valid, item.getName() + " entity는 JPA 연관관계를 사용할 수 없다"));
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> notDeclareStaticCreateMethod() {
+    return new ArchCondition<>("정적 create 메서드를 선언하면 안 된다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        boolean valid =
+            item.getMethods().stream()
+                .filter(method -> method.getOwner().equals(item))
+                .noneMatch(
+                    method ->
+                        method.getName().equals("create")
+                            && method.getModifiers().contains(JavaModifier.STATIC));
+
+        events.add(
+            new SimpleConditionEvent(
+                item, valid, item.getName() + " entity는 정적 create 메서드를 가질 수 없다"));
+      }
+    };
   }
 
   private static ArchCondition<JavaClass> haveApiV1RequestMapping() {
