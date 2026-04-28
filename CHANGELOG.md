@@ -12,6 +12,7 @@
 - product option DDL 문서 추가
 - 옵션 그룹과 옵션값의 중복 검증, productId 검증, 추가 금액 검증 단위 테스트 추가
 - `docs/domains/PRODUCT-CONTENT.md` 문서 추가
+- `docs/AI-INTEGRATION.md` 문서 추가
 ### 수정
 - 프로젝트와 API 문서 노출 버전을 `0.7.0`으로 변경
 - 상품 옵션과 옵션값을 객체 연관관계 없이 `productId`, `productOptionId` 값으로 연결
@@ -19,6 +20,7 @@
 - 상품 설명 생성/검수/승인 API 명세 추가
 - 상품 이미지는 직접 등록하고 AI는 텍스트 설명만 생성하는 현재 범위 정책 반영
 - 도메인 모델, 패키지 구조, DTO 예시, 프로젝트 개요 문서를 현재 구현 기준으로 정합성 보강
+- 공통 AI 클라이언트 구조와 OpenAI 기반 API 키 주입 정책 문서화
 
 ## [0.6.1]
 ### 추가

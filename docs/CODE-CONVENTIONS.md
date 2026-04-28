@@ -86,6 +86,7 @@
 - 조회 전용 메서드는 가능한 읽기 전용 트랜잭션을 사용한다.
 - 사용자 생성처럼 다른 도메인을 함께 조합하는 흐름은 Service에서 명시적으로 처리한다.
 - 작업 범위에 없는 다른 도메인 클래스는 임의 생성하지 않는다.
+- 외부 AI provider 호출이 필요한 경우 도메인 service는 `common.ai` 인터페이스만 호출한다.
 
 예:
 - `UserService`
@@ -140,6 +141,14 @@
 - `BaseException`
 - `BaseExceptionHandler`
 - `BaseExceptionHandlerFilter`
+
+## 10.1 AI 연동 규칙
+- 외부 AI 호출 코드는 `common.ai` 패키지에 둔다.
+- 도메인 패키지에서 HTTP client 구현을 직접 작성하지 않는다.
+- AI provider 구현체는 설정값으로 교체 가능하게 작성한다.
+- API 키는 코드에 직접 작성하지 않는다.
+- API 키는 `application.yml`에서 관리하되, 실제 키가 들어간 설정 파일은 저장소 커밋 범위 밖에서 관리한다.
+- AI 호출 실패는 공통 예외 또는 전용 AI 예외로 감싸되, 민감 정보는 로그에 남기지 않는다.
 
 ## 11. Lombok 사용 기준
 - Lombok은 필요한 범위에서만 사용한다.

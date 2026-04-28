@@ -12,7 +12,8 @@
 4. `docs/HARNESS-RULES.md`
 5. `docs/API-SPEC.md`
 6. `docs/DOMAIN-MODEL.md`
-7. `docs/domains/*.md`
+7. `docs/AI-INTEGRATION.md`
+8. `docs/domains/*.md`
 
 ## 3. 문서 우선순위
 문서 간 충돌 시 아래 우선순위를 따른다.
@@ -23,9 +24,10 @@
 4. `docs/CODE-CONVENTIONS.md`
 5. `docs/API-SPEC.md`
 6. `docs/DOMAIN-MODEL.md`
-7. `docs/domains/*.md`
-8. `docs/PROJECT-OVERVIEW.md`
-9. `docs/VERSION-POLICY.md`, `docs/CHANGELOG-CONVENTION.md`, `docs/COMMIT-MESSAGE.md`
+7. `docs/AI-INTEGRATION.md`
+8. `docs/domains/*.md`
+9. `docs/PROJECT-OVERVIEW.md`
+10. `docs/VERSION-POLICY.md`, `docs/CHANGELOG-CONVENTION.md`, `docs/COMMIT-MESSAGE.md`
 
 ## 4. 작업 유형별 참조 문서
 ### 도메인 구현
@@ -36,6 +38,7 @@
 
 ### API 구현
 - `docs/API-SPEC.md`
+- `docs/AI-INTEGRATION.md`
 - `docs/PACKAGE-STRUCTURE.md`
 - `docs/CODE-CONVENTIONS.md`
 
