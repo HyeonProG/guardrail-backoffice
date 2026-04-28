@@ -29,6 +29,11 @@
 상품의 기본 정보와 상태를 관리한다.
 `Product`는 `Category`를 객체 연관관계 없이 `categoryId`로 참조한다.
 
+### ProductOption
+상품 옵션 그룹과 옵션 선택값을 관리한다.
+`ProductOption`은 `Product`를 객체 연관관계 없이 `productId`로 참조한다.
+`ProductOptionItem`은 `ProductOption`을 객체 연관관계 없이 `productOptionId`로 참조한다.
+
 ### FileAttachment
 상품 이미지 포함 파일 자원을 관리한다.
 `FileAttachment`는 대상 도메인을 `targetType`, `targetId`로 참조한다.
