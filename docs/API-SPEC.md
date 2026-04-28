@@ -197,6 +197,113 @@ response result:
 - 로그아웃 시 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
 - `REVOKED` 상태 세션은 토큰 재발급을 허용하지 않는다.
 
+## 7.2 카테고리 API 기준
+### 카테고리 생성 API
+```http
+POST /api/v1/categories
+```
+
+request body:
+- `parentId`
+- `name`
+
+response result:
+- `id`
+- `parentId`
+- `name`
+- `status`
+- `createdAt`
+- `updatedAt`
+
+규칙:
+- 생성 시 `status`는 `ACTIVE`로 시작한다.
+- `parentId`가 존재하면 부모 카테고리는 `deleted = false` 상태여야 한다.
+
+### 카테고리 목록 조회 API
+```http
+GET /api/v1/categories?page=0&size=20&sort=createdAt,desc&parentId={parentId}&status=ACTIVE
+```
+
+query:
+- `page`
+- `size`
+- `sort`
+- `parentId`
+- `status`
+
+response result:
+- `PageResponse<CategoryResponse>`
+
+규칙:
+- 목록 조회는 `deleted = false` 기준으로만 수행한다.
+- `parentId`가 없으면 최상위 카테고리 목록 조회를 의미한다.
+- `status`는 필요 시 필터로 사용한다.
+
+### 카테고리 상세 조회 API
+```http
+GET /api/v1/categories/{categoryId}
+```
+
+response result:
+- `CategoryResponse`
+
+규칙:
+- 삭제되지 않은 카테고리만 조회할 수 있다.
+
+### 카테고리 기본 정보 수정 API
+```http
+PUT /api/v1/categories/{categoryId}
+```
+
+request body:
+- `parentId`
+- `name`
+
+response result:
+- `CategoryResponse`
+
+규칙:
+- 기본 정보 수정은 `name`, `parentId`만 처리한다.
+- 상태 변경은 별도 API에서 처리한다.
+
+### 카테고리 상태 변경 API
+```http
+PATCH /api/v1/categories/{categoryId}/status
+```
+
+request body:
+- `status`
+
+response result:
+- `CategoryResponse`
+
+규칙:
+- `status`는 `ACTIVE`, `INACTIVE`만 허용한다.
+
+### 카테고리 삭제 API
+```http
+DELETE /api/v1/categories/{categoryId}
+```
+
+response result:
+- `null`
+
+규칙:
+- soft delete로 처리한다.
+
+### 카테고리 복구 API
+```http
+PATCH /api/v1/categories/{categoryId}/restore
+```
+
+response result:
+- `CategoryResponse`
+
+규칙:
+- `deleted = true` 카테고리만 복구할 수 있다.
+- 하위 카테고리 복구 시 부모 카테고리는 `deleted = false` 상태여야 한다.
+- 복구 후 `status`는 기존 값을 유지한다.
+
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
 
