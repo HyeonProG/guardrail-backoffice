@@ -9,7 +9,7 @@ plugins {
 
 // Project metadata
 group = 'com.hyeon'
-version = '0.5.0'
+version = '0.6.0'
 description = 'guardrail'
 
 // Java toolchain

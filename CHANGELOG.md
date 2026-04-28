@@ -4,6 +4,18 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.6.0]
+### 추가
+- Product 도메인 엔티티, 상태 enum, 이력 엔티티, repository, Querydsl 조회 저장소 추가
+- 상품 생성, 단건 조회, 목록 조회, 기본 정보 수정, 상태 변경, 삭제, 이력 조회 API 추가
+- product DDL 문서 추가
+- 상품 상태 전이, 카테고리 검증, 상품 이력 저장 단위 테스트 추가
+### 수정
+- 프로젝트와 API 문서 노출 버전을 `0.6.0`으로 변경
+- 상품 신규 등록 시 삭제되지 않은 ACTIVE 카테고리만 사용할 수 있도록 검증 연동
+- 상품 파일 첨부는 `target_type = PRODUCT`, `target_id = product.id` 규칙으로 연결되도록 DDL 기준 반영
+- 상품 비활성화 이력을 `INACTIVATED`로 분리하고 product 문서 구조와 actorId 요청 정책을 현재 구현 기준으로 정리
+
 ## [0.5.0]
 ### 추가
 - FileAttachment 도메인 엔티티, 상태 enum, 대상 타입 enum, repository, Querydsl 조회 저장소 추가
