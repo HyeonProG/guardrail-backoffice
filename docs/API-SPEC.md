@@ -304,6 +304,127 @@ response result:
 - 하위 카테고리 복구 시 부모 카테고리는 `deleted = false` 상태여야 한다.
 - 복구 후 `status`는 기존 값을 유지한다.
 
+## 7.3 상품 API 기준
+### 상품 생성 API
+```http
+POST /api/v1/products
+```
+
+request body:
+- `categoryId`
+- `name`
+- `description`
+- `quantity`
+- `actorId`
+
+response result:
+- `id`
+- `categoryId`
+- `name`
+- `description`
+- `quantity`
+- `status`
+- `createdAt`
+- `updatedAt`
+
+규칙:
+- 생성 시 `status`는 `DRAFT`로 시작한다.
+- 생성 시 `CREATED` 이력을 저장한다.
+- `actorId`는 현재 단계에서 request body로 받는다.
+- 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
+
+### 상품 목록 조회 API
+```http
+GET /api/v1/products?page=0&size=20&sort=createdAt,desc&categoryId={categoryId}&status=DRAFT
+```
+
+query:
+- `page`
+- `size`
+- `sort`
+- `categoryId`
+- `status`
+
+response result:
+- `PageResponse<ProductResponse>`
+
+규칙:
+- 목록 조회는 `deleted = false` 기준으로만 수행한다.
+- `categoryId`, `status`는 필요 시 필터로 사용한다.
+
+### 상품 상세 조회 API
+```http
+GET /api/v1/products/{productId}
+```
+
+response result:
+- `ProductResponse`
+
+규칙:
+- 삭제되지 않은 상품만 조회할 수 있다.
+
+### 상품 기본 정보 수정 API
+```http
+PUT /api/v1/products/{productId}
+```
+
+request body:
+- `categoryId`
+- `name`
+- `description`
+- `quantity`
+- `actorId`
+
+response result:
+- `ProductResponse`
+
+규칙:
+- 기본 정보 수정은 `categoryId`, `name`, `description`, `quantity`만 처리한다.
+- 상태 변경은 별도 API에서 처리한다.
+- 수정 시 `UPDATED` 이력을 저장한다.
+- 카테고리는 `deleted = false` 상태여야 한다.
+
+### 상품 상태 변경 API
+```http
+PATCH /api/v1/products/{productId}/status
+```
+
+request body:
+- `status`
+- `actorId`
+- `reason`
+
+response result:
+- `ProductResponse`
+
+규칙:
+- `status`는 `DRAFT -> PENDING -> APPROVED`, `DRAFT -> PENDING -> REJECTED`, `REJECTED -> PENDING`, `APPROVED -> INACTIVE` 흐름만 허용한다.
+- `REJECTED` 변경 시 `reason`은 필수다.
+- `SUBMITTED`, `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 저장한다.
+- `actorId`는 현재 단계에서 request body로 받는다.
+
+### 상품 삭제 API
+```http
+DELETE /api/v1/products/{productId}
+```
+
+response result:
+- `null`
+
+규칙:
+- soft delete로 처리한다.
+
+### 상품 이력 목록 조회 API
+```http
+GET /api/v1/products/{productId}/histories
+```
+
+response result:
+- `List<ProductHistoryResponse>`
+
+규칙:
+- 상품 이력은 생성, 수정, 상태 변경 흐름 기준으로 조회한다.
+
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
 

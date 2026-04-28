@@ -112,7 +112,69 @@ APPROVED -> INACTIVE
 - `INACTIVE`는 승인 이후 비활성화된 상태다.
 - `REJECTED` 상태의 상품은 수정 후 다시 `PENDING` 상태로 제출할 수 있다.
 
-## 7. 패키지 배치
+## 7. API 유스케이스
+### 상품 생성
+- `POST /api/v1/products`
+- request: `ProductCreateRequest`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - 생성 시 상품 상태는 `DRAFT`로 시작한다.
+  - 생성 시 `CREATED` 이력을 함께 저장한다.
+  - 생성 시 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
+
+### 상품 목록 조회
+- `GET /api/v1/products`
+- query:
+  - `page`
+  - `size`
+  - `sort`
+  - `categoryId`
+  - `status`
+- response: `BaseResponseEntity<PageResponse<ProductResponse>>`
+- 규칙:
+  - 목록 조회는 `deleted = false` 기준으로만 수행한다.
+  - `categoryId`, `status`는 필요 시 필터로 사용한다.
+
+### 상품 상세 조회
+- `GET /api/v1/products/{productId}`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - 삭제되지 않은 상품만 조회할 수 있다.
+
+### 상품 기본 정보 수정
+- `PUT /api/v1/products/{productId}`
+- request: `ProductUpdateRequest`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - 상태 변경은 이 API에서 처리하지 않는다.
+  - 수정 시 `UPDATED` 이력을 함께 저장한다.
+  - 수정 시 카테고리는 `deleted = false` 상태여야 한다.
+
+### 상품 상태 변경
+- `PATCH /api/v1/products/{productId}/status`
+- request: `ProductStatusUpdateRequest`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - `status`, `actorId`, `reason`을 request body로 받는다.
+  - 상태 전이는 문서에 정의한 흐름만 허용한다.
+  - `REJECTED` 변경 시 `reason`은 필수다.
+  - `SUBMITTED`, `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 함께 저장한다.
+
+### 상품 삭제
+- `DELETE /api/v1/products/{productId}`
+- response: `BaseResponseEntity<Void>`
+- 규칙:
+  - soft delete로 처리한다.
+
+### 상품 이력 목록 조회
+- `GET /api/v1/products/{productId}/histories`
+- response: `BaseResponseEntity<List<ProductHistoryResponse>>`
+- 규칙:
+  - 상품 이력은 생성, 수정, 상태 변경 흐름을 시간순으로 조회한다.
+
+## 8. 패키지 배치
 `Product` 도메인은 `com.hyeon.guardrail.product` 하위에 배치한다.
 
 ```text

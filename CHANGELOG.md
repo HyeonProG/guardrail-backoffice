@@ -15,6 +15,7 @@
 - 상품 신규 등록 시 삭제되지 않은 ACTIVE 카테고리만 사용할 수 있도록 검증 연동
 - 상품 파일 첨부는 `target_type = PRODUCT`, `target_id = product.id` 규칙으로 연결되도록 DDL 기준 반영
 - 상품 비활성화 이력을 `INACTIVATED`로 분리하고 product 문서 구조와 actorId 요청 정책을 현재 구현 기준으로 정리
+- product 생성, 목록, 상세, 수정, 상태 변경, 삭제, 이력 조회 API 명세와 actorId, reason 규칙 문서화
 
 ## [0.5.0]
 ### 추가
