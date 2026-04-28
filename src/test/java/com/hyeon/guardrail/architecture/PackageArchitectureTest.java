@@ -121,6 +121,8 @@ class PackageArchitectureTest {
       ArchRuleDefinition.classes()
           .that()
           .resideInAPackage("..dto..")
+          .and()
+          .resideOutsideOfPackage("..common.ai.dto..")
           .should(simpleNameEndingWithRequestOrResponse())
           .as("dto 패키지 클래스명은 Request 또는 Response로 끝나야 한다")
           .allowEmptyShould(true);

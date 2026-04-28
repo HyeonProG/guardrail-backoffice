@@ -115,6 +115,7 @@
 - 응답 DTO는 `Response`로 끝낸다.
 - DTO는 Entity를 직접 노출하지 않는다.
 - DTO는 API 목적이 드러나도록 이름을 작성한다.
+- `common.ai.dto`처럼 외부 API request/response가 아니라 내부 AI 호출 command/result만 다루는 경우에는 `Command`, `Result` 네이밍을 사용할 수 있다.
 - request DTO에는 필요한 validation annotation을 작성한다.
 - request DTO는 controller 진입 시점의 기본 입력 검증을 담당한다.
 - service 계층은 도메인 상태, 중복, 권한 등 비즈니스 검증을 담당한다.

@@ -619,6 +619,7 @@ DTO 이름은 목적이 드러나도록 작성한다.
 규칙:
 - 요청 DTO는 `Request`로 끝낸다.
 - 응답 DTO는 `Response`로 끝낸다.
+- `common.ai.dto`처럼 내부 AI 호출 전용 데이터는 예외적으로 `Command`, `Result` 네이밍을 사용할 수 있다.
 - Entity 이름을 그대로 노출하지 않고 API 목적을 기준으로 작성한다.
 
 ## 12. Enum 응답 기준

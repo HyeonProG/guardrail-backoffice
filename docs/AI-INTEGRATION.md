@@ -71,6 +71,7 @@ com.hyeon.guardrail.common.ai
 - `AiContentGenerator`는 상품 설명 생성 공통 인터페이스다.
 - `OpenAiContentGenerator`는 OpenAI 연동 구현체다.
 - `ProductDescriptionPromptFactory`는 프롬프트 조합 책임만 가진다.
+- `common.ai.dto`는 외부 API request/response DTO가 아니라 내부 AI 호출 command/result를 표현한다.
 - 도메인 서비스는 `AiContentGenerator`만 의존한다.
 - 외부 HTTP 호출 상세 구현은 도메인 패키지에 두지 않는다.
 
