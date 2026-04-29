@@ -33,6 +33,13 @@ public class User extends SoftDeleteEntity {
   @Column(name = "status", nullable = false)
   private UserStatus status;
 
+  /** 사용자 기본 정보를 수정 */
+  public void updateBasicInfo(String email, String name, UserRole role) {
+    this.email = email;
+    this.name = name;
+    this.role = role;
+  }
+
   /** 사용자 상태를 사용으로 변경 */
   public void activate() {
     this.status = UserStatus.ACTIVE;

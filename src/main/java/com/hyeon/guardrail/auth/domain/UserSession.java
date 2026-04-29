@@ -47,6 +47,18 @@ public class UserSession extends BaseEntity {
   @Column(name = "expired_at", nullable = false)
   private LocalDateTime expiredAt;
 
+  /** 세션 토큰 정보를 갱신 */
+  public void refreshToken(
+      String accessTokenId,
+      String refreshTokenHash,
+      LocalDateTime refreshedAt,
+      LocalDateTime expiredAt) {
+    this.accessTokenId = accessTokenId;
+    this.refreshTokenHash = refreshTokenHash;
+    this.refreshedAt = refreshedAt;
+    this.expiredAt = expiredAt;
+  }
+
   /** 세션을 활성 상태로 변경 */
   public void activate() {
     this.status = SessionStatus.ACTIVE;

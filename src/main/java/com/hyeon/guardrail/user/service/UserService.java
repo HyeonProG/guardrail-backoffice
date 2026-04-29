@@ -83,15 +83,9 @@ public class UserService {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
     }
 
-    int updatedCount =
-        userRepository.updateBasicInfo(
-            userId, request.getEmail(), request.getName(), request.getRole());
-
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "사용자를 찾을 수 없습니다.");
-    }
-
-    return UserResponse.from(findActiveUser(userId));
+    User user = findActiveUser(userId);
+    user.updateBasicInfo(request.getEmail(), request.getName(), request.getRole());
+    return UserResponse.from(user);
   }
 
   /** 사용자 상태 변경 */

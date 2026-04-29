@@ -49,6 +49,22 @@ public class FileAttachment extends SoftDeleteEntity {
   @Column(name = "status", nullable = false)
   private FileStatus status;
 
+  /** 파일 첨부 기본 정보를 수정 */
+  public void updateBasicInfo(
+      String fileName,
+      String originalFileName,
+      String filePath,
+      long fileSize,
+      String contentType,
+      int sortOrder) {
+    this.fileName = fileName;
+    this.originalFileName = originalFileName;
+    this.filePath = filePath;
+    this.fileSize = fileSize;
+    this.contentType = contentType;
+    this.sortOrder = sortOrder;
+  }
+
   /** 파일 상태를 운영 활성으로 변경 */
   public void activate() {
     this.status = FileStatus.ACTIVE;

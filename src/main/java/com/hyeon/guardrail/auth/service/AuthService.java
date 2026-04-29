@@ -164,12 +164,8 @@ public class AuthService {
     TokenIssueResponse refreshToken = jwtService.issueRefreshToken(user.getId(), session.getId());
     String refreshTokenHash = hashRefreshToken(refreshToken.getToken());
 
-    sessionRepository.refreshToken(
-        session.getId(),
-        accessTokenId,
-        refreshTokenHash,
-        LocalDateTime.now(),
-        refreshToken.getExpiredAt());
+    session.refreshToken(
+        accessTokenId, refreshTokenHash, LocalDateTime.now(), refreshToken.getExpiredAt());
 
     return new TokenRefreshResponse(
         accessToken.getToken(),

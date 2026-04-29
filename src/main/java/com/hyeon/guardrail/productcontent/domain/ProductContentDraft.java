@@ -48,6 +48,11 @@ public class ProductContentDraft extends SoftDeleteEntity {
   @Column(name = "reject_reason", length = 1000)
   private String rejectReason;
 
+  /** 상품 설명 초안 본문을 수정 */
+  public void updateContent(String content) {
+    this.content = content;
+  }
+
   /** 생성 또는 반려 상태의 초안을 승인 요청 상태로 변경 */
   public void submit(UUID actorId) {
     if (status != ProductContentStatus.GENERATED && status != ProductContentStatus.REJECTED) {

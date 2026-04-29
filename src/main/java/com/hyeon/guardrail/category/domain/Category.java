@@ -30,6 +30,12 @@ public class Category extends SoftDeleteEntity {
   @Column(name = "status", nullable = false)
   private CategoryStatus status;
 
+  /** 카테고리 기본 정보를 수정 */
+  public void updateBasicInfo(UUID parentId, String name) {
+    this.parentId = parentId;
+    this.name = name;
+  }
+
   /** 카테고리 상태를 운영 활성으로 변경 */
   public void activate() {
     this.status = CategoryStatus.ACTIVE;

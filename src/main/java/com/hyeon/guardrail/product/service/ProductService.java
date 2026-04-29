@@ -76,23 +76,17 @@ public class ProductService {
   @Transactional
   public ProductResponse updateProduct(UUID productId, ProductUpdateRequest request) {
     currentUserService.validateActor(request.getActorId());
-    findProduct(productId);
+    Product product = findProduct(productId);
     validateCategoryExists(request.getCategoryId());
 
-    int updatedCount =
-        productRepository.updateBasicInfo(
-            productId,
-            request.getCategoryId(),
-            request.getName(),
-            normalizeDescription(request.getDescription()),
-            request.getQuantity());
-
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
-    }
+    product.updateBasicInfo(
+        request.getCategoryId(),
+        request.getName(),
+        normalizeDescription(request.getDescription()),
+        request.getQuantity());
 
     saveHistory(productId, request.getActorId(), ProductHistoryType.UPDATED, null);
-    return ProductResponse.from(findProduct(productId));
+    return ProductResponse.from(product);
   }
 
   /** 상품 상태 변경 */

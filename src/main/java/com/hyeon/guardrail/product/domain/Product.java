@@ -38,6 +38,19 @@ public class Product extends SoftDeleteEntity {
   @Column(name = "status", nullable = false)
   private ProductStatus status;
 
+  /** 상품 기본 정보를 수정 */
+  public void updateBasicInfo(UUID categoryId, String name, String description, int quantity) {
+    this.categoryId = categoryId;
+    this.name = name;
+    this.description = description;
+    this.quantity = quantity;
+  }
+
+  /** 상품 설명을 반영한다 */
+  public void updateDescription(String description) {
+    this.description = description;
+  }
+
   /** 상품을 승인 대기 상태로 제출 */
   public void submit() {
     if (status != ProductStatus.DRAFT && status != ProductStatus.REJECTED) {

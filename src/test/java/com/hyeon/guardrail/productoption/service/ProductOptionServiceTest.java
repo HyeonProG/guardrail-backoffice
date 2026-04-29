@@ -16,6 +16,7 @@ import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
 import com.hyeon.guardrail.productoption.dto.ProductOptionCreateRequest;
 import com.hyeon.guardrail.productoption.dto.ProductOptionItemCreateRequest;
+import com.hyeon.guardrail.productoption.dto.ProductOptionItemResponse;
 import com.hyeon.guardrail.productoption.dto.ProductOptionItemStatusUpdateRequest;
 import com.hyeon.guardrail.productoption.dto.ProductOptionItemUpdateRequest;
 import com.hyeon.guardrail.productoption.dto.ProductOptionUpdateRequest;
@@ -97,8 +98,7 @@ class ProductOptionServiceTest {
     assertThatThrownBy(
             () -> productOptionService.updateProductOption(categoryId, productOptionId, request))
         .isInstanceOf(BaseException.class);
-    verify(productOptionRepository, never())
-        .updateBasicInfo(any(UUID.class), any(UUID.class), any(String.class), any(Integer.class));
+    assertThat(productOption.getSortOrder()).isEqualTo(1);
   }
 
   /** 같은 옵션 그룹 안에서 미삭제 옵션값명 중복은 실패한다. */
@@ -202,18 +202,17 @@ class ProductOptionServiceTest {
     when(productOptionItemRepositoryQuery.existsByProductOptionIdAndSortOrder(
             productOptionId, 1, productOptionItemId))
         .thenReturn(false);
-    when(productOptionItemRepository.updateBasicInfo(
-            productOptionId, productOptionItemId, "블랙", 1000, 1))
-        .thenReturn(1);
 
-    productOptionService.updateProductOptionItem(
-        categoryId,
-        productOptionId,
-        productOptionItemId,
-        new ProductOptionItemUpdateRequest("블랙", 1000, 1, UUID.randomUUID()));
+    ProductOptionItemResponse response =
+        productOptionService.updateProductOptionItem(
+            categoryId,
+            productOptionId,
+            productOptionItemId,
+            new ProductOptionItemUpdateRequest("블랙", 1000, 1, UUID.randomUUID()));
 
-    verify(productOptionItemRepository)
-        .updateBasicInfo(productOptionId, productOptionItemId, "블랙", 1000, 1);
+    assertThat(response.getName()).isEqualTo("블랙");
+    assertThat(response.getAdditionalPrice()).isEqualTo(1000);
+    assertThat(response.getSortOrder()).isEqualTo(1);
     verify(productOptionItemRepositoryQuery)
         .existsByProductOptionIdAndName(productOptionId, "블랙", productOptionItemId);
     verify(productOptionItemRepositoryQuery)

@@ -58,14 +58,9 @@ public class CategoryService {
     validateParentExists(request.getParentId());
     validateNameNotDuplicated(categoryId, request.getParentId(), request.getName());
 
-    int updatedCount =
-        categoryRepository.updateBasicInfo(categoryId, request.getParentId(), request.getName());
-
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다.");
-    }
-
-    return CategoryResponse.from(findActiveCategory(categoryId));
+    Category category = findActiveCategory(categoryId);
+    category.updateBasicInfo(request.getParentId(), request.getName());
+    return CategoryResponse.from(category);
   }
 
   /** 카테고리 상태 변경 */

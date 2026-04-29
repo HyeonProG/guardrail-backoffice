@@ -86,21 +86,15 @@ public class FileAttachmentService {
         request.getSortOrder(),
         fileAttachmentId);
 
-    int updatedCount =
-        fileAttachmentRepository.updateBasicInfo(
-            fileAttachmentId,
-            request.getFileName(),
-            request.getOriginalFileName(),
-            request.getFilePath(),
-            request.getFileSize(),
-            request.getContentType(),
-            request.getSortOrder());
+    fileAttachment.updateBasicInfo(
+        request.getFileName(),
+        request.getOriginalFileName(),
+        request.getFilePath(),
+        request.getFileSize(),
+        request.getContentType(),
+        request.getSortOrder());
 
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "파일 첨부를 찾을 수 없습니다.");
-    }
-
-    return FileAttachmentResponse.from(findFileAttachment(fileAttachmentId));
+    return FileAttachmentResponse.from(fileAttachment);
   }
 
   /** 파일 첨부 삭제 */

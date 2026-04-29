@@ -100,15 +100,10 @@ public class ProductContentService {
       UUID productId, UUID draftId, ProductContentUpdateRequest request) {
     ProductContentDraft draft = findDraft(productId, draftId);
     validateDraftEditable(draft);
-    int updatedCount =
-        productContentDraftRepository.updateContent(draftId, productId, request.getContent());
-
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "상품 설명 초안을 찾을 수 없습니다.");
-    }
+    draft.updateContent(request.getContent());
 
     saveHistory(draftId, productId, request.getActorId(), ProductContentHistoryType.EDITED, null);
-    return ProductContentDraftResponse.from(findDraft(productId, draftId));
+    return ProductContentDraftResponse.from(draft);
   }
 
   /** 상품 설명 초안 승인 요청 */
@@ -128,11 +123,10 @@ public class ProductContentService {
   public ProductContentDraftResponse applyDraft(
       UUID productId, UUID draftId, ProductContentApplyRequest request) {
     ProductContentDraft draft = findDraft(productId, draftId);
-
-    int updatedCount = productRepository.updateDescription(productId, draft.getContent());
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
-    }
+    productRepositoryQuery
+        .findById(productId)
+        .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다."))
+        .updateDescription(draft.getContent());
 
     saveHistory(draftId, productId, request.getActorId(), ProductContentHistoryType.APPLIED, null);
     return ProductContentDraftResponse.from(draft);
@@ -144,11 +138,10 @@ public class ProductContentService {
       UUID productId, UUID draftId, ProductContentApproveRequest request) {
     ProductContentDraft draft = findDraft(productId, draftId);
     draft.approve(request.getActorId());
-
-    int updatedCount = productRepository.updateDescription(productId, draft.getContent());
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
-    }
+    productRepositoryQuery
+        .findById(productId)
+        .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다."))
+        .updateDescription(draft.getContent());
 
     saveHistory(draftId, productId, request.getActorId(), ProductContentHistoryType.APPROVED, null);
     return ProductContentDraftResponse.from(draft);

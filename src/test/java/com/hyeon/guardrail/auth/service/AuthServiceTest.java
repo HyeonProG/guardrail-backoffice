@@ -197,8 +197,8 @@ class AuthServiceTest {
 
     assertThat(response.getAccessToken()).isEqualTo("new-access-token");
     assertThat(response.getRefreshToken()).isEqualTo("new-refresh-token");
-    verify(sessionRepository)
-        .refreshToken(eq(sessionId), any(String.class), eq("new-refresh-token-hash"), any(), any());
+    assertThat(session.getRefreshTokenHash()).isEqualTo("new-refresh-token-hash");
+    assertThat(session.getAccessTokenId()).isNotBlank();
   }
 
   /** 로그아웃 성공 시 세션 상태를 철회로 변경 */

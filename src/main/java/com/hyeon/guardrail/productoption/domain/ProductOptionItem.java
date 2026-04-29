@@ -36,6 +36,13 @@ public class ProductOptionItem extends SoftDeleteEntity {
   @Column(name = "status", nullable = false)
   private ProductOptionStatus status;
 
+  /** 옵션값 기본 정보를 수정 */
+  public void updateBasicInfo(String name, int additionalPrice, int sortOrder) {
+    this.name = name;
+    this.additionalPrice = additionalPrice;
+    this.sortOrder = sortOrder;
+  }
+
   /** 옵션값 활성화 */
   public void activate() {
     this.status = ProductOptionStatus.ACTIVE;

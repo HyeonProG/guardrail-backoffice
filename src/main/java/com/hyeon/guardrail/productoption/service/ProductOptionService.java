@@ -86,19 +86,14 @@ public class ProductOptionService {
   public ProductOptionResponse updateProductOption(
       UUID categoryId, UUID productOptionId, ProductOptionUpdateRequest request) {
     validateCategoryExists(categoryId);
-    findProductOption(categoryId, productOptionId);
+    ProductOption productOption = findProductOption(categoryId, productOptionId);
     validateProductOptionNameNotDuplicated(categoryId, request.getName(), productOptionId);
     validateProductOptionSortOrderNotDuplicated(
         categoryId, request.getSortOrder(), productOptionId);
 
-    int updatedCount =
-        productOptionRepository.updateBasicInfo(
-            categoryId, productOptionId, request.getName(), request.getSortOrder());
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다.");
-    }
+    productOption.updateBasicInfo(request.getName(), request.getSortOrder());
 
-    return ProductOptionResponse.from(findProductOption(categoryId, productOptionId));
+    return ProductOptionResponse.from(productOption);
   }
 
   /** 옵션 그룹 상태 변경 */
@@ -162,26 +157,18 @@ public class ProductOptionService {
       ProductOptionItemUpdateRequest request) {
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
-    findProductOptionItem(productOptionId, productOptionItemId);
+    ProductOptionItem productOptionItem =
+        findProductOptionItem(productOptionId, productOptionItemId);
     validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(
         productOptionId, request.getName(), productOptionItemId);
     validateProductOptionItemSortOrderNotDuplicated(
         productOptionId, request.getSortOrder(), productOptionItemId);
 
-    int updatedCount =
-        productOptionItemRepository.updateBasicInfo(
-            productOptionId,
-            productOptionItemId,
-            request.getName(),
-            request.getAdditionalPrice(),
-            request.getSortOrder());
-    if (updatedCount == 0) {
-      throw new BaseException(BaseResponseStatus.NOT_FOUND, "옵션값을 찾을 수 없습니다.");
-    }
+    productOptionItem.updateBasicInfo(
+        request.getName(), request.getAdditionalPrice(), request.getSortOrder());
 
-    return ProductOptionItemResponse.from(
-        findProductOptionItem(productOptionId, productOptionItemId));
+    return ProductOptionItemResponse.from(productOptionItem);
   }
 
   /** 옵션값 상태 변경 */
