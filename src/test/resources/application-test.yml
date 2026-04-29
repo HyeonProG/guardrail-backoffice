@@ -31,7 +31,17 @@ logging:
 
 # 테스트용 커스텀 업로드 설정
 app:
+  cors:
+    allowed-origins:
+      - http://localhost:5173
   upload:
     max-file-size-mb: 10
     storage-root-path: /uploads/products
     allowed-content-types: image/jpeg,image/png,image/webp
+  ai:
+    enabled: true
+    provider: openai
+    model: gpt-4.1-mini
+    timeout-seconds: 30
+    base-url: https://api.openai.com/v1
+    api-key: test-api-key
