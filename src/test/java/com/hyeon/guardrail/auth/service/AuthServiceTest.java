@@ -15,6 +15,8 @@ import com.hyeon.guardrail.auth.domain.SessionStatus;
 import com.hyeon.guardrail.auth.domain.UserLoginHistory;
 import com.hyeon.guardrail.auth.domain.UserPasswordHistory;
 import com.hyeon.guardrail.auth.domain.UserSession;
+import com.hyeon.guardrail.auth.dto.ChangePasswordRequest;
+import com.hyeon.guardrail.auth.dto.ChangePasswordResponse;
 import com.hyeon.guardrail.auth.dto.LoginRequest;
 import com.hyeon.guardrail.auth.dto.LoginResponse;
 import com.hyeon.guardrail.auth.dto.LogoutResponse;
@@ -26,6 +28,7 @@ import com.hyeon.guardrail.auth.repository.UserLoginHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserSessionRepository;
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserRole;
 import com.hyeon.guardrail.user.domain.UserStatus;
@@ -54,6 +57,7 @@ class AuthServiceTest {
   @Mock private UserRepositoryQuery userRepositoryQuery;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private JwtService jwtService;
+  @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private AuthService authService;
 
@@ -224,5 +228,37 @@ class AuthServiceTest {
     assertThat(response.getSessionId()).isEqualTo(sessionId);
     assertThat(response.getStatus()).isEqualTo(SessionStatus.REVOKED);
     assertThat(session.getStatus()).isEqualTo(SessionStatus.REVOKED);
+  }
+
+  /** 현재 비밀번호가 일치하면 새 비밀번호 이력을 저장한다 */
+  @Test
+  void changePasswordStoresNewNonTemporaryPasswordHistory() {
+    UUID userId = UUID.randomUUID();
+    UserPasswordHistory latestPasswordHistory =
+        new UserPasswordHistory(
+            userId, "encoded-current-password", true, LocalDateTime.now().plusDays(1));
+    ChangePasswordRequest request = new ChangePasswordRequest("current-password", "new-password");
+
+    when(authRepositoryQuery.findLatestValidPasswordHistory(eq(userId), any(LocalDateTime.class)))
+        .thenReturn(Optional.of(latestPasswordHistory));
+    when(passwordEncoder.matches(
+            request.getCurrentPassword(), latestPasswordHistory.getPasswordHash()))
+        .thenReturn(true);
+    when(passwordEncoder.matches(request.getNewPassword(), latestPasswordHistory.getPasswordHash()))
+        .thenReturn(false);
+    when(passwordEncoder.encode(request.getNewPassword())).thenReturn("encoded-new-password");
+    when(passwordHistoryRepository.save(any(UserPasswordHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ChangePasswordResponse response = authService.changePassword(userId, request);
+
+    verify(currentUserService).validateActor(userId);
+    ArgumentCaptor<UserPasswordHistory> captor = ArgumentCaptor.forClass(UserPasswordHistory.class);
+    verify(passwordHistoryRepository).save(captor.capture());
+    assertThat(captor.getValue().getUserId()).isEqualTo(userId);
+    assertThat(captor.getValue().getPasswordHash()).isEqualTo("encoded-new-password");
+    assertThat(captor.getValue().isTemporary()).isFalse();
+    assertThat(captor.getValue().getExpiredAt()).isNull();
+    assertThat(response.isTemporary()).isFalse();
   }
 }

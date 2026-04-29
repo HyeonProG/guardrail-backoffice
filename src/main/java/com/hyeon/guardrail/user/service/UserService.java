@@ -4,6 +4,8 @@ import com.hyeon.guardrail.auth.service.AuthService;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.mail.MailSender;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
+import com.hyeon.guardrail.common.response.PageResponse;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserStatus;
 import com.hyeon.guardrail.user.dto.UserCreateRequest;
@@ -16,6 +18,7 @@ import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.security.SecureRandom;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,11 +35,16 @@ public class UserService {
   private final UserRepositoryQuery userRepositoryQuery;
   private final AuthService authService;
   private final MailSender mailSender;
+  private final CurrentUserService currentUserService;
   private final SecureRandom secureRandom = new SecureRandom();
 
   /** 사용자 생성과 초기 비밀번호 발급 */
   @Transactional
   public UserCreateResponse createUser(UserCreateRequest request) {
+    if (userRepository.count() > 0) {
+      currentUserService.requireAdminOrOperator();
+    }
+
     if (userRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
     }
@@ -59,6 +67,13 @@ public class UserService {
   @Transactional(readOnly = true)
   public UserResponse getUser(UUID userId) {
     return UserResponse.from(findActiveUser(userId));
+  }
+
+  /** 사용자 목록 조회 */
+  @Transactional(readOnly = true)
+  public PageResponse<UserResponse> getUsers(UserStatus status, Pageable pageable) {
+    currentUserService.requireAdminOrOperator();
+    return PageResponse.from(userRepositoryQuery.findAll(status, pageable).map(UserResponse::from));
   }
 
   /** 사용자 기본 정보 수정 */

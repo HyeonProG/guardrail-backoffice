@@ -18,6 +18,7 @@ import com.hyeon.guardrail.category.service.CategoryService;
 import com.hyeon.guardrail.common.ai.dto.ProductDescriptionGenerateResult;
 import com.hyeon.guardrail.common.ai.generator.AiContentGenerator;
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.AuthenticatedUser;
 import com.hyeon.guardrail.file.domain.FileTargetType;
 import com.hyeon.guardrail.file.dto.FileAttachmentCreateRequest;
 import com.hyeon.guardrail.file.service.FileAttachmentService;
@@ -42,9 +43,13 @@ import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.service.UserService;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,11 +69,17 @@ public class BackOfficeCoreFlowIntegrationTest {
   @Autowired private UserPasswordHistoryRepository passwordHistoryRepository;
   @MockitoBean private AiContentGenerator aiContentGenerator;
 
+  @AfterEach
+  void clearSecurityContext() {
+    SecurityContextHolder.clearContext();
+  }
+
   /** 관리자 생성부터 로그인, 분류, 파일, 상품 승인과 비활성화 흐름을 검증 */
   @Test
   public void backOfficeCoreFlowApprovesAndInactivatesProduct() {
     var admin =
         userService.createUser(new UserCreateRequest(uniqueEmail("admin"), "관리자", UserRole.ADMIN));
+    authenticate(admin.getUserId(), admin.getRole());
 
     assertThat(admin.getUserId()).isNotNull();
     assertThat(admin.getRole()).isEqualTo(UserRole.ADMIN);
@@ -192,6 +203,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var admin =
         userService.createUser(
             new UserCreateRequest(uniqueEmail("reject-admin"), "반려 관리자", UserRole.ADMIN));
+    authenticate(admin.getUserId(), admin.getRole());
 
     assertThatThrownBy(
             () ->
@@ -250,6 +262,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var admin =
         userService.createUser(
             new UserCreateRequest(uniqueEmail("inactive-admin"), "비활성 관리자", UserRole.ADMIN));
+    authenticate(admin.getUserId(), admin.getRole());
     var category = categoryService.createCategory(new CategoryCreateRequest(null, "비활성 분류"));
     categoryService.updateCategoryStatus(
         category.getId(), new CategoryStatusUpdateRequest(CategoryStatus.INACTIVE));
@@ -268,6 +281,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var admin =
         userService.createUser(
             new UserCreateRequest(uniqueEmail("content-admin"), "설명 관리자", UserRole.ADMIN));
+    authenticate(admin.getUserId(), admin.getRole());
     var category = categoryService.createCategory(new CategoryCreateRequest(null, "생활용품"));
     var product =
         productService.createProduct(
@@ -360,6 +374,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var admin =
         userService.createUser(
             new UserCreateRequest(uniqueEmail("content-reject"), "설명 반려자", UserRole.ADMIN));
+    authenticate(admin.getUserId(), admin.getRole());
     var category = categoryService.createCategory(new CategoryCreateRequest(null, "문구"));
     var product =
         productService.createProduct(
@@ -402,5 +417,14 @@ public class BackOfficeCoreFlowIntegrationTest {
 
   private String uniqueEmail(String prefix) {
     return prefix + "-" + UUID.randomUUID() + "@example.com";
+  }
+
+  private void authenticate(UUID userId, UserRole role) {
+    SecurityContextHolder.getContext()
+        .setAuthentication(
+            new UsernamePasswordAuthenticationToken(
+                new AuthenticatedUser(userId, role),
+                "test-token",
+                List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))));
   }
 }

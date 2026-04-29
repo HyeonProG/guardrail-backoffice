@@ -147,6 +147,9 @@
 - 존재하지 않는 이메일 로그인 실패는 로그인 이력을 저장하지 않고 즉시 인증 실패로 종료한다.
 - 로그인 실패 사유는 별도 컬럼으로 관리하지 않는다.
 - 비밀번호 이력은 최근 비밀번호 재사용 방지와 임시 비밀번호 만료 추적을 위해 사용한다.
+- 사용자는 `내 정보` 화면에서 현재 비밀번호를 검증한 뒤 자신의 비밀번호를 변경할 수 있다.
+- 비밀번호 변경 성공 시 새 비밀번호 이력을 추가하고 `temporary=false`, `expiredAt=null`로 저장한다.
+- 현재 로그인한 사용자 본인만 자신의 비밀번호를 변경할 수 있다.
 - 로그아웃 시 세션은 삭제하지 않고 상태를 `REVOKED`로 변경한다.
 - 로그인 이력은 삭제보다 보존 정책으로 관리한다.
 - 세션과 비밀번호 이력은 삭제보다 상태와 만료 정책으로 관리한다.
@@ -178,6 +181,13 @@
 3. 세션 상태를 `REVOKED`로 변경한다.
 4. 로그아웃 후 해당 세션으로는 재발급을 허용하지 않는다.
 
+### 6.4 비밀번호 변경
+1. 현재 로그인 사용자가 자신의 계정에 대해서만 변경 요청을 보낼 수 있다.
+2. 최근 유효 비밀번호 이력과 `currentPassword`를 검증한다.
+3. 새 비밀번호는 현재 비밀번호와 달라야 한다.
+4. 변경 성공 시 새로운 비밀번호 이력을 추가한다.
+5. 새 비밀번호 이력은 `temporary=false`, `expiredAt=null`로 저장한다.
+
 ## 7. 패키지 배치
 `Auth` 도메인은 `com.hyeon.guardrail.auth` 하위에 배치한다.
 
@@ -201,6 +211,8 @@ com.hyeon.guardrail.auth
 ├── dto
 │   ├── LoginRequest.java
 │   ├── LoginResponse.java
+│   ├── ChangePasswordRequest.java
+│   ├── ChangePasswordResponse.java
 │   ├── TokenRefreshRequest.java
 │   └── TokenRefreshResponse.java
 └── controller

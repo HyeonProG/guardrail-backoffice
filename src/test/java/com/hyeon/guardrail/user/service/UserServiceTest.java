@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.hyeon.guardrail.auth.service.AuthService;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.mail.MailSender;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserRole;
 import com.hyeon.guardrail.user.domain.UserStatus;
@@ -34,6 +35,7 @@ class UserServiceTest {
   @Mock private UserRepositoryQuery userRepositoryQuery;
   @Mock private AuthService authService;
   @Mock private MailSender mailSender;
+  @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private UserService userService;
 
@@ -45,6 +47,7 @@ class UserServiceTest {
     ReflectionTestUtils.setField(savedUser, "id", UUID.randomUUID());
 
     when(userRepository.existsByEmailAndDeletedFalse(request.getEmail())).thenReturn(false);
+    when(userRepository.count()).thenReturn(0L);
     when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
     UserCreateResponse response = userService.createUser(request);
@@ -66,6 +69,7 @@ class UserServiceTest {
     UserCreateRequest request = new UserCreateRequest("staff@example.com", "홍길동", UserRole.STAFF);
 
     when(userRepository.existsByEmailAndDeletedFalse(request.getEmail())).thenReturn(true);
+    when(userRepository.count()).thenReturn(0L);
 
     assertThatThrownBy(() -> userService.createUser(request)).isInstanceOf(BaseException.class);
     verify(authService, never()).saveInitialPassword(any(), any());

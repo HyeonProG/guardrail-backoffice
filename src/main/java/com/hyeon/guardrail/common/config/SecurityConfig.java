@@ -1,5 +1,7 @@
 package com.hyeon.guardrail.common.config;
 
+import com.hyeon.guardrail.common.exception.BaseExceptionHandlerFilter;
+import com.hyeon.guardrail.common.security.JwtAuthenticationFilter;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -7,9 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,6 +25,16 @@ public class SecurityConfig {
   @Value("${app.cors.allowed-origins}")
   private List<String> allowedOrigins;
 
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final BaseExceptionHandlerFilter baseExceptionHandlerFilter;
+
+  public SecurityConfig(
+      JwtAuthenticationFilter jwtAuthenticationFilter,
+      BaseExceptionHandlerFilter baseExceptionHandlerFilter) {
+    this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.baseExceptionHandlerFilter = baseExceptionHandlerFilter;
+  }
+
   /** 인증 구현 전 기본 보안 필터 체인 설정 */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,13 +42,20 @@ public class SecurityConfig {
         .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
+        .sessionManagement(
+            sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             authorize ->
                 authorize
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
                     .permitAll()
+                    .requestMatchers("/api/v1/auth/login", "/api/v1/auth/token/refresh")
+                    .permitAll()
                     .anyRequest()
-                    .permitAll())
+                    .authenticated())
+        .addFilterBefore(baseExceptionHandlerFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(jwtAuthenticationFilter, BaseExceptionHandlerFilter.class)
         .logout(Customizer.withDefaults());
 
     return http.build();

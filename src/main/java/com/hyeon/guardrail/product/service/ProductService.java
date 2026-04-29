@@ -6,6 +6,7 @@ import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.common.response.PageResponse;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.product.domain.Product;
 import com.hyeon.guardrail.product.domain.ProductHistory;
 import com.hyeon.guardrail.product.domain.ProductHistoryType;
@@ -36,10 +37,12 @@ public class ProductService {
   private final ProductHistoryRepository productHistoryRepository;
   private final ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
+  private final CurrentUserService currentUserService;
 
   /** 상품 생성 */
   @Transactional
   public ProductResponse createProduct(ProductCreateRequest request) {
+    currentUserService.validateActor(request.getActorId());
     validateCategoryAvailableForCreation(request.getCategoryId());
 
     Product product =
@@ -72,6 +75,7 @@ public class ProductService {
   /** 상품 기본 정보 수정 */
   @Transactional
   public ProductResponse updateProduct(UUID productId, ProductUpdateRequest request) {
+    currentUserService.validateActor(request.getActorId());
     findProduct(productId);
     validateCategoryExists(request.getCategoryId());
 
@@ -94,6 +98,7 @@ public class ProductService {
   /** 상품 상태 변경 */
   @Transactional
   public ProductResponse updateProductStatus(UUID productId, ProductStatusUpdateRequest request) {
+    currentUserService.validateActor(request.getActorId());
     Product product = findProduct(productId);
     ProductHistoryType historyType = changeStatus(product, request);
 
@@ -145,11 +150,13 @@ public class ProductService {
     }
 
     if (status == ProductStatus.APPROVED) {
+      currentUserService.requireAdminOrOperator();
       product.approve();
       return ProductHistoryType.APPROVED;
     }
 
     if (status == ProductStatus.REJECTED) {
+      currentUserService.requireAdminOrOperator();
       validateRejectReason(request.getReason());
       product.reject();
       return ProductHistoryType.REJECTED;
