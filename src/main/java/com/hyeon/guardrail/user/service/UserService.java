@@ -91,6 +91,7 @@ public class UserService {
   /** 사용자 상태 변경 */
   @Transactional
   public UserResponse updateUserStatus(UUID userId, UserStatusUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     User user = findActiveUser(userId);
 
     if (request.getStatus() == UserStatus.ACTIVE) {
@@ -105,6 +106,7 @@ public class UserService {
   /** 사용자 삭제 */
   @Transactional
   public void deleteUser(UUID userId) {
+    currentUserService.requireAdminOrOperator();
     User user = findActiveUser(userId);
     user.delete();
   }

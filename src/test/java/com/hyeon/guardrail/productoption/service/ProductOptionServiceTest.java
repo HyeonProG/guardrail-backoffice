@@ -11,6 +11,7 @@ import com.hyeon.guardrail.category.domain.Category;
 import com.hyeon.guardrail.category.domain.CategoryStatus;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.productoption.domain.ProductOption;
 import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
@@ -42,6 +43,7 @@ class ProductOptionServiceTest {
   @Mock private ProductOptionRepositoryQuery productOptionRepositoryQuery;
   @Mock private ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
   @Mock private CategoryRepositoryQuery categoryRepositoryQuery;
+  @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private ProductOptionService productOptionService;
 

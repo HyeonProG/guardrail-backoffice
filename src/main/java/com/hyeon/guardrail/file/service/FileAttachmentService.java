@@ -2,6 +2,7 @@ package com.hyeon.guardrail.file.service;
 
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.file.domain.FileAttachment;
 import com.hyeon.guardrail.file.domain.FileStatus;
 import com.hyeon.guardrail.file.domain.FileTargetType;
@@ -26,6 +27,7 @@ public class FileAttachmentService {
 
   private final FileAttachmentRepository fileAttachmentRepository;
   private final FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
+  private final CurrentUserService currentUserService;
 
   @Value("${app.upload.max-file-size-mb}")
   private long maxFileSizeMb;
@@ -100,6 +102,7 @@ public class FileAttachmentService {
   /** 파일 첨부 삭제 */
   @Transactional
   public void deleteFileAttachment(UUID fileAttachmentId) {
+    currentUserService.requireAdminOrOperator();
     FileAttachment fileAttachment = findFileAttachment(fileAttachmentId);
     fileAttachment.delete();
   }

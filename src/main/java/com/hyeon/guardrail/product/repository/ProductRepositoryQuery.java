@@ -3,11 +3,14 @@ package com.hyeon.guardrail.product.repository;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.product.domain.Product;
+import com.hyeon.guardrail.product.domain.ProductHistoryType;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import com.hyeon.guardrail.product.domain.QProduct;
+import com.hyeon.guardrail.product.domain.QProductHistory;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -41,8 +44,10 @@ public class ProductRepositoryQuery {
   }
 
   /** 삭제되지 않은 상품 목록 조회 */
-  public Page<Product> findAll(UUID categoryId, ProductStatus status, Pageable pageable) {
+  public Page<Product> findAll(
+      UUID categoryId, ProductStatus status, UUID ownerId, Pageable pageable) {
     QProduct product = QProduct.product;
+    QProductHistory productHistory = QProductHistory.productHistory;
     BooleanBuilder condition = new BooleanBuilder();
     condition.and(product.deleted.isFalse());
 
@@ -52,6 +57,17 @@ public class ProductRepositoryQuery {
 
     if (status != null) {
       condition.and(product.status.eq(status));
+    }
+
+    if (ownerId != null) {
+      condition.and(
+          JPAExpressions.selectOne()
+              .from(productHistory)
+              .where(
+                  productHistory.productId.eq(product.id),
+                  productHistory.actorId.eq(ownerId),
+                  productHistory.type.eq(ProductHistoryType.CREATED))
+              .exists());
     }
 
     List<Product> content =

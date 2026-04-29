@@ -11,6 +11,7 @@ import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.common.response.PageResponse;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public class CategoryService {
 
   private final CategoryRepository categoryRepository;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
+  private final CurrentUserService currentUserService;
 
   /** 카테고리 생성 */
   @Transactional
@@ -67,6 +69,7 @@ public class CategoryService {
   @Transactional
   public CategoryResponse updateCategoryStatus(
       UUID categoryId, CategoryStatusUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     Category category = findActiveCategory(categoryId);
 
     if (request.getStatus() == CategoryStatus.ACTIVE) {
@@ -81,6 +84,7 @@ public class CategoryService {
   /** 카테고리 삭제 */
   @Transactional
   public void deleteCategory(UUID categoryId) {
+    currentUserService.requireAdminOrOperator();
     Category category = findActiveCategory(categoryId);
     category.delete();
   }
@@ -88,6 +92,7 @@ public class CategoryService {
   /** 카테고리 복구 */
   @Transactional
   public CategoryResponse restoreCategory(UUID categoryId) {
+    currentUserService.requireAdminOrOperator();
     Category category = findDeletedCategory(categoryId);
     validateParentExists(category.getParentId());
     validateNameNotDuplicated(category.getId(), category.getParentId(), category.getName());

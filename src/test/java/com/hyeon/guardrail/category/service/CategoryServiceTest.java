@@ -15,6 +15,7 @@ import com.hyeon.guardrail.category.dto.CategoryStatusUpdateRequest;
 import com.hyeon.guardrail.category.repository.CategoryRepository;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +35,7 @@ class CategoryServiceTest {
 
   @Mock private CategoryRepository categoryRepository;
   @Mock private CategoryRepositoryQuery categoryRepositoryQuery;
+  @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private CategoryService categoryService;
 

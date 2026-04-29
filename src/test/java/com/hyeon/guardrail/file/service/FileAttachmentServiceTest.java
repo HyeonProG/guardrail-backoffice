@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.file.domain.FileAttachment;
 import com.hyeon.guardrail.file.domain.FileStatus;
 import com.hyeon.guardrail.file.domain.FileTargetType;
@@ -32,6 +33,7 @@ class FileAttachmentServiceTest {
 
   @Mock private FileAttachmentRepository fileAttachmentRepository;
   @Mock private FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
+  @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private FileAttachmentService fileAttachmentService;
 

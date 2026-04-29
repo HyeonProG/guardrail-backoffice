@@ -1,6 +1,7 @@
 package com.hyeon.guardrail.product.repository;
 
 import com.hyeon.guardrail.product.domain.ProductHistory;
+import com.hyeon.guardrail.product.domain.ProductHistoryType;
 import com.hyeon.guardrail.product.domain.QProductHistory;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -27,5 +28,22 @@ public class ProductHistoryRepositoryQuery {
         .where(productHistory.productId.eq(productId))
         .orderBy(productHistory.createdAt.asc())
         .fetch();
+  }
+
+  /** 상품 생성 이력 기준 소유 여부 조회 */
+  public boolean isProductOwner(UUID productId, UUID actorId) {
+    QProductHistory productHistory = QProductHistory.productHistory;
+
+    Integer fetched =
+        queryFactory
+            .selectOne()
+            .from(productHistory)
+            .where(
+                productHistory.productId.eq(productId),
+                productHistory.actorId.eq(actorId),
+                productHistory.type.eq(ProductHistoryType.CREATED))
+            .fetchFirst();
+
+    return fetched != null;
   }
 }

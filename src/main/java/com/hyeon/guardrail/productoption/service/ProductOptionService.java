@@ -3,6 +3,7 @@ package com.hyeon.guardrail.productoption.service;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.productoption.domain.ProductOption;
 import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
@@ -34,6 +35,7 @@ public class ProductOptionService {
   private final ProductOptionRepositoryQuery productOptionRepositoryQuery;
   private final ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
+  private final CurrentUserService currentUserService;
 
   /** 옵션 그룹 생성 */
   @Transactional
@@ -100,6 +102,7 @@ public class ProductOptionService {
   @Transactional
   public ProductOptionResponse updateProductOptionStatus(
       UUID categoryId, UUID productOptionId, ProductOptionStatusUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     ProductOption productOption = findProductOption(categoryId, productOptionId);
     changeStatus(productOption, request.getStatus());
@@ -109,6 +112,7 @@ public class ProductOptionService {
   /** 옵션 그룹 삭제 */
   @Transactional
   public void deleteProductOption(UUID categoryId, UUID productOptionId) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     ProductOption productOption = findProductOption(categoryId, productOptionId);
     productOption.delete();
@@ -178,6 +182,7 @@ public class ProductOptionService {
       UUID productOptionId,
       UUID productOptionItemId,
       ProductOptionItemStatusUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =
@@ -190,6 +195,7 @@ public class ProductOptionService {
   @Transactional
   public void deleteProductOptionItem(
       UUID categoryId, UUID productOptionId, UUID productOptionItemId) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =

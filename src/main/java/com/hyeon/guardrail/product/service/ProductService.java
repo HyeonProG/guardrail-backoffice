@@ -68,14 +68,21 @@ public class ProductService {
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> getProducts(
       UUID categoryId, ProductStatus status, Pageable pageable) {
+    UUID ownerId =
+        currentUserService.getCurrentUserRole() == com.hyeon.guardrail.user.domain.UserRole.STAFF
+            ? currentUserService.getCurrentUserId()
+            : null;
     return PageResponse.from(
-        productRepositoryQuery.findAll(categoryId, status, pageable).map(ProductResponse::from));
+        productRepositoryQuery
+            .findAll(categoryId, status, ownerId, pageable)
+            .map(ProductResponse::from));
   }
 
   /** 상품 기본 정보 수정 */
   @Transactional
   public ProductResponse updateProduct(UUID productId, ProductUpdateRequest request) {
     currentUserService.validateActor(request.getActorId());
+    validateProductOwnerForStaff(productId);
     Product product = findProduct(productId);
     validateCategoryExists(request.getCategoryId());
 
@@ -93,6 +100,7 @@ public class ProductService {
   @Transactional
   public ProductResponse updateProductStatus(UUID productId, ProductStatusUpdateRequest request) {
     currentUserService.validateActor(request.getActorId());
+    validateProductOwnerForStaff(productId);
     Product product = findProduct(productId);
     ProductHistoryType historyType = changeStatus(product, request);
 
@@ -103,6 +111,7 @@ public class ProductService {
   /** 상품 삭제 */
   @Transactional
   public void deleteProduct(UUID productId) {
+    currentUserService.requireAdminOrOperator();
     Product product = findProduct(productId);
     product.delete();
   }
@@ -110,10 +119,22 @@ public class ProductService {
   /** 상품 처리 이력 목록 조회 */
   @Transactional(readOnly = true)
   public List<ProductHistoryResponse> getProductHistories(UUID productId) {
+    validateProductOwnerForStaff(productId);
     findProduct(productId);
     return productHistoryRepositoryQuery.findAllByProductId(productId).stream()
         .map(ProductHistoryResponse::from)
         .toList();
+  }
+
+  private void validateProductOwnerForStaff(UUID productId) {
+    if (currentUserService.getCurrentUserRole() != com.hyeon.guardrail.user.domain.UserRole.STAFF) {
+      return;
+    }
+
+    if (!productHistoryRepositoryQuery.isProductOwner(
+        productId, currentUserService.getCurrentUserId())) {
+      throw new BaseException(BaseResponseStatus.FORBIDDEN, "본인이 등록한 상품만 관리할 수 있습니다.");
+    }
   }
 
   private Product findProduct(UUID productId) {

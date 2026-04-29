@@ -4,6 +4,8 @@ import com.hyeon.guardrail.common.ai.dto.ProductDescriptionGenerateCommand;
 import com.hyeon.guardrail.common.ai.generator.AiContentGenerator;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
+import com.hyeon.guardrail.common.security.CurrentUserService;
+import com.hyeon.guardrail.product.repository.ProductHistoryRepositoryQuery;
 import com.hyeon.guardrail.product.repository.ProductRepository;
 import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
 import com.hyeon.guardrail.productcontent.domain.ProductContentDraft;
@@ -39,13 +41,16 @@ public class ProductContentService {
   private final ProductContentHistoryRepository productContentHistoryRepository;
   private final ProductContentHistoryRepositoryQuery productContentHistoryRepositoryQuery;
   private final ProductRepository productRepository;
+  private final ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
   private final ProductRepositoryQuery productRepositoryQuery;
   private final AiContentGenerator aiContentGenerator;
+  private final CurrentUserService currentUserService;
 
   /** AI 상품 설명 초안 생성 */
   @Transactional
   public ProductContentDraftResponse generateDraft(
       UUID productId, ProductContentGenerateRequest request) {
+    validateProductOwnerForStaff(productId);
     validateProductExists(productId);
 
     ProductContentHistoryType historyType =
@@ -82,6 +87,7 @@ public class ProductContentService {
   /** 상품 설명 초안 목록 조회 */
   @Transactional(readOnly = true)
   public List<ProductContentDraftResponse> getDrafts(UUID productId, ProductContentStatus status) {
+    validateProductOwnerForStaff(productId);
     validateProductExists(productId);
     return productContentDraftRepositoryQuery.findAllByProductId(productId, status).stream()
         .map(ProductContentDraftResponse::from)
@@ -91,6 +97,7 @@ public class ProductContentService {
   /** 상품 설명 초안 단건 조회 */
   @Transactional(readOnly = true)
   public ProductContentDraftResponse getDraft(UUID productId, UUID draftId) {
+    validateProductOwnerForStaff(productId);
     return ProductContentDraftResponse.from(findDraft(productId, draftId));
   }
 
@@ -98,6 +105,7 @@ public class ProductContentService {
   @Transactional
   public ProductContentDraftResponse updateDraft(
       UUID productId, UUID draftId, ProductContentUpdateRequest request) {
+    validateProductOwnerForStaff(productId);
     ProductContentDraft draft = findDraft(productId, draftId);
     validateDraftEditable(draft);
     draft.updateContent(request.getContent());
@@ -110,6 +118,7 @@ public class ProductContentService {
   @Transactional
   public ProductContentDraftResponse submitDraft(
       UUID productId, UUID draftId, ProductContentSubmitRequest request) {
+    validateProductOwnerForStaff(productId);
     ProductContentDraft draft = findDraft(productId, draftId);
     draft.submit(request.getActorId());
     saveHistory(
@@ -122,6 +131,7 @@ public class ProductContentService {
   @Transactional
   public ProductContentDraftResponse applyDraft(
       UUID productId, UUID draftId, ProductContentApplyRequest request) {
+    validateProductOwnerForStaff(productId);
     ProductContentDraft draft = findDraft(productId, draftId);
     productRepositoryQuery
         .findById(productId)
@@ -136,6 +146,7 @@ public class ProductContentService {
   @Transactional
   public ProductContentDraftResponse approveDraft(
       UUID productId, UUID draftId, ProductContentApproveRequest request) {
+    currentUserService.requireAdminOrOperator();
     ProductContentDraft draft = findDraft(productId, draftId);
     draft.approve(request.getActorId());
     productRepositoryQuery
@@ -151,6 +162,7 @@ public class ProductContentService {
   @Transactional
   public ProductContentDraftResponse rejectDraft(
       UUID productId, UUID draftId, ProductContentRejectRequest request) {
+    currentUserService.requireAdminOrOperator();
     ProductContentDraft draft = findDraft(productId, draftId);
     draft.reject(request.getReason());
     saveHistory(
@@ -166,6 +178,7 @@ public class ProductContentService {
   /** 상품 설명 처리 이력 목록 조회 */
   @Transactional(readOnly = true)
   public List<ProductContentHistoryResponse> getHistories(UUID productId, UUID draftId) {
+    validateProductOwnerForStaff(productId);
     findDraft(productId, draftId);
     return productContentHistoryRepositoryQuery.findAllByDraftId(productId, draftId).stream()
         .map(ProductContentHistoryResponse::from)
@@ -175,8 +188,20 @@ public class ProductContentService {
   /** 상품 설명 초안 삭제 */
   @Transactional
   public void deleteDraft(UUID productId, UUID draftId) {
+    currentUserService.requireAdminOrOperator();
     ProductContentDraft draft = findDraft(productId, draftId);
     draft.delete();
+  }
+
+  private void validateProductOwnerForStaff(UUID productId) {
+    if (currentUserService.getCurrentUserRole() != com.hyeon.guardrail.user.domain.UserRole.STAFF) {
+      return;
+    }
+
+    if (!productHistoryRepositoryQuery.isProductOwner(
+        productId, currentUserService.getCurrentUserId())) {
+      throw new BaseException(BaseResponseStatus.FORBIDDEN, "본인이 등록한 상품만 관리할 수 있습니다.");
+    }
   }
 
   private ProductContentDraft findDraft(UUID productId, UUID draftId) {
