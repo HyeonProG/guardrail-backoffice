@@ -332,6 +332,10 @@ response result:
 - 생성 시 `CREATED` 이력을 저장한다.
 - `actorId`는 현재 단계에서 request body로 받는다.
 - 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
+- 상품명은 등록 화면에서 직접 입력한다.
+- 카테고리는 사전 생성된 목록에서 선택한다.
+- 옵션은 별도 상품 옵션 관리 메뉴에서 사전 생성된 값을 화면에서 선택해 사용한다.
+- 옵션 선택값은 현재 상품 생성 API request에 직접 포함하지 않는다.
 
 ### 상품 목록 조회 API
 ```http
@@ -424,6 +428,148 @@ response result:
 
 규칙:
 - 상품 이력은 생성, 수정, 상태 변경 흐름 기준으로 조회한다.
+
+## 7.3.1 상품 옵션 API 기준
+### 옵션 그룹 생성 API
+```http
+POST /api/v1/product-options
+```
+
+request body:
+- `name`
+- `sortOrder`
+- `status`
+- `actorId`
+
+response result:
+- `ProductOptionResponse`
+
+규칙:
+- 옵션 그룹은 상품에 종속되지 않는 마스터 데이터다.
+- 옵션 그룹명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+
+### 옵션 그룹 목록 조회 API
+```http
+GET /api/v1/product-options?status=ACTIVE
+```
+
+query:
+- `status`
+
+response result:
+- `List<ProductOptionResponse>`
+
+규칙:
+- 목록 조회는 미삭제 기준으로만 수행한다.
+- 상품 등록 화면과 상품 설명 생성 화면은 `ACTIVE` 옵션만 선택 대상으로 사용한다.
+
+### 옵션 그룹 상세 조회 API
+```http
+GET /api/v1/product-options/{productOptionId}
+```
+
+response result:
+- `ProductOptionResponse`
+
+규칙:
+- 옵션 그룹 상세 응답에는 옵션값 목록을 포함할 수 있다.
+
+### 옵션 그룹 수정 API
+```http
+PUT /api/v1/product-options/{productOptionId}
+```
+
+request body:
+- `name`
+- `sortOrder`
+- `actorId`
+
+response result:
+- `ProductOptionResponse`
+
+### 옵션 그룹 상태 변경 API
+```http
+PATCH /api/v1/product-options/{productOptionId}/status
+```
+
+request body:
+- `status`
+- `actorId`
+
+response result:
+- `ProductOptionResponse`
+
+### 옵션 그룹 삭제 API
+```http
+DELETE /api/v1/product-options/{productOptionId}
+```
+
+response result:
+- `null`
+
+### 옵션값 생성 API
+```http
+POST /api/v1/product-options/{productOptionId}/items
+```
+
+request body:
+- `name`
+- `additionalPrice`
+- `sortOrder`
+- `status`
+- `actorId`
+
+response result:
+- `ProductOptionItemResponse`
+
+규칙:
+- 옵션값은 특정 상품에 종속되지 않는다.
+- 같은 옵션 그룹 안에서 옵션값명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+
+### 옵션값 목록 조회 API
+```http
+GET /api/v1/product-options/{productOptionId}/items?status=ACTIVE
+```
+
+query:
+- `status`
+
+response result:
+- `List<ProductOptionItemResponse>`
+
+### 옵션값 수정 API
+```http
+PUT /api/v1/product-options/{productOptionId}/items/{productOptionItemId}
+```
+
+request body:
+- `name`
+- `additionalPrice`
+- `sortOrder`
+- `actorId`
+
+response result:
+- `ProductOptionItemResponse`
+
+### 옵션값 상태 변경 API
+```http
+PATCH /api/v1/product-options/{productOptionId}/items/{productOptionItemId}/status
+```
+
+request body:
+- `status`
+- `actorId`
+
+response result:
+- `ProductOptionItemResponse`
+
+### 옵션값 삭제 API
+```http
+DELETE /api/v1/product-options/{productOptionId}/items/{productOptionItemId}
+```
+
+response result:
+- `null`
 
 ## 7.4 상품 설명 생성/검수 API 기준
 ### 설명 초안 생성 API

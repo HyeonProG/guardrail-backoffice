@@ -28,6 +28,7 @@
 ### Product
 상품의 기본 정보와 상태를 관리한다.
 `Product`는 `Category`를 객체 연관관계 없이 `categoryId`로 참조한다.
+상품 등록 시 선택된 옵션은 `ProductOption` 마스터 데이터를 사용한다.
 
 ### ProductContent
 AI 설명 생성, 운영자 검수, 관리자 승인 반영 흐름을 관리한다.
@@ -35,8 +36,7 @@ AI 설명 생성, 운영자 검수, 관리자 승인 반영 흐름을 관리한�
 현재 범위에서 AI는 텍스트 설명만 생성하고, 상품 이미지는 `FileAttachment`로 직접 등록한다.
 
 ### ProductOption
-상품 옵션 그룹과 옵션 선택값을 관리한다.
-`ProductOption`은 `Product`를 객체 연관관계 없이 `productId`로 참조한다.
+상품 등록 전에 미리 관리되는 옵션 그룹과 옵션 선택값 마스터 데이터를 관리한다.
 `ProductOptionItem`은 `ProductOption`을 객체 연관관계 없이 `productOptionId`로 참조한다.
 
 ### FileAttachment
