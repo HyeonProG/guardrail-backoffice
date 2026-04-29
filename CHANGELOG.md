@@ -4,6 +4,11 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.8.1]
+### 수정
+- AI 기본 연동 설정을 OpenAI 클라우드 예시에서 Ollama 로컬 실행 기준으로 정리
+- AI 연동 문서를 OpenAI 호환 API 기준과 Ollama 사용 흐름에 맞게 보강
+
 ## [0.8.0]
 ### 추가
 - ProductContent 도메인 엔티티, 상태/출처/이력 enum, repository, Querydsl 조회 저장소 추가

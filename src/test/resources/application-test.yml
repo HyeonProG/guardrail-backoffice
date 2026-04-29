@@ -21,6 +21,14 @@ spring:
     init:
       mode: never
 
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: gemma3
+          temperature: 0.2
+
 # 테스트 로그 기본 설정
 logging:
   level:
@@ -40,8 +48,3 @@ app:
     allowed-content-types: image/jpeg,image/png,image/webp
   ai:
     enabled: true
-    provider: openai
-    model: gpt-4.1-mini
-    timeout-seconds: 30
-    base-url: https://api.openai.com/v1
-    api-key: test-api-key

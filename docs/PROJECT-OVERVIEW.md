@@ -80,7 +80,7 @@ AI 활용 개발의 불안정성을 줄이고, 재작업 비용을 낮춰 결과
 - Querydsl
 - PostgreSQL
 
-AI 설명 생성 연동은 현재 `OpenAI` provider와 `application.yml` 기반 API 키 관리 방식을 기준으로 설계한다.
+AI 설명 생성 연동은 현재 `Spring AI + Ollama` 조합과 `application.yml` 기반 설정 방식을 기준으로 설계한다.
 
 프론트엔드와 추가 인프라 구성은 도메인 및 API 설계 이후 확정한다.
 
