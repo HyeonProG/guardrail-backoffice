@@ -11,6 +11,7 @@ import com.hyeon.guardrail.common.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +60,11 @@ public class CategoryController {
   public BaseResponseEntity<PageResponse<CategoryResponse>> getCategories(
       @RequestParam(required = false) UUID parentId,
       @RequestParam(required = false) CategoryStatus status,
-      @PageableDefault(size = 20) Pageable pageable) {
-    return BaseResponseEntity.success(categoryService.getCategories(parentId, status, pageable));
+      @PageableDefault(size = 20) Pageable pageable,
+      HttpServletRequest request) {
+    boolean filterByParent = request.getParameterMap().containsKey("parentId");
+    return BaseResponseEntity.success(
+        categoryService.getCategories(parentId, filterByParent, status, pageable));
   }
 
   /** 카테고리 수정 */

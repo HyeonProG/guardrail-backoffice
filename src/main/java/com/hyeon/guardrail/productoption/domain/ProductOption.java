@@ -20,8 +20,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductOption extends SoftDeleteEntity {
 
-  @Column(name = "product_id", nullable = false)
-  private UUID productId;
+  @Column(name = "category_id", nullable = false)
+  private UUID categoryId;
 
   @Column(name = "name", nullable = false)
   private String name;

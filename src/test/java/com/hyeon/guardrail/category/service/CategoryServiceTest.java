@@ -91,14 +91,14 @@ class CategoryServiceTest {
     Category category = new Category(parentId, "상의", CategoryStatus.ACTIVE);
     ReflectionTestUtils.setField(category, "id", UUID.randomUUID());
 
-    when(categoryRepositoryQuery.findAll(parentId, CategoryStatus.ACTIVE, pageable))
+    when(categoryRepositoryQuery.findAll(parentId, true, CategoryStatus.ACTIVE, pageable))
         .thenReturn(new PageImpl<>(List.of(category), pageable, 1));
 
-    var response = categoryService.getCategories(parentId, CategoryStatus.ACTIVE, pageable);
+    var response = categoryService.getCategories(parentId, true, CategoryStatus.ACTIVE, pageable);
 
     assertThat(response.getContent()).hasSize(1);
     assertThat(response.getContent().get(0).getName()).isEqualTo("상의");
-    verify(categoryRepositoryQuery).findAll(parentId, CategoryStatus.ACTIVE, pageable);
+    verify(categoryRepositoryQuery).findAll(parentId, true, CategoryStatus.ACTIVE, pageable);
   }
 
   /** 삭제된 카테고리 복구 시 부모가 삭제되지 않았고 이름이 중복되지 않아야 한다 */

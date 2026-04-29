@@ -1,35 +1,33 @@
 # Product 도메인
 
 ## 1. 책임
-`Product`는 상품의 기본 정보와 등록 상태를 관리한다.
+`Product`는 직원이 작성 중인 상품 등록 요청의 기본 정보와 승인 상태를 관리한다.
 
-상품 설명 생성, 검증, 승인, 반려 흐름의 중심 데이터이며, 최종적으로 백오피스에서 관리되는 상품 정보를 표현한다.
-
-상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 등록하고, 상품 설명은 `ProductContent` 도메인에서 AI가 텍스트 초안을 생성한다.
-상품 옵션은 `ProductOption` 마스터 데이터에서 선택한다.
+직원은 상품 등록 페이지에서 상품 제목, 카테고리, 옵션, 상세 설명, 이미지를 입력하고 승인 요청을 올린다.  
+관리자는 별도 승인 요청 리스트에서 이를 검토하고 승인 또는 반려한다.
 
 ## 2. 주요 엔티티
 ### Product
-상품 본체 엔티티다.
+상품 등록 요청 본체 엔티티다.
 
 관리 대상:
 - 상품 UUID PK
 - 카테고리 ID
 - 상품명
-- 상품 설명
+- 상세 설명
 - 수량
 - 상품 상태
 - 생성일시, 수정일시, 삭제 여부
 
 ### ProductHistory
-상품 등록, 승인, 반려 이력을 관리한다.
+상품 생성, 수정, 승인 요청, 승인, 반려, 비활성화 이력을 관리한다.
 
 관리 대상:
 - 상품 이력 UUID PK
 - 상품 ID
 - 처리 유형
 - 처리자 ID
-- 반려 사유
+- 처리 사유
 - 생성일시, 수정일시
 
 ## 3. Enum
@@ -48,11 +46,11 @@
 
 값:
 - `CREATED`
+- `UPDATED`
 - `SUBMITTED`
 - `APPROVED`
 - `REJECTED`
 - `INACTIVATED`
-- `UPDATED`
 
 ## 4. 필드 초안
 ### Product
@@ -61,7 +59,7 @@
 | `id` | UUID PK |
 | `categoryId` | 카테고리 UUID |
 | `name` | 상품명 |
-| `description` | 상품 설명 |
+| `description` | 상품 등록 폼의 현재 상세 설명 값 |
 | `quantity` | 판매 가능 수량 |
 | `status` | 상품 상태 |
 | `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
@@ -74,7 +72,7 @@
 | `id` | UUID PK |
 | `productId` | 상품 UUID |
 | `actorId` | 처리자 사용자 UUID |
-| `type` | 상품 이력 유형 |
+| `type` | 처리 이력 유형 |
 | `reason` | 반려 사유 또는 처리 사유 |
 | `createdAt` | 생성일시, `BaseEntity` 상속 |
 | `updatedAt` | 수정일시, `BaseEntity` 상속 |
@@ -84,22 +82,17 @@
 - `Product`는 `SoftDeleteEntity`를 상속한다.
 - `ProductHistory`는 `BaseEntity`를 상속한다.
 - 상품 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
-- `Category`는 객체 연관관계로 참조하지 않는다.
-- 카테고리 참조는 `categoryId`로 카테고리 UUID 값을 저장한다.
-- `quantity`는 운영상 판매 가능 수량 기준으로 관리한다.
-- 처리자 사용자는 객체 연관관계로 참조하지 않는다.
-- 처리자 참조는 `actorId`로 사용자 UUID 값을 저장한다.
-- 상품 승인과 반려 흐름은 `ProductHistory`에 기록한다.
-- 상품 비활성화 흐름은 `ProductHistory`에 `INACTIVATED` 이력으로 기록한다.
-- 반려 사유는 `REJECTED` 이력에서만 필수로 다룬다.
-- `reason`은 `REJECTED` 이력에서는 필수이며, 그 외 이력에서는 선택 값으로 다룬다.
+- 카테고리는 객체 연관관계로 참조하지 않고 `categoryId` 값으로만 저장한다.
+- 처리자 사용자는 객체 연관관계로 참조하지 않고 `actorId` 값으로만 저장한다.
+- 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 등록한다.
+- 상품 옵션은 선택한 카테고리에 연결된 `ProductOption` 마스터 데이터에서 선택한다.
+- 현재 범위에서는 선택된 옵션값을 상품 생성 request에 직접 영속 저장하지 않고, 상품 등록 화면 표시와 AI 설명 생성 입력값에 활용한다.
+- 상세 설명은 운영자가 직접 입력할 수도 있고, `ProductContent` 도메인에서 AI 초안을 생성한 뒤 적용할 수도 있다.
+- AI는 설명 초안을 생성할 뿐이며, 최종 설명 반영 결정은 직원이 한다.
+- 상품 승인 전까지는 실제 게시 완료 상태가 아니다.
+- 상품 승인 요청, 승인, 반려, 비활성화 흐름은 `ProductHistory`에 기록한다.
 - 생성, 기본 정보 수정, 상태 변경 request에는 이력 저장을 위한 `actorId`를 포함한다.
 - 현재 단계에서는 `actorId`를 인증 토큰에서 추출하지 않고 request body 값으로 받는다.
-- 최종 승인 반영된 설명만 `Product.description`에 저장한다.
-- AI 생성 초안과 검수/승인 흐름은 `ProductContent` 도메인에서 별도로 관리한다.
-- 상품 이미지는 AI가 생성하지 않고 운영자가 직접 등록한 파일 메타데이터를 사용한다.
-- 카테고리와 옵션 마스터 데이터는 상품 등록 전에 별도 1depth 메뉴에서 미리 관리한다.
-- 상품 등록 화면에서는 카테고리와 옵션을 선택형 UI로 사용한다.
 
 ## 6. 상태 전이 규칙
 상품 상태는 아래 흐름을 따른다.
@@ -112,26 +105,44 @@ APPROVED -> INACTIVE
 ```
 
 규칙:
-- `DRAFT`는 운영자가 작성 중인 상태다.
-- `PENDING`은 관리자 승인을 기다리는 상태다.
-- `APPROVED`는 승인 완료 상태다.
-- `REJECTED`는 반려 상태다.
+- `DRAFT`는 직원이 상품 등록 폼을 작성 중인 상태다.
+- `PENDING`은 승인 요청 리스트에 올라가 관리자의 검토를 기다리는 상태다.
+- `APPROVED`는 관리자 승인 완료 상태다.
+- `REJECTED`는 관리자 반려 상태다.
 - `INACTIVE`는 승인 이후 비활성화된 상태다.
-- `REJECTED` 상태의 상품은 수정 후 다시 `PENDING` 상태로 제출할 수 있다.
+- 반려된 상품은 기본 정보와 설명을 수정한 뒤 다시 `PENDING`으로 승인 요청할 수 있다.
 
-## 7. API 유스케이스
+## 7. 백오피스 화면 흐름
+### 상품 등록 페이지
+- 직원은 상품 제목, 카테고리, 옵션, 상세 설명, 이미지를 입력한다.
+- 카테고리와 옵션은 드롭다운 또는 선택형 UI로 입력한다.
+- 상세 설명은 직접 작성하거나, AI 설명 생성 팝업을 열어 초안을 적용할 수 있다.
+- AI 초안을 적용해도 아직 상품이 승인된 것은 아니다.
+
+### 승인 요청
+- 상품 입력이 완료되면 직원은 승인 요청을 수행한다.
+- 이 시점에 상품 상태는 `DRAFT -> PENDING`으로 변경된다.
+- 승인 요청 후 상품은 관리자 승인 요청 리스트에서 검토된다.
+
+### 관리자 승인 요청 리스트
+- 관리자는 `PENDING` 상태 상품 목록을 조회한다.
+- 관리자는 상품 기본 정보와 상세 설명을 검토한 뒤 승인 또는 반려한다.
+- 승인 시 `APPROVED`, 반려 시 `REJECTED`로 변경된다.
+
+## 8. API 유스케이스
 ### 상품 생성
 - `POST /api/v1/products`
 - request: `ProductCreateRequest`
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
   - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - `description`은 선택 값이다.
   - 생성 시 상품 상태는 `DRAFT`로 시작한다.
   - 생성 시 `CREATED` 이력을 함께 저장한다.
-  - 생성 시 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
+  - 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
   - 상품명은 상품 등록 화면에서 직접 입력한다.
   - 카테고리는 사전 생성된 카테고리 목록에서 선택한다.
-  - 옵션은 상품 생성 request에서 직접 저장하지 않고, 등록 화면에서 선택해 설명 생성과 표시용 데이터에 활용한다.
+  - 옵션은 선택된 카테고리에 연결된 목록에서 화면에서 선택한다.
 
 ### 상품 목록 조회
 - `GET /api/v1/products`
@@ -158,20 +169,34 @@ APPROVED -> INACTIVE
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
   - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - `description`은 선택 값이다.
   - 상태 변경은 이 API에서 처리하지 않는다.
   - 수정 시 `UPDATED` 이력을 함께 저장한다.
-  - 수정 시 카테고리는 `deleted = false` 상태여야 한다.
-  - 승인 완료 후 최종 설명 수정은 이 API에서 처리한다.
+  - 카테고리는 `deleted = false` 상태여야 한다.
 
-### 상품 상태 변경
+### 상품 승인 요청
 - `PATCH /api/v1/products/{productId}/status`
 - request: `ProductStatusUpdateRequest`
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
-  - `status`, `actorId`, `reason`을 request body로 받는다.
-  - 상태 전이는 문서에 정의한 흐름만 허용한다.
+  - 직원은 `status = PENDING`으로 요청한다.
+  - `DRAFT`, `REJECTED` 상태에서만 승인 요청할 수 있다.
+  - `SUBMITTED` 이력을 함께 저장한다.
+
+### 상품 승인 또는 반려
+- `PATCH /api/v1/products/{productId}/status`
+- request: `ProductStatusUpdateRequest`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - 관리자는 `PENDING` 상태 상품만 `APPROVED` 또는 `REJECTED`로 처리할 수 있다.
   - `REJECTED` 변경 시 `reason`은 필수다.
-  - `SUBMITTED`, `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 함께 저장한다.
+  - `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 함께 저장한다.
+
+### 승인 요청 리스트 조회
+- `GET /api/v1/products?status=PENDING`
+- response: `BaseResponseEntity<PageResponse<ProductResponse>>`
+- 규칙:
+  - 관리자는 이 목록을 별도 승인 요청 관리 화면에서 조회한다.
 
 ### 상품 삭제
 - `DELETE /api/v1/products/{productId}`
@@ -185,7 +210,7 @@ APPROVED -> INACTIVE
 - 규칙:
   - 상품 이력은 생성, 수정, 상태 변경 흐름을 시간순으로 조회한다.
 
-## 8. 패키지 배치
+## 9. 패키지 배치
 `Product` 도메인은 `com.hyeon.guardrail.product` 하위에 배치한다.
 
 ```text

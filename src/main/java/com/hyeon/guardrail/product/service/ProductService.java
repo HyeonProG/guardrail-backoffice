@@ -46,7 +46,7 @@ public class ProductService {
         new Product(
             request.getCategoryId(),
             request.getName(),
-            request.getDescription(),
+            normalizeDescription(request.getDescription()),
             request.getQuantity(),
             ProductStatus.DRAFT);
     Product savedProduct = productRepository.save(product);
@@ -80,7 +80,7 @@ public class ProductService {
             productId,
             request.getCategoryId(),
             request.getName(),
-            request.getDescription(),
+            normalizeDescription(request.getDescription()),
             request.getQuantity());
 
     if (updatedCount == 0) {
@@ -174,6 +174,13 @@ public class ProductService {
       return null;
     }
     return reason;
+  }
+
+  private String normalizeDescription(String description) {
+    if (description == null || description.isBlank()) {
+      return "";
+    }
+    return description;
   }
 
   private void saveHistory(UUID productId, UUID actorId, ProductHistoryType type, String reason) {

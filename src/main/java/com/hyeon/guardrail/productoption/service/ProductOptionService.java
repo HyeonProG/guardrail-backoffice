@@ -1,8 +1,8 @@
 package com.hyeon.guardrail.productoption.service;
 
+import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
-import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
 import com.hyeon.guardrail.productoption.domain.ProductOption;
 import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
@@ -33,37 +33,46 @@ public class ProductOptionService {
   private final ProductOptionItemRepository productOptionItemRepository;
   private final ProductOptionRepositoryQuery productOptionRepositoryQuery;
   private final ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
-  private final ProductRepositoryQuery productRepositoryQuery;
+  private final CategoryRepositoryQuery categoryRepositoryQuery;
 
   /** 옵션 그룹 생성 */
   @Transactional
   public ProductOptionResponse createProductOption(
-      UUID productId, ProductOptionCreateRequest request) {
-    validateProductExists(productId);
-    validateProductOptionNameNotDuplicated(productId, request.getName(), null);
-    validateProductOptionSortOrderNotDuplicated(productId, request.getSortOrder(), null);
+      UUID categoryId, ProductOptionCreateRequest request) {
+    validateCategoryExists(categoryId);
+    validateProductOptionNameNotDuplicated(categoryId, request.getName(), null);
+    validateProductOptionSortOrderNotDuplicated(categoryId, request.getSortOrder(), null);
 
     ProductOption productOption =
         new ProductOption(
-            productId, request.getName(), request.getSortOrder(), request.getStatus());
+            categoryId, request.getName(), request.getSortOrder(), request.getStatus());
 
     return ProductOptionResponse.from(productOptionRepository.save(productOption));
   }
 
   /** 옵션 그룹 목록 조회 */
   @Transactional(readOnly = true)
-  public List<ProductOptionResponse> getProductOptions(UUID productId, ProductOptionStatus status) {
-    validateProductExists(productId);
-    return productOptionRepositoryQuery.findAllByProductId(productId, status).stream()
-        .map(ProductOptionResponse::from)
+  public List<ProductOptionResponse> getProductOptions(
+      UUID categoryId, ProductOptionStatus status) {
+    validateCategoryExists(categoryId);
+    return productOptionRepositoryQuery.findAllByCategoryId(categoryId, status).stream()
+        .map(
+            productOption ->
+                ProductOptionResponse.from(
+                    productOption,
+                    productOptionItemRepositoryQuery
+                        .findAllByProductOptionId(productOption.getId(), status)
+                        .stream()
+                        .map(ProductOptionItemResponse::from)
+                        .toList()))
         .toList();
   }
 
   /** 옵션 그룹 단건 조회 */
   @Transactional(readOnly = true)
-  public ProductOptionResponse getProductOption(UUID productId, UUID productOptionId) {
-    validateProductExists(productId);
-    ProductOption productOption = findProductOption(productId, productOptionId);
+  public ProductOptionResponse getProductOption(UUID categoryId, UUID productOptionId) {
+    validateCategoryExists(categoryId);
+    ProductOption productOption = findProductOption(categoryId, productOptionId);
     List<ProductOptionItemResponse> items =
         productOptionItemRepositoryQuery.findAllByProductOptionId(productOptionId, null).stream()
             .map(ProductOptionItemResponse::from)
@@ -75,46 +84,47 @@ public class ProductOptionService {
   /** 옵션 그룹 기본 정보 수정 */
   @Transactional
   public ProductOptionResponse updateProductOption(
-      UUID productId, UUID productOptionId, ProductOptionUpdateRequest request) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
-    validateProductOptionNameNotDuplicated(productId, request.getName(), productOptionId);
-    validateProductOptionSortOrderNotDuplicated(productId, request.getSortOrder(), productOptionId);
+      UUID categoryId, UUID productOptionId, ProductOptionUpdateRequest request) {
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
+    validateProductOptionNameNotDuplicated(categoryId, request.getName(), productOptionId);
+    validateProductOptionSortOrderNotDuplicated(
+        categoryId, request.getSortOrder(), productOptionId);
 
     int updatedCount =
         productOptionRepository.updateBasicInfo(
-            productId, productOptionId, request.getName(), request.getSortOrder());
+            categoryId, productOptionId, request.getName(), request.getSortOrder());
     if (updatedCount == 0) {
       throw new BaseException(BaseResponseStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다.");
     }
 
-    return ProductOptionResponse.from(findProductOption(productId, productOptionId));
+    return ProductOptionResponse.from(findProductOption(categoryId, productOptionId));
   }
 
   /** 옵션 그룹 상태 변경 */
   @Transactional
   public ProductOptionResponse updateProductOptionStatus(
-      UUID productId, UUID productOptionId, ProductOptionStatusUpdateRequest request) {
-    validateProductExists(productId);
-    ProductOption productOption = findProductOption(productId, productOptionId);
+      UUID categoryId, UUID productOptionId, ProductOptionStatusUpdateRequest request) {
+    validateCategoryExists(categoryId);
+    ProductOption productOption = findProductOption(categoryId, productOptionId);
     changeStatus(productOption, request.getStatus());
     return ProductOptionResponse.from(productOption);
   }
 
   /** 옵션 그룹 삭제 */
   @Transactional
-  public void deleteProductOption(UUID productId, UUID productOptionId) {
-    validateProductExists(productId);
-    ProductOption productOption = findProductOption(productId, productOptionId);
+  public void deleteProductOption(UUID categoryId, UUID productOptionId) {
+    validateCategoryExists(categoryId);
+    ProductOption productOption = findProductOption(categoryId, productOptionId);
     productOption.delete();
   }
 
   /** 옵션값 생성 */
   @Transactional
   public ProductOptionItemResponse createProductOptionItem(
-      UUID productId, UUID productOptionId, ProductOptionItemCreateRequest request) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
+      UUID categoryId, UUID productOptionId, ProductOptionItemCreateRequest request) {
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
     validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(productOptionId, request.getName(), null);
     validateProductOptionItemSortOrderNotDuplicated(productOptionId, request.getSortOrder(), null);
@@ -133,9 +143,9 @@ public class ProductOptionService {
   /** 옵션값 목록 조회 */
   @Transactional(readOnly = true)
   public List<ProductOptionItemResponse> getProductOptionItems(
-      UUID productId, UUID productOptionId, ProductOptionStatus status) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
+      UUID categoryId, UUID productOptionId, ProductOptionStatus status) {
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
     return productOptionItemRepositoryQuery
         .findAllByProductOptionId(productOptionId, status)
         .stream()
@@ -146,12 +156,12 @@ public class ProductOptionService {
   /** 옵션값 기본 정보 수정 */
   @Transactional
   public ProductOptionItemResponse updateProductOptionItem(
-      UUID productId,
+      UUID categoryId,
       UUID productOptionId,
       UUID productOptionItemId,
       ProductOptionItemUpdateRequest request) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
     findProductOptionItem(productOptionId, productOptionItemId);
     validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(
@@ -177,12 +187,12 @@ public class ProductOptionService {
   /** 옵션값 상태 변경 */
   @Transactional
   public ProductOptionItemResponse updateProductOptionItemStatus(
-      UUID productId,
+      UUID categoryId,
       UUID productOptionId,
       UUID productOptionItemId,
       ProductOptionItemStatusUpdateRequest request) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =
         findProductOptionItem(productOptionId, productOptionItemId);
     changeStatus(productOptionItem, request.getStatus());
@@ -192,23 +202,23 @@ public class ProductOptionService {
   /** 옵션값 삭제 */
   @Transactional
   public void deleteProductOptionItem(
-      UUID productId, UUID productOptionId, UUID productOptionItemId) {
-    validateProductExists(productId);
-    findProductOption(productId, productOptionId);
+      UUID categoryId, UUID productOptionId, UUID productOptionItemId) {
+    validateCategoryExists(categoryId);
+    findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =
         findProductOptionItem(productOptionId, productOptionItemId);
     productOptionItem.delete();
   }
 
-  private void validateProductExists(UUID productId) {
-    productRepositoryQuery
-        .findById(productId)
-        .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
+  private void validateCategoryExists(UUID categoryId) {
+    categoryRepositoryQuery
+        .findById(categoryId)
+        .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "카테고리를 찾을 수 없습니다."));
   }
 
-  private ProductOption findProductOption(UUID productId, UUID productOptionId) {
+  private ProductOption findProductOption(UUID categoryId, UUID productOptionId) {
     return productOptionRepositoryQuery
-        .findById(productId, productOptionId)
+        .findById(categoryId, productOptionId)
         .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "옵션 그룹을 찾을 수 없습니다."));
   }
 
@@ -219,16 +229,16 @@ public class ProductOptionService {
   }
 
   private void validateProductOptionNameNotDuplicated(
-      UUID productId, String name, UUID excludedId) {
-    if (productOptionRepositoryQuery.existsByProductIdAndName(productId, name, excludedId)) {
+      UUID categoryId, String name, UUID excludedId) {
+    if (productOptionRepositoryQuery.existsByCategoryIdAndName(categoryId, name, excludedId)) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션명입니다.");
     }
   }
 
   private void validateProductOptionSortOrderNotDuplicated(
-      UUID productId, int sortOrder, UUID excludedId) {
-    if (productOptionRepositoryQuery.existsByProductIdAndSortOrder(
-        productId, sortOrder, excludedId)) {
+      UUID categoryId, int sortOrder, UUID excludedId) {
+    if (productOptionRepositoryQuery.existsByCategoryIdAndSortOrder(
+        categoryId, sortOrder, excludedId)) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션 그룹 정렬 순서입니다.");
     }
   }

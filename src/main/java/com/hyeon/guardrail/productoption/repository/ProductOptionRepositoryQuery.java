@@ -22,7 +22,7 @@ public class ProductOptionRepositoryQuery {
   }
 
   /** 삭제되지 않은 옵션 그룹 단건 조회 */
-  public Optional<ProductOption> findById(UUID productId, UUID productOptionId) {
+  public Optional<ProductOption> findById(UUID categoryId, UUID productOptionId) {
     QProductOption productOption = QProductOption.productOption;
 
     return Optional.ofNullable(
@@ -30,16 +30,16 @@ public class ProductOptionRepositoryQuery {
             .selectFrom(productOption)
             .where(
                 productOption.id.eq(productOptionId),
-                productOption.productId.eq(productId),
+                productOption.categoryId.eq(categoryId),
                 productOption.deleted.isFalse())
             .fetchOne());
   }
 
   /** 삭제되지 않은 옵션 그룹 목록 조회 */
-  public List<ProductOption> findAllByProductId(UUID productId, ProductOptionStatus status) {
+  public List<ProductOption> findAllByCategoryId(UUID categoryId, ProductOptionStatus status) {
     QProductOption productOption = QProductOption.productOption;
     BooleanBuilder condition = new BooleanBuilder();
-    condition.and(productOption.productId.eq(productId));
+    condition.and(productOption.categoryId.eq(categoryId));
     condition.and(productOption.deleted.isFalse());
 
     if (status != null) {
@@ -54,10 +54,10 @@ public class ProductOptionRepositoryQuery {
   }
 
   /** 미삭제 옵션 그룹 이름 존재 여부 조회 */
-  public boolean existsByProductIdAndName(UUID productId, String name, UUID excludedId) {
+  public boolean existsByCategoryIdAndName(UUID categoryId, String name, UUID excludedId) {
     QProductOption productOption = QProductOption.productOption;
     BooleanBuilder condition = new BooleanBuilder();
-    condition.and(productOption.productId.eq(productId));
+    condition.and(productOption.categoryId.eq(categoryId));
     condition.and(productOption.name.eq(name));
     condition.and(productOption.deleted.isFalse());
 
@@ -69,10 +69,10 @@ public class ProductOptionRepositoryQuery {
   }
 
   /** 미삭제 옵션 그룹 정렬 순서 존재 여부 조회 */
-  public boolean existsByProductIdAndSortOrder(UUID productId, int sortOrder, UUID excludedId) {
+  public boolean existsByCategoryIdAndSortOrder(UUID categoryId, int sortOrder, UUID excludedId) {
     QProductOption productOption = QProductOption.productOption;
     BooleanBuilder condition = new BooleanBuilder();
-    condition.and(productOption.productId.eq(productId));
+    condition.and(productOption.categoryId.eq(categoryId));
     condition.and(productOption.sortOrder.eq(sortOrder));
     condition.and(productOption.deleted.isFalse());
 

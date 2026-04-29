@@ -334,8 +334,10 @@ response result:
 - 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
 - 상품명은 등록 화면에서 직접 입력한다.
 - 카테고리는 사전 생성된 목록에서 선택한다.
-- 옵션은 별도 상품 옵션 관리 메뉴에서 사전 생성된 값을 화면에서 선택해 사용한다.
-- 옵션 선택값은 현재 상품 생성 API request에 직접 포함하지 않는다.
+- 옵션은 별도 상품 옵션 관리 메뉴에서 카테고리별로 사전 생성된 값을 화면에서 선택해 사용한다.
+- 옵션 선택값은 현재 상품 생성 API request에 직접 포함하지 않고, 선택된 카테고리 기준 화면 데이터와 설명 생성 입력값에 활용한다.
+- `description`은 선택 값이다.
+- 상품 생성은 최종 등록이 아니라 직원 작성 중 초안 저장 단계다.
 
 ### 상품 목록 조회 API
 ```http
@@ -406,6 +408,8 @@ response result:
 - `REJECTED` 변경 시 `reason`은 필수다.
 - `SUBMITTED`, `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 저장한다.
 - `actorId`는 현재 단계에서 request body로 받는다.
+- 직원은 `DRAFT` 또는 `REJECTED` 상태에서 `PENDING`으로 승인 요청한다.
+- 관리자는 `PENDING` 상태 상품을 `APPROVED` 또는 `REJECTED`로 처리한다.
 
 ### 상품 삭제 API
 ```http
@@ -429,10 +433,69 @@ response result:
 규칙:
 - 상품 이력은 생성, 수정, 상태 변경 흐름 기준으로 조회한다.
 
+### 승인 요청 리스트 조회 API
+```http
+GET /api/v1/products?status=PENDING
+```
+
+response result:
+- `PageResponse<ProductResponse>`
+
+규칙:
+- 관리자는 이 목록을 별도 승인 요청 관리 화면에서 조회한다.
+
+## 7.4 상품 설명 초안 API 기준
+### 설명 초안 생성 API
+```http
+POST /api/v1/products/{productId}/contents/generate
+```
+
+request body:
+- `actorId`
+- `productName`
+- `categoryName`
+- `optionSummary`
+- `featureKeywords`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- 상품 설명은 직접 입력하거나 AI 초안 생성 후 적용할 수 있다.
+- AI는 상품명, 카테고리명, 옵션 요약, 특징 키워드만 입력으로 사용한다.
+- 이미지 데이터는 설명 생성 request에 포함하지 않는다.
+
+### 설명 초안 적용 API
+```http
+PATCH /api/v1/products/{productId}/contents/{draftId}/apply
+```
+
+request body:
+- `actorId`
+
+response result:
+- `ProductContentDraftResponse`
+
+규칙:
+- 선택한 초안 내용을 현재 `Product.description`에 반영한다.
+- 적용은 승인 요청이 아니며, 상품 상태를 변경하지 않는다.
+
+### 설명 초안 목록 조회 API
+```http
+GET /api/v1/products/{productId}/contents
+```
+
+response result:
+- `List<ProductContentDraftResponse>`
+
+규칙:
+- 목록은 생성일시 내림차순으로 조회한다.
+- 생성, 수정, 적용 이력을 함께 사용할 수 있다.
+
 ## 7.3.1 상품 옵션 API 기준
 ### 옵션 그룹 생성 API
 ```http
-POST /api/v1/product-options
+POST /api/v1/categories/{categoryId}/options
 ```
 
 request body:
@@ -445,12 +508,13 @@ response result:
 - `ProductOptionResponse`
 
 규칙:
-- 옵션 그룹은 상품에 종속되지 않는 마스터 데이터다.
-- 옵션 그룹명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+- 옵션 그룹은 선택한 카테고리에 종속되는 마스터 데이터다.
+- 카테고리는 삭제되지 않은 상태여야 한다.
+- 같은 카테고리 안에서 옵션 그룹명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
 
 ### 옵션 그룹 목록 조회 API
 ```http
-GET /api/v1/product-options?status=ACTIVE
+GET /api/v1/categories/{categoryId}/options?status=ACTIVE
 ```
 
 query:
@@ -460,12 +524,13 @@ response result:
 - `List<ProductOptionResponse>`
 
 규칙:
+- 목록 조회는 삭제되지 않은 카테고리 기준으로만 수행한다.
 - 목록 조회는 미삭제 기준으로만 수행한다.
-- 상품 등록 화면과 상품 설명 생성 화면은 `ACTIVE` 옵션만 선택 대상으로 사용한다.
+- 상품 등록 화면과 상품 설명 생성 화면은 선택한 카테고리에 연결된 `ACTIVE` 옵션만 선택 대상으로 사용한다.
 
 ### 옵션 그룹 상세 조회 API
 ```http
-GET /api/v1/product-options/{productOptionId}
+GET /api/v1/categories/{categoryId}/options/{productOptionId}
 ```
 
 response result:
@@ -476,7 +541,7 @@ response result:
 
 ### 옵션 그룹 수정 API
 ```http
-PUT /api/v1/product-options/{productOptionId}
+PUT /api/v1/categories/{categoryId}/options/{productOptionId}
 ```
 
 request body:
@@ -489,7 +554,7 @@ response result:
 
 ### 옵션 그룹 상태 변경 API
 ```http
-PATCH /api/v1/product-options/{productOptionId}/status
+PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/status
 ```
 
 request body:
@@ -501,7 +566,7 @@ response result:
 
 ### 옵션 그룹 삭제 API
 ```http
-DELETE /api/v1/product-options/{productOptionId}
+DELETE /api/v1/categories/{categoryId}/options/{productOptionId}
 ```
 
 response result:
@@ -509,7 +574,7 @@ response result:
 
 ### 옵션값 생성 API
 ```http
-POST /api/v1/product-options/{productOptionId}/items
+POST /api/v1/categories/{categoryId}/options/{productOptionId}/items
 ```
 
 request body:
@@ -523,12 +588,12 @@ response result:
 - `ProductOptionItemResponse`
 
 규칙:
-- 옵션값은 특정 상품에 종속되지 않는다.
+- 옵션값은 선택한 카테고리에 속한 옵션 그룹에 종속된다.
 - 같은 옵션 그룹 안에서 옵션값명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
 
 ### 옵션값 목록 조회 API
 ```http
-GET /api/v1/product-options/{productOptionId}/items?status=ACTIVE
+GET /api/v1/categories/{categoryId}/options/{productOptionId}/items?status=ACTIVE
 ```
 
 query:
@@ -539,7 +604,7 @@ response result:
 
 ### 옵션값 수정 API
 ```http
-PUT /api/v1/product-options/{productOptionId}/items/{productOptionItemId}
+PUT /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOptionItemId}
 ```
 
 request body:
@@ -553,7 +618,7 @@ response result:
 
 ### 옵션값 상태 변경 API
 ```http
-PATCH /api/v1/product-options/{productOptionId}/items/{productOptionItemId}/status
+PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOptionItemId}/status
 ```
 
 request body:
@@ -565,7 +630,7 @@ response result:
 
 ### 옵션값 삭제 API
 ```http
-DELETE /api/v1/product-options/{productOptionId}/items/{productOptionItemId}
+DELETE /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOptionItemId}
 ```
 
 response result:

@@ -52,15 +52,18 @@ public class CategoryRepositoryQuery {
   }
 
   /** 삭제되지 않은 카테고리 목록 조회 */
-  public Page<Category> findAll(UUID parentId, CategoryStatus status, Pageable pageable) {
+  public Page<Category> findAll(
+      UUID parentId, boolean filterByParent, CategoryStatus status, Pageable pageable) {
     QCategory category = QCategory.category;
     BooleanBuilder condition = new BooleanBuilder();
     condition.and(category.deleted.isFalse());
 
-    if (parentId == null) {
-      condition.and(category.parentId.isNull());
-    } else {
-      condition.and(category.parentId.eq(parentId));
+    if (filterByParent) {
+      if (parentId == null) {
+        condition.and(category.parentId.isNull());
+      } else {
+        condition.and(category.parentId.eq(parentId));
+      }
     }
 
     if (status != null) {

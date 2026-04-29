@@ -29,7 +29,10 @@ class CategoryRepositoryQueryTest {
     assertThatThrownBy(
             () ->
                 categoryRepositoryQuery.findAll(
-                    null, null, PageRequest.of(0, 20, Sort.by(Sort.Order.asc("unknownField")))))
+                    null,
+                    false,
+                    null,
+                    PageRequest.of(0, 20, Sort.by(Sort.Order.asc("unknownField")))))
         .isInstanceOf(BaseException.class)
         .extracting("status")
         .isEqualTo(BaseResponseStatus.INVALID_REQUEST);

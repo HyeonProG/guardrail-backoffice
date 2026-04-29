@@ -4,6 +4,7 @@ package com.hyeon.guardrail.productcontent.domain;
 public enum ProductContentHistoryType {
   GENERATED,
   EDITED,
+  APPLIED,
   SUBMITTED,
   APPROVED,
   REJECTED,

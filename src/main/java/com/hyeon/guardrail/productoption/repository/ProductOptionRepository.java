@@ -18,11 +18,11 @@ public interface ProductOptionRepository extends JpaRepository<ProductOption, UU
          set productOption.name = :name,
              productOption.sortOrder = :sortOrder
        where productOption.id = :productOptionId
-         and productOption.productId = :productId
+         and productOption.categoryId = :categoryId
          and productOption.deleted = false
       """)
   int updateBasicInfo(
-      @Param("productId") UUID productId,
+      @Param("categoryId") UUID categoryId,
       @Param("productOptionId") UUID productOptionId,
       @Param("name") String name,
       @Param("sortOrder") int sortOrder);

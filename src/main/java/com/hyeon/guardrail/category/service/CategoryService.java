@@ -45,9 +45,11 @@ public class CategoryService {
   /** 카테고리 목록 조회 */
   @Transactional(readOnly = true)
   public PageResponse<CategoryResponse> getCategories(
-      UUID parentId, CategoryStatus status, Pageable pageable) {
+      UUID parentId, boolean filterByParent, CategoryStatus status, Pageable pageable) {
     return PageResponse.from(
-        categoryRepositoryQuery.findAll(parentId, status, pageable).map(CategoryResponse::from));
+        categoryRepositoryQuery
+            .findAll(parentId, filterByParent, status, pageable)
+            .map(CategoryResponse::from));
   }
 
   /** 카테고리 기본 정보 수정 */

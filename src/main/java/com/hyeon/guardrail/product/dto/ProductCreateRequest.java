@@ -2,7 +2,6 @@ package com.hyeon.guardrail.product.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -22,12 +21,10 @@ public class ProductCreateRequest {
   @Schema(description = "카테고리 ID")
   private UUID categoryId;
 
-  @NotBlank
   @Schema(description = "상품명", example = "가드레일 티셔츠")
   private String name;
 
-  @NotBlank
-  @Schema(description = "상품 설명", example = "판매 페이지에 노출할 상품 설명")
+  @Schema(description = "초기 설명 메모", example = "초기 메모가 있으면 입력하고, 없으면 비워둘 수 있습니다.")
   private String description;
 
   @Min(0)

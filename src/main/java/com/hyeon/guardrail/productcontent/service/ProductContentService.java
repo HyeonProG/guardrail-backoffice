@@ -11,6 +11,7 @@ import com.hyeon.guardrail.productcontent.domain.ProductContentHistory;
 import com.hyeon.guardrail.productcontent.domain.ProductContentHistoryType;
 import com.hyeon.guardrail.productcontent.domain.ProductContentSource;
 import com.hyeon.guardrail.productcontent.domain.ProductContentStatus;
+import com.hyeon.guardrail.productcontent.dto.ProductContentApplyRequest;
 import com.hyeon.guardrail.productcontent.dto.ProductContentApproveRequest;
 import com.hyeon.guardrail.productcontent.dto.ProductContentDraftResponse;
 import com.hyeon.guardrail.productcontent.dto.ProductContentGenerateRequest;
@@ -119,6 +120,21 @@ public class ProductContentService {
     saveHistory(
         draftId, productId, request.getActorId(), ProductContentHistoryType.SUBMITTED, null);
 
+    return ProductContentDraftResponse.from(draft);
+  }
+
+  /** 상품 설명 초안 적용 */
+  @Transactional
+  public ProductContentDraftResponse applyDraft(
+      UUID productId, UUID draftId, ProductContentApplyRequest request) {
+    ProductContentDraft draft = findDraft(productId, draftId);
+
+    int updatedCount = productRepository.updateDescription(productId, draft.getContent());
+    if (updatedCount == 0) {
+      throw new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
+    }
+
+    saveHistory(draftId, productId, request.getActorId(), ProductContentHistoryType.APPLIED, null);
     return ProductContentDraftResponse.from(draft);
   }
 

@@ -4,6 +4,21 @@
 
 기록은 간단하게 유지하며, `추가`, `수정`, `삭제` 단위로 작성한다.
 
+## [0.8.3]
+### 수정
+- 프로젝트와 API 문서 노출 버전을 `0.8.3`으로 변경
+- product option 도메인을 전역 옵션 마스터 구조에서 카테고리별 옵션 마스터 구조로 재설계
+- product option 백엔드 API를 `/api/v1/categories/{categoryId}/options` 구조로 변경
+- product option 중복 규칙과 DDL을 카테고리 기준으로 변경
+- 프론트 상품 옵션 관리 화면과 상품 설명 옵션 선택 흐름을 카테고리 기준으로 정리
+
+## [0.8.2]
+### 수정
+- 프로젝트와 API 문서 노출 버전을 `0.8.2`로 변경
+- product option 백엔드 API를 `/api/v1/products/{productId}/options` 구조에서 `/api/v1/product-options` 마스터 데이터 구조로 재설계
+- product option 엔티티, Querydsl 중복 규칙, 서비스, DDL을 상품 종속 구조에서 전역 옵션 마스터 구조로 변경
+- 프론트 상품 옵션 관리 화면과 상품 설명 옵션 선택 화면을 독립 옵션 마스터 API 기준으로 정리
+
 ## [0.8.1]
 ### 수정
 - AI 기본 연동 설정을 OpenAI 클라우드 예시에서 Ollama 로컬 실행 기준으로 정리

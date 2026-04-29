@@ -18,8 +18,8 @@ public class ProductOptionResponse {
   @Schema(description = "옵션 그룹 ID")
   private UUID id;
 
-  @Schema(description = "상품 ID")
-  private UUID productId;
+  @Schema(description = "카테고리 ID")
+  private UUID categoryId;
 
   @Schema(description = "옵션명", example = "색상")
   private String name;
@@ -49,7 +49,7 @@ public class ProductOptionResponse {
       ProductOption productOption, List<ProductOptionItemResponse> items) {
     return new ProductOptionResponse(
         productOption.getId(),
-        productOption.getProductId(),
+        productOption.getCategoryId(),
         productOption.getName(),
         productOption.getSortOrder(),
         productOption.getStatus(),

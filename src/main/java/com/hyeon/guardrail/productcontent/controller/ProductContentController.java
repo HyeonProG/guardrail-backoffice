@@ -2,6 +2,7 @@ package com.hyeon.guardrail.productcontent.controller;
 
 import com.hyeon.guardrail.common.response.BaseResponseEntity;
 import com.hyeon.guardrail.productcontent.domain.ProductContentStatus;
+import com.hyeon.guardrail.productcontent.dto.ProductContentApplyRequest;
 import com.hyeon.guardrail.productcontent.dto.ProductContentApproveRequest;
 import com.hyeon.guardrail.productcontent.dto.ProductContentDraftResponse;
 import com.hyeon.guardrail.productcontent.dto.ProductContentGenerateRequest;
@@ -83,6 +84,17 @@ public class ProductContentController {
       @Valid @RequestBody ProductContentSubmitRequest request) {
     return BaseResponseEntity.success(
         productContentService.submitDraft(productId, draftId, request), "상품 설명 초안이 승인 요청되었습니다.");
+  }
+
+  /** 상품 설명 초안 적용 */
+  @Operation(summary = "상품 설명 초안 적용", description = "선택한 상품 설명 초안을 현재 상품 상세 설명에 반영합니다.")
+  @PatchMapping("/{draftId}/apply")
+  public BaseResponseEntity<ProductContentDraftResponse> applyDraft(
+      @PathVariable UUID productId,
+      @PathVariable UUID draftId,
+      @Valid @RequestBody ProductContentApplyRequest request) {
+    return BaseResponseEntity.success(
+        productContentService.applyDraft(productId, draftId, request), "상품 설명 초안이 적용되었습니다.");
   }
 
   /** 상품 설명 초안 승인 */
