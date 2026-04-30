@@ -10,13 +10,17 @@ import static org.mockito.Mockito.when;
 import com.hyeon.guardrail.category.domain.Category;
 import com.hyeon.guardrail.category.domain.CategoryStatus;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
+import com.hyeon.guardrail.common.ai.dto.ProductDescriptionGenerateResult;
+import com.hyeon.guardrail.common.ai.generator.AiContentGenerator;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.security.CurrentUserService;
+import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.product.domain.Product;
 import com.hyeon.guardrail.product.domain.ProductHistory;
 import com.hyeon.guardrail.product.domain.ProductHistoryType;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import com.hyeon.guardrail.product.dto.ProductCreateRequest;
+import com.hyeon.guardrail.product.dto.ProductDescriptionGenerateRequest;
 import com.hyeon.guardrail.product.dto.ProductStatusUpdateRequest;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepository;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepositoryQuery;
@@ -26,6 +30,7 @@ import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepository;
 import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepositoryQuery;
 import com.hyeon.guardrail.productoption.repository.ProductOptionItemRepositoryQuery;
 import com.hyeon.guardrail.productoption.repository.ProductOptionRepositoryQuery;
+import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,6 +56,9 @@ class ProductServiceTest {
   @Mock private ProductOptionRepositoryQuery productOptionRepositoryQuery;
   @Mock private ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
   @Mock private CurrentUserService currentUserService;
+  @Mock private AiContentGenerator aiContentGenerator;
+  @Mock private FileAttachmentRepository fileAttachmentRepository;
+  @Mock private UserRepositoryQuery userRepositoryQuery;
 
   @InjectMocks private ProductService productService;
 
@@ -184,5 +192,31 @@ class ProductServiceTest {
     verify(productHistoryRepository).save(historyCaptor.capture());
     assertThat(historyCaptor.getValue().getType()).isEqualTo(ProductHistoryType.INACTIVATED);
     assertThat(historyCaptor.getValue().getReason()).isNull();
+  }
+
+  /** 상품 설명 AI 생성은 결과를 상품 설명에 반영하고 UPDATED 이력을 남긴다 */
+  @Test
+  void generateProductDescriptionUpdatesDescriptionAndStoresHistory() {
+    UUID productId = UUID.randomUUID();
+    UUID actorId = UUID.randomUUID();
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "기존 설명", 10, ProductStatus.DRAFT);
+    ReflectionTestUtils.setField(product, "id", productId);
+    ProductDescriptionGenerateRequest request =
+        new ProductDescriptionGenerateRequest(
+            actorId, "티셔츠", "상의", "색상: 블랙 / 사이즈: M", List.of("가벼움", "출퇴근용"));
+
+    when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
+    when(aiContentGenerator.generateProductDescription(any()))
+        .thenReturn(new ProductDescriptionGenerateResult("AI가 생성한 설명입니다."));
+    when(productSelectedOptionRepositoryQuery.findAllByProductId(productId)).thenReturn(List.of());
+
+    var response = productService.generateProductDescription(productId, request);
+
+    assertThat(response.getDescription()).isEqualTo("AI가 생성한 설명입니다.");
+    assertThat(product.getDescription()).isEqualTo("AI가 생성한 설명입니다.");
+    ArgumentCaptor<ProductHistory> historyCaptor = ArgumentCaptor.forClass(ProductHistory.class);
+    verify(productHistoryRepository).save(historyCaptor.capture());
+    assertThat(historyCaptor.getValue().getType()).isEqualTo(ProductHistoryType.UPDATED);
+    assertThat(historyCaptor.getValue().getReason()).isEqualTo("AI 설명 초안 생성");
   }
 }

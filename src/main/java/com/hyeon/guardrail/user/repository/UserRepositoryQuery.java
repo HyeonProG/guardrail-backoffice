@@ -5,6 +5,7 @@ import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +41,17 @@ public class UserRepositoryQuery {
             .selectFrom(user)
             .where(user.email.eq(email), user.deleted.isFalse())
             .fetchOne());
+  }
+
+  /** 삭제되지 않은 사용자 ID 목록 조회 */
+  public List<User> findAllByIds(Collection<UUID> userIds) {
+    QUser user = QUser.user;
+
+    if (userIds == null || userIds.isEmpty()) {
+      return List.of();
+    }
+
+    return queryFactory.selectFrom(user).where(user.id.in(userIds), user.deleted.isFalse()).fetch();
   }
 
   /** 삭제되지 않은 사용자 목록 조회 */

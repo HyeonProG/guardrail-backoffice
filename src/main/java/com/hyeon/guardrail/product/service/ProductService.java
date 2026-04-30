@@ -3,6 +3,8 @@ package com.hyeon.guardrail.product.service;
 import com.hyeon.guardrail.category.domain.Category;
 import com.hyeon.guardrail.category.domain.CategoryStatus;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
+import com.hyeon.guardrail.common.ai.dto.ProductDescriptionGenerateCommand;
+import com.hyeon.guardrail.common.ai.generator.AiContentGenerator;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.common.response.PageResponse;
@@ -15,6 +17,7 @@ import com.hyeon.guardrail.product.domain.ProductHistoryType;
 import com.hyeon.guardrail.product.domain.ProductSelectedOption;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import com.hyeon.guardrail.product.dto.ProductCreateRequest;
+import com.hyeon.guardrail.product.dto.ProductDescriptionGenerateRequest;
 import com.hyeon.guardrail.product.dto.ProductHistoryResponse;
 import com.hyeon.guardrail.product.dto.ProductResponse;
 import com.hyeon.guardrail.product.dto.ProductSelectedOptionResponse;
@@ -26,13 +29,13 @@ import com.hyeon.guardrail.product.repository.ProductRepository;
 import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
 import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepository;
 import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepositoryQuery;
-import com.hyeon.guardrail.productcontent.repository.ProductContentDraftRepository;
-import com.hyeon.guardrail.productcontent.repository.ProductContentHistoryRepository;
 import com.hyeon.guardrail.productoption.domain.ProductOption;
 import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
 import com.hyeon.guardrail.productoption.repository.ProductOptionItemRepositoryQuery;
 import com.hyeon.guardrail.productoption.repository.ProductOptionRepositoryQuery;
+import com.hyeon.guardrail.user.domain.User;
+import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,13 +58,13 @@ public class ProductService {
   private final ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
   private final CurrentUserService currentUserService;
+  private final AiContentGenerator aiContentGenerator;
   private final ProductSelectedOptionRepository productSelectedOptionRepository;
   private final ProductSelectedOptionRepositoryQuery productSelectedOptionRepositoryQuery;
-  private final ProductContentDraftRepository productContentDraftRepository;
-  private final ProductContentHistoryRepository productContentHistoryRepository;
   private final FileAttachmentRepository fileAttachmentRepository;
   private final ProductOptionRepositoryQuery productOptionRepositoryQuery;
   private final ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
+  private final UserRepositoryQuery userRepositoryQuery;
 
   /** 상품 생성 */
   @Transactional
@@ -126,6 +129,30 @@ public class ProductService {
     return toResponse(product);
   }
 
+  /** 상품 설명 AI 생성 후 현재 설명에 반영 */
+  @Transactional
+  public ProductResponse generateProductDescription(
+      UUID productId, ProductDescriptionGenerateRequest request) {
+    currentUserService.validateActor(request.getActorId());
+    validateProductOwnerForStaff(productId);
+    Product product = findProduct(productId);
+    validateDescriptionGenerateRequest(request);
+
+    String generatedDescription =
+        aiContentGenerator
+            .generateProductDescription(
+                new ProductDescriptionGenerateCommand(
+                    normalizeText(request.getProductName()),
+                    normalizeText(request.getCategoryName()),
+                    normalizeOptionSummary(request.getOptionSummary()),
+                    request.getFeatureKeywords()))
+            .getDescriptionText();
+
+    product.updateDescription(normalizeDescription(generatedDescription));
+    saveHistory(productId, request.getActorId(), ProductHistoryType.UPDATED, "AI 설명 초안 생성");
+    return toResponse(product);
+  }
+
   /** 상품 상태 변경 */
   @Transactional
   public ProductResponse updateProductStatus(UUID productId, ProductStatusUpdateRequest request) {
@@ -145,8 +172,6 @@ public class ProductService {
     Product product = findProduct(productId);
     validateProductHardDeletable(product);
 
-    productContentHistoryRepository.deleteByProductId(productId);
-    productContentDraftRepository.deleteByProductId(productId);
     productHistoryRepository.deleteByProductId(productId);
     productSelectedOptionRepository.deleteByProductId(productId);
     fileAttachmentRepository.deleteByTargetTypeAndTargetId(FileTargetType.PRODUCT, productId);
@@ -158,8 +183,18 @@ public class ProductService {
   public List<ProductHistoryResponse> getProductHistories(UUID productId) {
     validateProductOwnerForStaff(productId);
     findProduct(productId);
-    return productHistoryRepositoryQuery.findAllByProductId(productId).stream()
-        .map(ProductHistoryResponse::from)
+    List<ProductHistory> histories = productHistoryRepositoryQuery.findAllByProductId(productId);
+    Map<UUID, String> actorNameById =
+        userRepositoryQuery
+            .findAllByIds(histories.stream().map(ProductHistory::getActorId).distinct().toList())
+            .stream()
+            .collect(Collectors.toMap(User::getId, User::getName));
+
+    return histories.stream()
+        .map(
+            history ->
+                ProductHistoryResponse.from(
+                    history, actorNameById.getOrDefault(history.getActorId(), "-")))
         .toList();
   }
 
@@ -248,6 +283,12 @@ public class ProductService {
     }
   }
 
+  private void validateDescriptionGenerateRequest(ProductDescriptionGenerateRequest request) {
+    if (request.getFeatureKeywords() == null || request.getFeatureKeywords().isEmpty()) {
+      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "설명 생성을 위한 키워드를 입력해 주세요.");
+    }
+  }
+
   private String normalizeReason(String reason) {
     if (reason == null || reason.isBlank()) {
       return null;
@@ -260,6 +301,21 @@ public class ProductService {
       return "";
     }
     return description;
+  }
+
+  private String normalizeText(String value) {
+    if (value == null || value.isBlank()) {
+      return "";
+    }
+    return value.trim();
+  }
+
+  private String normalizeOptionSummary(String value) {
+    String normalized = normalizeText(value);
+    if (normalized.isBlank()) {
+      return "옵션 없음";
+    }
+    return normalized;
   }
 
   private void saveHistory(UUID productId, UUID actorId, ProductHistoryType type, String reason) {

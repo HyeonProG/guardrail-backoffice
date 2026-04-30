@@ -4,6 +4,7 @@ import com.hyeon.guardrail.common.response.BaseResponseEntity;
 import com.hyeon.guardrail.common.response.PageResponse;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import com.hyeon.guardrail.product.dto.ProductCreateRequest;
+import com.hyeon.guardrail.product.dto.ProductDescriptionGenerateRequest;
 import com.hyeon.guardrail.product.dto.ProductHistoryResponse;
 import com.hyeon.guardrail.product.dto.ProductResponse;
 import com.hyeon.guardrail.product.dto.ProductStatusUpdateRequest;
@@ -71,6 +72,15 @@ public class ProductController {
       @PathVariable UUID productId, @Valid @RequestBody ProductUpdateRequest request) {
     return BaseResponseEntity.success(
         productService.updateProduct(productId, request), "상품이 수정되었습니다.");
+  }
+
+  /** 상품 설명 AI 생성 */
+  @Operation(summary = "상품 설명 AI 생성", description = "상품 정보를 기반으로 AI 설명을 생성해 현재 상품 설명에 반영합니다.")
+  @PatchMapping("/{productId}/description/generate")
+  public BaseResponseEntity<ProductResponse> generateProductDescription(
+      @PathVariable UUID productId, @Valid @RequestBody ProductDescriptionGenerateRequest request) {
+    return BaseResponseEntity.success(
+        productService.generateProductDescription(productId, request), "상품 설명 AI 초안이 반영되었습니다.");
   }
 
   /** 상품 상태 변경 */

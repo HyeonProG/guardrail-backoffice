@@ -23,6 +23,9 @@ public class ProductHistoryResponse {
   @Schema(description = "처리자 사용자 ID")
   private UUID actorId;
 
+  @Schema(description = "처리자 이름")
+  private String actorName;
+
   @Schema(description = "상품 이력 유형", example = "APPROVED")
   private ProductHistoryType type;
 
@@ -36,11 +39,12 @@ public class ProductHistoryResponse {
   private LocalDateTime updatedAt;
 
   /** 상품 이력 엔티티를 응답으로 변환 */
-  public static ProductHistoryResponse from(ProductHistory productHistory) {
+  public static ProductHistoryResponse from(ProductHistory productHistory, String actorName) {
     return new ProductHistoryResponse(
         productHistory.getId(),
         productHistory.getProductId(),
         productHistory.getActorId(),
+        actorName,
         productHistory.getType(),
         productHistory.getReason(),
         productHistory.getCreatedAt(),
