@@ -7,6 +7,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -97,5 +98,19 @@ public class ProductOptionRepositoryQuery {
             .fetchOne();
 
     return result == null ? 1 : result;
+  }
+
+  /** 옵션 그룹 ID 목록으로 삭제되지 않은 옵션 그룹 조회 */
+  public List<ProductOption> findAllByIds(Collection<UUID> productOptionIds) {
+    if (productOptionIds == null || productOptionIds.isEmpty()) {
+      return List.of();
+    }
+
+    QProductOption productOption = QProductOption.productOption;
+
+    return queryFactory
+        .selectFrom(productOption)
+        .where(productOption.id.in(productOptionIds), productOption.deleted.isFalse())
+        .fetch();
   }
 }

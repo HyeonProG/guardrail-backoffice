@@ -4,6 +4,7 @@ import com.hyeon.guardrail.product.domain.Product;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,9 @@ public class ProductResponse {
   @Schema(description = "판매 가능 수량", example = "100")
   private int quantity;
 
+  @Schema(description = "선택된 옵션값 목록")
+  private List<ProductSelectedOptionResponse> selectedOptions;
+
   @Schema(description = "상품 상태", example = "DRAFT")
   private ProductStatus status;
 
@@ -39,13 +43,15 @@ public class ProductResponse {
   private LocalDateTime updatedAt;
 
   /** 상품 엔티티를 응답으로 변환 */
-  public static ProductResponse from(Product product) {
+  public static ProductResponse from(
+      Product product, List<ProductSelectedOptionResponse> selectedOptions) {
     return new ProductResponse(
         product.getId(),
         product.getCategoryId(),
         product.getName(),
         product.getDescription(),
         product.getQuantity(),
+        selectedOptions,
         product.getStatus(),
         product.getCreatedAt(),
         product.getUpdatedAt());

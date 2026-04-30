@@ -12,20 +12,33 @@ import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.product.domain.Product;
 import com.hyeon.guardrail.product.domain.ProductHistory;
 import com.hyeon.guardrail.product.domain.ProductHistoryType;
+import com.hyeon.guardrail.product.domain.ProductSelectedOption;
 import com.hyeon.guardrail.product.domain.ProductStatus;
 import com.hyeon.guardrail.product.dto.ProductCreateRequest;
 import com.hyeon.guardrail.product.dto.ProductHistoryResponse;
 import com.hyeon.guardrail.product.dto.ProductResponse;
+import com.hyeon.guardrail.product.dto.ProductSelectedOptionResponse;
 import com.hyeon.guardrail.product.dto.ProductStatusUpdateRequest;
 import com.hyeon.guardrail.product.dto.ProductUpdateRequest;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepository;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepositoryQuery;
 import com.hyeon.guardrail.product.repository.ProductRepository;
 import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
+import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepository;
+import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepositoryQuery;
 import com.hyeon.guardrail.productcontent.repository.ProductContentDraftRepository;
 import com.hyeon.guardrail.productcontent.repository.ProductContentHistoryRepository;
+import com.hyeon.guardrail.productoption.domain.ProductOption;
+import com.hyeon.guardrail.productoption.domain.ProductOptionItem;
+import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
+import com.hyeon.guardrail.productoption.repository.ProductOptionItemRepositoryQuery;
+import com.hyeon.guardrail.productoption.repository.ProductOptionRepositoryQuery;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -42,9 +55,13 @@ public class ProductService {
   private final ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
   private final CurrentUserService currentUserService;
+  private final ProductSelectedOptionRepository productSelectedOptionRepository;
+  private final ProductSelectedOptionRepositoryQuery productSelectedOptionRepositoryQuery;
   private final ProductContentDraftRepository productContentDraftRepository;
   private final ProductContentHistoryRepository productContentHistoryRepository;
   private final FileAttachmentRepository fileAttachmentRepository;
+  private final ProductOptionRepositoryQuery productOptionRepositoryQuery;
+  private final ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
 
   /** 상품 생성 */
   @Transactional
@@ -60,15 +77,17 @@ public class ProductService {
             request.getQuantity(),
             ProductStatus.DRAFT);
     Product savedProduct = productRepository.save(product);
+    syncSelectedOptions(
+        savedProduct.getId(), request.getCategoryId(), request.getSelectedOptionItemIds());
     saveHistory(savedProduct.getId(), request.getActorId(), ProductHistoryType.CREATED, null);
 
-    return ProductResponse.from(savedProduct);
+    return toResponse(savedProduct);
   }
 
   /** 상품 단건 조회 */
   @Transactional(readOnly = true)
   public ProductResponse getProduct(UUID productId) {
-    return ProductResponse.from(findProduct(productId));
+    return toResponse(findProduct(productId));
   }
 
   /** 상품 목록 조회 */
@@ -82,7 +101,7 @@ public class ProductService {
     return PageResponse.from(
         productRepositoryQuery
             .findAll(categoryId, status, ownerId, pageable)
-            .map(ProductResponse::from));
+            .map(this::toResponse));
   }
 
   /** 상품 기본 정보 수정 */
@@ -99,9 +118,12 @@ public class ProductService {
         request.getName(),
         normalizeDescription(request.getDescription()),
         request.getQuantity());
+    if (request.getSelectedOptionItemIds() != null) {
+      syncSelectedOptions(productId, request.getCategoryId(), request.getSelectedOptionItemIds());
+    }
 
     saveHistory(productId, request.getActorId(), ProductHistoryType.UPDATED, null);
-    return ProductResponse.from(product);
+    return toResponse(product);
   }
 
   /** 상품 상태 변경 */
@@ -113,7 +135,7 @@ public class ProductService {
     ProductHistoryType historyType = changeStatus(product, request);
 
     saveHistory(productId, request.getActorId(), historyType, normalizeReason(request.getReason()));
-    return ProductResponse.from(product);
+    return toResponse(product);
   }
 
   /** 상품 삭제 */
@@ -126,6 +148,7 @@ public class ProductService {
     productContentHistoryRepository.deleteByProductId(productId);
     productContentDraftRepository.deleteByProductId(productId);
     productHistoryRepository.deleteByProductId(productId);
+    productSelectedOptionRepository.deleteByProductId(productId);
     fileAttachmentRepository.deleteByTargetTypeAndTargetId(FileTargetType.PRODUCT, productId);
     productRepository.delete(product);
   }
@@ -241,5 +264,68 @@ public class ProductService {
 
   private void saveHistory(UUID productId, UUID actorId, ProductHistoryType type, String reason) {
     productHistoryRepository.save(new ProductHistory(productId, actorId, type, reason));
+  }
+
+  private ProductResponse toResponse(Product product) {
+    return ProductResponse.from(
+        product,
+        productSelectedOptionRepositoryQuery.findAllByProductId(product.getId()).stream()
+            .map(ProductSelectedOptionResponse::from)
+            .toList());
+  }
+
+  private void syncSelectedOptions(
+      UUID productId, UUID categoryId, Collection<UUID> selectedOptionItemIds) {
+    productSelectedOptionRepository.deleteByProductId(productId);
+
+    if (selectedOptionItemIds == null || selectedOptionItemIds.isEmpty()) {
+      return;
+    }
+
+    List<ProductOptionItem> optionItems =
+        productOptionItemRepositoryQuery.findAllByIds(selectedOptionItemIds);
+
+    if (optionItems.size() != selectedOptionItemIds.size()) {
+      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "선택한 옵션값 중 일부를 찾을 수 없습니다.");
+    }
+
+    Map<UUID, ProductOption> optionById =
+        productOptionRepositoryQuery
+            .findAllByIds(
+                optionItems.stream().map(ProductOptionItem::getProductOptionId).distinct().toList())
+            .stream()
+            .collect(Collectors.toMap(ProductOption::getId, Function.identity()));
+
+    List<ProductSelectedOption> selections =
+        optionItems.stream()
+            .map(
+                item -> {
+                  ProductOption option = optionById.get(item.getProductOptionId());
+                  validateSelectedOption(categoryId, option, item);
+                  return new ProductSelectedOption(
+                      productId,
+                      option.getId(),
+                      option.getName(),
+                      item.getId(),
+                      item.getName(),
+                      item.getAdditionalPrice(),
+                      item.getSortOrder());
+                })
+            .toList();
+
+    productSelectedOptionRepository.saveAll(selections);
+  }
+
+  private void validateSelectedOption(
+      UUID categoryId, ProductOption option, ProductOptionItem item) {
+    if (option == null
+        || !option.getCategoryId().equals(categoryId)
+        || option.getStatus() != ProductOptionStatus.ACTIVE) {
+      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "카테고리에 맞지 않는 옵션이 선택되었습니다.");
+    }
+
+    if (item.getStatus() != ProductOptionStatus.ACTIVE) {
+      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "비활성 옵션값은 선택할 수 없습니다.");
+    }
   }
 }

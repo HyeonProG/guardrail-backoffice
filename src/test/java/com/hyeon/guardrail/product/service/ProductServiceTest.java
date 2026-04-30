@@ -22,6 +22,11 @@ import com.hyeon.guardrail.product.repository.ProductHistoryRepository;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepositoryQuery;
 import com.hyeon.guardrail.product.repository.ProductRepository;
 import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
+import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepository;
+import com.hyeon.guardrail.product.repository.ProductSelectedOptionRepositoryQuery;
+import com.hyeon.guardrail.productoption.repository.ProductOptionItemRepositoryQuery;
+import com.hyeon.guardrail.productoption.repository.ProductOptionRepositoryQuery;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -40,7 +45,11 @@ class ProductServiceTest {
   @Mock private ProductRepositoryQuery productRepositoryQuery;
   @Mock private ProductHistoryRepository productHistoryRepository;
   @Mock private ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
+  @Mock private ProductSelectedOptionRepository productSelectedOptionRepository;
+  @Mock private ProductSelectedOptionRepositoryQuery productSelectedOptionRepositoryQuery;
   @Mock private CategoryRepositoryQuery categoryRepositoryQuery;
+  @Mock private ProductOptionRepositoryQuery productOptionRepositoryQuery;
+  @Mock private ProductOptionItemRepositoryQuery productOptionItemRepositoryQuery;
   @Mock private CurrentUserService currentUserService;
 
   @InjectMocks private ProductService productService;
@@ -73,6 +82,7 @@ class ProductServiceTest {
         new ProductCreateRequest(categoryId, "티셔츠", "상품 설명", 10, actorId);
 
     when(categoryRepositoryQuery.findById(categoryId)).thenReturn(Optional.of(category));
+    when(productSelectedOptionRepositoryQuery.findAllByProductId(productId)).thenReturn(List.of());
     when(productRepository.save(any(Product.class)))
         .thenAnswer(
             invocation -> {
@@ -139,6 +149,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
+    when(productSelectedOptionRepositoryQuery.findAllByProductId(productId)).thenReturn(List.of());
 
     var response =
         productService.updateProductStatus(
@@ -161,6 +172,7 @@ class ProductServiceTest {
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
+    when(productSelectedOptionRepositoryQuery.findAllByProductId(productId)).thenReturn(List.of());
 
     var response =
         productService.updateProductStatus(
