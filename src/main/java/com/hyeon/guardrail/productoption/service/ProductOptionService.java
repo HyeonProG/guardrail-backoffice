@@ -43,11 +43,10 @@ public class ProductOptionService {
       UUID categoryId, ProductOptionCreateRequest request) {
     validateCategoryExists(categoryId);
     validateProductOptionNameNotDuplicated(categoryId, request.getName(), null);
-    validateProductOptionSortOrderNotDuplicated(categoryId, request.getSortOrder(), null);
+    int nextSortOrder = productOptionRepositoryQuery.findNextSortOrderByCategoryId(categoryId);
 
     ProductOption productOption =
-        new ProductOption(
-            categoryId, request.getName(), request.getSortOrder(), request.getStatus());
+        new ProductOption(categoryId, request.getName(), nextSortOrder, request.getStatus());
 
     return ProductOptionResponse.from(productOptionRepository.save(productOption));
   }
@@ -90,10 +89,7 @@ public class ProductOptionService {
     validateCategoryExists(categoryId);
     ProductOption productOption = findProductOption(categoryId, productOptionId);
     validateProductOptionNameNotDuplicated(categoryId, request.getName(), productOptionId);
-    validateProductOptionSortOrderNotDuplicated(
-        categoryId, request.getSortOrder(), productOptionId);
-
-    productOption.updateBasicInfo(request.getName(), request.getSortOrder());
+    productOption.updateBasicInfo(request.getName());
 
     return ProductOptionResponse.from(productOption);
   }
@@ -126,14 +122,15 @@ public class ProductOptionService {
     findProductOption(categoryId, productOptionId);
     validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(productOptionId, request.getName(), null);
-    validateProductOptionItemSortOrderNotDuplicated(productOptionId, request.getSortOrder(), null);
+    int nextSortOrder =
+        productOptionItemRepositoryQuery.findNextSortOrderByProductOptionId(productOptionId);
 
     ProductOptionItem productOptionItem =
         new ProductOptionItem(
             productOptionId,
             request.getName(),
             request.getAdditionalPrice(),
-            request.getSortOrder(),
+            nextSortOrder,
             request.getStatus());
 
     return ProductOptionItemResponse.from(productOptionItemRepository.save(productOptionItem));
@@ -166,11 +163,7 @@ public class ProductOptionService {
     validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(
         productOptionId, request.getName(), productOptionItemId);
-    validateProductOptionItemSortOrderNotDuplicated(
-        productOptionId, request.getSortOrder(), productOptionItemId);
-
-    productOptionItem.updateBasicInfo(
-        request.getName(), request.getAdditionalPrice(), request.getSortOrder());
+    productOptionItem.updateBasicInfo(request.getName(), request.getAdditionalPrice());
 
     return ProductOptionItemResponse.from(productOptionItem);
   }
@@ -228,27 +221,11 @@ public class ProductOptionService {
     }
   }
 
-  private void validateProductOptionSortOrderNotDuplicated(
-      UUID categoryId, int sortOrder, UUID excludedId) {
-    if (productOptionRepositoryQuery.existsByCategoryIdAndSortOrder(
-        categoryId, sortOrder, excludedId)) {
-      throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션 그룹 정렬 순서입니다.");
-    }
-  }
-
   private void validateProductOptionItemNameNotDuplicated(
       UUID productOptionId, String name, UUID excludedId) {
     if (productOptionItemRepositoryQuery.existsByProductOptionIdAndName(
         productOptionId, name, excludedId)) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션값명입니다.");
-    }
-  }
-
-  private void validateProductOptionItemSortOrderNotDuplicated(
-      UUID productOptionId, int sortOrder, UUID excludedId) {
-    if (productOptionItemRepositoryQuery.existsByProductOptionIdAndSortOrder(
-        productOptionId, sortOrder, excludedId)) {
-      throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션값 정렬 순서입니다.");
     }
   }
 

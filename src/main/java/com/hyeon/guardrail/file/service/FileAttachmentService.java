@@ -11,12 +11,18 @@ import com.hyeon.guardrail.file.dto.FileAttachmentResponse;
 import com.hyeon.guardrail.file.dto.FileAttachmentUpdateRequest;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepositoryQuery;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /** 파일 첨부 유스케이스 서비스 */
 @Service
@@ -34,6 +40,9 @@ public class FileAttachmentService {
 
   @Value("${app.upload.storage-root-path}")
   private String storageRootPath;
+
+  @Value("${app.upload.public-url-prefix}")
+  private String publicUrlPrefix;
 
   @Value("#{'${app.upload.allowed-content-types}'.split(',')}")
   private List<String> allowedContentTypes;
@@ -56,6 +65,50 @@ public class FileAttachmentService {
             request.getFileSize(),
             request.getContentType(),
             request.getSortOrder(),
+            FileStatus.ACTIVE);
+
+    return FileAttachmentResponse.from(fileAttachmentRepository.save(fileAttachment));
+  }
+
+  /** 파일 업로드와 메타데이터 생성을 함께 처리 */
+  @Transactional
+  public FileAttachmentResponse uploadFileAttachment(
+      FileTargetType targetType, UUID targetId, MultipartFile file, int sortOrder) {
+    if (file == null || file.isEmpty()) {
+      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "업로드할 파일이 필요합니다.");
+    }
+
+    String originalFileName =
+        file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
+    String sanitizedOriginalName = originalFileName.replaceAll("\\s+", "-");
+    String extension = extractExtension(sanitizedOriginalName);
+    String generatedFileName = UUID.randomUUID() + extension;
+    String filePath = buildPublicFilePath(targetId, generatedFileName);
+
+    validateFileMetadata(file.getSize(), file.getContentType());
+    validateStoragePath(filePath);
+    validateSortOrderNotDuplicated(targetType, targetId, sortOrder);
+
+    Path absoluteDirectory = resolveStorageDirectory(targetId);
+    Path absoluteFilePath = absoluteDirectory.resolve(generatedFileName).normalize();
+
+    try {
+      Files.createDirectories(absoluteDirectory);
+      file.transferTo(absoluteFilePath);
+    } catch (IOException exception) {
+      throw new UncheckedIOException("파일을 저장하는 중 오류가 발생했습니다.", exception);
+    }
+
+    FileAttachment fileAttachment =
+        new FileAttachment(
+            targetType,
+            targetId,
+            generatedFileName,
+            originalFileName,
+            filePath,
+            file.getSize(),
+            file.getContentType(),
+            sortOrder,
             FileStatus.ACTIVE);
 
     return FileAttachmentResponse.from(fileAttachmentRepository.save(fileAttachment));
@@ -137,9 +190,24 @@ public class FileAttachmentService {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "저장 위치는 필수입니다.");
     }
 
-    if (!filePath.startsWith(storageRootPath)) {
+    if (!filePath.startsWith(publicUrlPrefix)) {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "허용되지 않은 저장 위치입니다.");
     }
+  }
+
+  private Path resolveStorageDirectory(UUID targetId) {
+    return Paths.get(storageRootPath).toAbsolutePath().normalize().resolve(targetId.toString());
+  }
+
+  private String buildPublicFilePath(UUID targetId, String fileName) {
+    return "%s/%s/%s".formatted(publicUrlPrefix, targetId, fileName);
+  }
+
+  private String extractExtension(String fileName) {
+    if (fileName == null || !fileName.contains(".")) {
+      return "";
+    }
+    return "." + fileName.substring(fileName.lastIndexOf('.') + 1);
   }
 
   private void validateSortOrderNotDuplicated(

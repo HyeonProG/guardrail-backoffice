@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /** 파일 첨부 API 컨트롤러 */
 @Tag(name = "FileAttachment", description = "파일 첨부 API")
@@ -40,6 +42,19 @@ public class FileAttachmentController {
       @Valid @RequestBody FileAttachmentCreateRequest request) {
     FileAttachmentResponse response = fileAttachmentService.createFileAttachment(request);
     return BaseResponseEntity.created(response, "파일 첨부가 생성되었습니다.");
+  }
+
+  /** 파일 업로드 */
+  @Operation(summary = "파일 업로드", description = "실제 파일 업로드와 파일 첨부 메타데이터 생성을 함께 처리합니다.")
+  @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public BaseResponseEntity<FileAttachmentResponse> uploadFileAttachment(
+      @RequestParam FileTargetType targetType,
+      @RequestParam UUID targetId,
+      @RequestParam int sortOrder,
+      @RequestParam MultipartFile file) {
+    FileAttachmentResponse response =
+        fileAttachmentService.uploadFileAttachment(targetType, targetId, file, sortOrder);
+    return BaseResponseEntity.created(response, "파일 업로드가 완료되었습니다.");
   }
 
   /** 파일 첨부 조회 */

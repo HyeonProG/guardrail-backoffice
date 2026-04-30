@@ -44,7 +44,8 @@ app:
       - http://localhost:5173
   upload:
     max-file-size-mb: 10
-    storage-root-path: /uploads/products
+    storage-root-path: uploads/products
+    public-url-prefix: /uploads/products
     allowed-content-types: image/jpeg,image/png,image/webp
   ai:
     enabled: true

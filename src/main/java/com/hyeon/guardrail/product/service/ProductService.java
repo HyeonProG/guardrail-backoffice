@@ -7,6 +7,8 @@ import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.common.response.PageResponse;
 import com.hyeon.guardrail.common.security.CurrentUserService;
+import com.hyeon.guardrail.file.domain.FileTargetType;
+import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.product.domain.Product;
 import com.hyeon.guardrail.product.domain.ProductHistory;
 import com.hyeon.guardrail.product.domain.ProductHistoryType;
@@ -20,6 +22,8 @@ import com.hyeon.guardrail.product.repository.ProductHistoryRepository;
 import com.hyeon.guardrail.product.repository.ProductHistoryRepositoryQuery;
 import com.hyeon.guardrail.product.repository.ProductRepository;
 import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
+import com.hyeon.guardrail.productcontent.repository.ProductContentDraftRepository;
+import com.hyeon.guardrail.productcontent.repository.ProductContentHistoryRepository;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,9 @@ public class ProductService {
   private final ProductHistoryRepositoryQuery productHistoryRepositoryQuery;
   private final CategoryRepositoryQuery categoryRepositoryQuery;
   private final CurrentUserService currentUserService;
+  private final ProductContentDraftRepository productContentDraftRepository;
+  private final ProductContentHistoryRepository productContentHistoryRepository;
+  private final FileAttachmentRepository fileAttachmentRepository;
 
   /** 상품 생성 */
   @Transactional
@@ -84,6 +91,7 @@ public class ProductService {
     currentUserService.validateActor(request.getActorId());
     validateProductOwnerForStaff(productId);
     Product product = findProduct(productId);
+    validateApprovedProductEditable(product);
     validateCategoryExists(request.getCategoryId());
 
     product.updateBasicInfo(
@@ -111,9 +119,15 @@ public class ProductService {
   /** 상품 삭제 */
   @Transactional
   public void deleteProduct(UUID productId) {
-    currentUserService.requireAdminOrOperator();
+    validateProductOwnerForStaff(productId);
     Product product = findProduct(productId);
-    product.delete();
+    validateProductHardDeletable(product);
+
+    productContentHistoryRepository.deleteByProductId(productId);
+    productContentDraftRepository.deleteByProductId(productId);
+    productHistoryRepository.deleteByProductId(productId);
+    fileAttachmentRepository.deleteByTargetTypeAndTargetId(FileTargetType.PRODUCT, productId);
+    productRepository.delete(product);
   }
 
   /** 상품 처리 이력 목록 조회 */
@@ -135,6 +149,26 @@ public class ProductService {
         productId, currentUserService.getCurrentUserId())) {
       throw new BaseException(BaseResponseStatus.FORBIDDEN, "본인이 등록한 상품만 관리할 수 있습니다.");
     }
+  }
+
+  private void validateApprovedProductEditable(Product product) {
+    if (product.getStatus() != ProductStatus.APPROVED) {
+      return;
+    }
+
+    if (currentUserService.getCurrentUserRole() == com.hyeon.guardrail.user.domain.UserRole.STAFF) {
+      throw new BaseException(BaseResponseStatus.FORBIDDEN, "승인 완료 상품은 관리자 또는 운영자만 수정할 수 있습니다.");
+    }
+  }
+
+  private void validateProductHardDeletable(Product product) {
+    if (product.getStatus() == ProductStatus.DRAFT
+        || product.getStatus() == ProductStatus.REJECTED) {
+      return;
+    }
+
+    throw new BaseException(
+        BaseResponseStatus.CONFLICT, "상품은 DRAFT 또는 REJECTED 상태에서만 완전 삭제할 수 있습니다.");
   }
 
   private Product findProduct(UUID productId) {

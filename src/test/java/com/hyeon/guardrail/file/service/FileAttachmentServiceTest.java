@@ -41,7 +41,8 @@ class FileAttachmentServiceTest {
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(fileAttachmentService, "maxFileSizeMb", 10L);
-    ReflectionTestUtils.setField(fileAttachmentService, "storageRootPath", "/uploads/products");
+    ReflectionTestUtils.setField(fileAttachmentService, "storageRootPath", "uploads/products");
+    ReflectionTestUtils.setField(fileAttachmentService, "publicUrlPrefix", "/uploads/products");
     ReflectionTestUtils.setField(
         fileAttachmentService,
         "allowedContentTypes",

@@ -15,4 +15,7 @@ public interface FileAttachmentRepository extends JpaRepository<FileAttachment, 
   /** 특정 파일을 제외한 삭제되지 않은 같은 대상의 정렬 순서 존재 여부 조회 */
   boolean existsByTargetTypeAndTargetIdAndSortOrderAndDeletedFalseAndIdNot(
       FileTargetType targetType, UUID targetId, int sortOrder, UUID fileAttachmentId);
+
+  /** 같은 대상의 파일 첨부 전체 삭제 */
+  void deleteByTargetTypeAndTargetId(FileTargetType targetType, UUID targetId);
 }

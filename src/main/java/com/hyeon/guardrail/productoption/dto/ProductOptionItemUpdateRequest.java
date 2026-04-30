@@ -26,10 +26,6 @@ public class ProductOptionItemUpdateRequest {
   @Schema(description = "추가 금액", example = "1000")
   private int additionalPrice;
 
-  @Min(0)
-  @Schema(description = "옵션값 정렬 순서", example = "1")
-  private int sortOrder;
-
   @NotNull
   @Schema(description = "처리자 사용자 ID")
   private UUID actorId;

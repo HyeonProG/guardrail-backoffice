@@ -27,10 +27,6 @@ public class ProductOptionItemCreateRequest {
   @Schema(description = "추가 금액", example = "1000")
   private int additionalPrice;
 
-  @Min(0)
-  @Schema(description = "옵션값 정렬 순서", example = "1")
-  private int sortOrder;
-
   @NotNull
   @Schema(description = "옵션값 상태", example = "ACTIVE")
   private ProductOptionStatus status;

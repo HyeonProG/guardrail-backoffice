@@ -50,6 +50,8 @@ public class SecurityConfig {
                 authorize
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
                     .permitAll()
+                    .requestMatchers("/uploads/**")
+                    .permitAll()
                     .requestMatchers("/api/v1/auth/login", "/api/v1/auth/token/refresh")
                     .permitAll()
                     .anyRequest()

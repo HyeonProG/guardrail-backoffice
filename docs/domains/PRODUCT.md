@@ -84,7 +84,7 @@
 - 상품 삭제는 `deleted` 값을 사용하는 soft delete로 처리한다.
 - 카테고리는 객체 연관관계로 참조하지 않고 `categoryId` 값으로만 저장한다.
 - 처리자 사용자는 객체 연관관계로 참조하지 않고 `actorId` 값으로만 저장한다.
-- 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 등록한다.
+- 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 선택하고, 현재 범위에서는 상품 생성 직후 이미지 메타데이터를 함께 등록한다.
 - 상품 옵션은 선택한 카테고리에 연결된 `ProductOption` 마스터 데이터에서 선택한다.
 - 현재 범위에서는 선택된 옵션값을 상품 생성 request에 직접 영속 저장하지 않고, 상품 등록 화면 표시와 AI 설명 생성 입력값에 활용한다.
 - 상세 설명은 운영자가 직접 입력할 수도 있고, `ProductContent` 도메인에서 AI 초안을 생성한 뒤 적용할 수도 있다.
@@ -143,6 +143,7 @@ APPROVED -> INACTIVE
   - 상품명은 상품 등록 화면에서 직접 입력한다.
   - 카테고리는 사전 생성된 카테고리 목록에서 선택한다.
   - 옵션은 선택된 카테고리에 연결된 목록에서 화면에서 선택한다.
+  - 이미지는 선택 값이며, 생성 직후 `FileAttachment` 메타데이터를 별도 등록한다.
 
 ### 상품 목록 조회
 - `GET /api/v1/products`
@@ -202,7 +203,9 @@ APPROVED -> INACTIVE
 - `DELETE /api/v1/products/{productId}`
 - response: `BaseResponseEntity<Void>`
 - 규칙:
-  - soft delete로 처리한다.
+  - hard delete로 처리한다.
+  - `DRAFT`, `REJECTED` 상태에서만 삭제할 수 있다.
+  - 삭제 시 상품 이력, 설명 초안, 설명 이력, 상품 대상 파일 메타데이터를 함께 정리한다.
 
 ### 상품 이력 목록 조회
 - `GET /api/v1/products/{productId}/histories`

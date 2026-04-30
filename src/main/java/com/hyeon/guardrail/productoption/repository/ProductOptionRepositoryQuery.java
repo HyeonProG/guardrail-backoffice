@@ -4,6 +4,7 @@ import com.hyeon.guardrail.productoption.domain.ProductOption;
 import com.hyeon.guardrail.productoption.domain.ProductOptionStatus;
 import com.hyeon.guardrail.productoption.domain.QProductOption;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -81,5 +82,20 @@ public class ProductOptionRepositoryQuery {
     }
 
     return queryFactory.selectOne().from(productOption).where(condition).fetchFirst() != null;
+  }
+
+  /** 카테고리 기준 다음 옵션 그룹 정렬 순서 조회 */
+  public int findNextSortOrderByCategoryId(UUID categoryId) {
+    QProductOption productOption = QProductOption.productOption;
+    NumberExpression<Integer> nextSortOrder = productOption.sortOrder.max().coalesce(0).add(1);
+
+    Integer result =
+        queryFactory
+            .select(nextSortOrder)
+            .from(productOption)
+            .where(productOption.categoryId.eq(categoryId), productOption.deleted.isFalse())
+            .fetchOne();
+
+    return result == null ? 1 : result;
   }
 }

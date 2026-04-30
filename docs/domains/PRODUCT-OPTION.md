@@ -81,9 +81,9 @@
 - 옵션값 참조는 `productOptionId`로 옵션 그룹 UUID 값을 저장한다.
 - 옵션 그룹 생성/조회/수정/삭제는 삭제되지 않은 카테고리 기준으로만 허용한다.
 - 같은 카테고리 안에서 옵션 그룹명은 미삭제 기준으로 중복될 수 없다.
-- 같은 카테고리 안에서 옵션 그룹 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+- 옵션 그룹 `sortOrder`는 생성 시 카테고리 기준 다음 순번으로 자동 부여한다.
 - 같은 옵션 그룹 안에서 옵션값명은 미삭제 기준으로 중복될 수 없다.
-- 같은 옵션 그룹 안에서 옵션값 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+- 옵션값 `sortOrder`는 생성 시 옵션 그룹 기준 다음 순번으로 자동 부여한다.
 - `INACTIVE`는 운영상 비활성 상태를 의미하고, `deleted = true`는 soft delete 상태를 의미한다.
 - 옵션 그룹 기본 정보 수정과 상태 변경은 별도 유스케이스로 분리한다.
 - 옵션값 기본 정보 수정과 상태 변경은 별도 유스케이스로 분리한다.
@@ -116,9 +116,10 @@
 - request: `ProductOptionCreateRequest`
 - response: `BaseResponseEntity<ProductOptionResponse>`
 - 규칙:
-  - `name`, `sortOrder`, `status`, `actorId`를 request body로 받는다.
+  - `name`, `status`, `actorId`를 request body로 받는다.
   - 카테고리는 삭제되지 않은 상태여야 한다.
-  - 같은 카테고리 안에서 옵션 그룹명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+  - 같은 카테고리 안에서 옵션 그룹명은 미삭제 기준으로 중복될 수 없다.
+  - 정렬 순서는 생성 시 자동 부여한다.
 
 ### 옵션 그룹 목록 조회
 - `GET /api/v1/categories/{categoryId}/options`
@@ -142,8 +143,9 @@
 - request: `ProductOptionUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionResponse>`
 - 규칙:
-  - `name`, `sortOrder`, `actorId`를 request body로 받는다.
+  - `name`, `actorId`를 request body로 받는다.
   - 상태 변경은 이 API에서 처리하지 않는다.
+  - 정렬 순서는 수정 대상이 아니다.
 
 ### 옵션 그룹 상태 변경
 - `PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/status`
@@ -164,9 +166,10 @@
 - request: `ProductOptionItemCreateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `additionalPrice`, `sortOrder`, `status`, `actorId`를 request body로 받는다.
-  - 같은 옵션 그룹 안에서 옵션값명과 `sortOrder`는 중복될 수 없다.
+  - `name`, `additionalPrice`, `status`, `actorId`를 request body로 받는다.
+  - 같은 옵션 그룹 안에서 옵션값명은 중복될 수 없다.
   - `additionalPrice`는 0 이상이어야 한다.
+  - 정렬 순서는 생성 시 자동 부여한다.
 
 ### 옵션값 목록 조회
 - `GET /api/v1/categories/{categoryId}/options/{productOptionId}/items`
@@ -181,8 +184,9 @@
 - request: `ProductOptionItemUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `additionalPrice`, `sortOrder`, `actorId`를 request body로 받는다.
+  - `name`, `additionalPrice`, `actorId`를 request body로 받는다.
   - 상태 변경은 이 API에서 처리하지 않는다.
+  - 정렬 순서는 수정 대상이 아니다.
 
 ### 옵션값 상태 변경
 - `PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOptionItemId}/status`

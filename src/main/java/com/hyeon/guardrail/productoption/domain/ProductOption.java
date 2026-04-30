@@ -34,9 +34,8 @@ public class ProductOption extends SoftDeleteEntity {
   private ProductOptionStatus status;
 
   /** 옵션 그룹 기본 정보를 수정 */
-  public void updateBasicInfo(String name, int sortOrder) {
+  public void updateBasicInfo(String name) {
     this.name = name;
-    this.sortOrder = sortOrder;
   }
 
   /** 옵션 그룹 활성화 */

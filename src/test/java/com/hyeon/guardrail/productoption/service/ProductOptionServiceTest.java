@@ -52,7 +52,7 @@ class ProductOptionServiceTest {
   void createProductOptionRequiresExistingCategory() {
     UUID categoryId = UUID.randomUUID();
     ProductOptionCreateRequest request =
-        new ProductOptionCreateRequest("색상", 1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE, UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId)).thenReturn(Optional.empty());
 
@@ -66,7 +66,7 @@ class ProductOptionServiceTest {
   void createProductOptionRejectsDuplicatedNameInCategory() {
     UUID categoryId = UUID.randomUUID();
     ProductOptionCreateRequest request =
-        new ProductOptionCreateRequest("색상", 1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE, UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -78,28 +78,25 @@ class ProductOptionServiceTest {
     verify(productOptionRepository, never()).save(any(ProductOption.class));
   }
 
-  /** 같은 카테고리 안에서 미삭제 옵션 그룹 정렬 순서 중복은 실패한다. */
+  /** 옵션 그룹 기본 정보 수정은 이름만 수정하고 정렬 순서는 유지한다. */
   @Test
-  void updateProductOptionRejectsDuplicatedSortOrderInCategory() {
+  void updateProductOptionKeepsSortOrder() {
     UUID categoryId = UUID.randomUUID();
     UUID productOptionId = UUID.randomUUID();
     ProductOption productOption =
         new ProductOption(categoryId, "색상", 1, ProductOptionStatus.ACTIVE);
-    ProductOptionUpdateRequest request = new ProductOptionUpdateRequest("색상", 2, UUID.randomUUID());
+    ProductOptionUpdateRequest request = new ProductOptionUpdateRequest("컬러", UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
     when(productOptionRepositoryQuery.findById(categoryId, productOptionId))
         .thenReturn(Optional.of(productOption));
-    when(productOptionRepositoryQuery.existsByCategoryIdAndName(categoryId, "색상", productOptionId))
+    when(productOptionRepositoryQuery.existsByCategoryIdAndName(categoryId, "컬러", productOptionId))
         .thenReturn(false);
-    when(productOptionRepositoryQuery.existsByCategoryIdAndSortOrder(
-            categoryId, 2, productOptionId))
-        .thenReturn(true);
 
-    assertThatThrownBy(
-            () -> productOptionService.updateProductOption(categoryId, productOptionId, request))
-        .isInstanceOf(BaseException.class);
+    var response = productOptionService.updateProductOption(categoryId, productOptionId, request);
+
+    assertThat(response.getName()).isEqualTo("컬러");
     assertThat(productOption.getSortOrder()).isEqualTo(1);
   }
 
@@ -110,7 +107,7 @@ class ProductOptionServiceTest {
     UUID productOptionId = UUID.randomUUID();
     ProductOptionItemCreateRequest request =
         new ProductOptionItemCreateRequest(
-            "블랙", 1000, 1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
+            "블랙", 1000, ProductOptionStatus.ACTIVE, UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -134,8 +131,7 @@ class ProductOptionServiceTest {
     UUID categoryId = UUID.randomUUID();
     UUID productOptionId = UUID.randomUUID();
     ProductOptionItemCreateRequest request =
-        new ProductOptionItemCreateRequest(
-            "블랙", -1, 1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionItemCreateRequest("블랙", -1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -181,7 +177,7 @@ class ProductOptionServiceTest {
     assertThat(response.getAdditionalPrice()).isEqualTo(1000);
   }
 
-  /** 옵션값 기본 정보 수정은 같은 옵션 그룹 안에서 자기 자신을 제외하고 중복을 검사한다. */
+  /** 옵션값 기본 정보 수정은 같은 옵션 그룹 안에서 자기 자신을 제외하고 이름 중복만 검사한다. */
   @Test
   void updateProductOptionItemExcludesCurrentItemFromDuplicateChecks() {
     UUID categoryId = UUID.randomUUID();
@@ -201,24 +197,19 @@ class ProductOptionServiceTest {
     when(productOptionItemRepositoryQuery.existsByProductOptionIdAndName(
             productOptionId, "블랙", productOptionItemId))
         .thenReturn(false);
-    when(productOptionItemRepositoryQuery.existsByProductOptionIdAndSortOrder(
-            productOptionId, 1, productOptionItemId))
-        .thenReturn(false);
 
     ProductOptionItemResponse response =
         productOptionService.updateProductOptionItem(
             categoryId,
             productOptionId,
             productOptionItemId,
-            new ProductOptionItemUpdateRequest("블랙", 1000, 1, UUID.randomUUID()));
+            new ProductOptionItemUpdateRequest("블랙", 1000, UUID.randomUUID()));
 
     assertThat(response.getName()).isEqualTo("블랙");
     assertThat(response.getAdditionalPrice()).isEqualTo(1000);
     assertThat(response.getSortOrder()).isEqualTo(1);
     verify(productOptionItemRepositoryQuery)
         .existsByProductOptionIdAndName(productOptionId, "블랙", productOptionItemId);
-    verify(productOptionItemRepositoryQuery)
-        .existsByProductOptionIdAndSortOrder(productOptionId, 1, productOptionItemId);
   }
 
   private Category category(UUID categoryId) {
