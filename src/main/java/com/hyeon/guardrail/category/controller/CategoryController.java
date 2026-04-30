@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +66,13 @@ public class CategoryController {
     boolean filterByParent = request.getParameterMap().containsKey("parentId");
     return BaseResponseEntity.success(
         categoryService.getCategories(parentId, filterByParent, status, pageable));
+  }
+
+  /** 삭제된 카테고리 목록 조회 */
+  @Operation(summary = "삭제된 카테고리 목록 조회", description = "soft delete 처리된 카테고리 목록을 조회합니다.")
+  @GetMapping("/deleted")
+  public BaseResponseEntity<List<CategoryResponse>> getDeletedCategories() {
+    return BaseResponseEntity.success(categoryService.getDeletedCategories());
   }
 
   /** 카테고리 수정 */

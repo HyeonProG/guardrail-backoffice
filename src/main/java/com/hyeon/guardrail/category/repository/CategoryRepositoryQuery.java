@@ -84,6 +84,17 @@ public class CategoryRepositoryQuery {
     return new PageImpl<>(content, pageable, total == null ? 0L : total);
   }
 
+  /** 삭제된 카테고리 목록 조회 */
+  public List<Category> findDeletedAll() {
+    QCategory category = QCategory.category;
+
+    return queryFactory
+        .selectFrom(category)
+        .where(category.deleted.isTrue())
+        .orderBy(category.updatedAt.desc(), category.createdAt.desc())
+        .fetch();
+  }
+
   private OrderSpecifier<?>[] toOrderSpecifiers(Sort sort) {
     QCategory category = QCategory.category;
 

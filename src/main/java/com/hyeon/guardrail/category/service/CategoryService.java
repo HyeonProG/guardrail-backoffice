@@ -12,6 +12,7 @@ import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
 import com.hyeon.guardrail.common.response.PageResponse;
 import com.hyeon.guardrail.common.security.CurrentUserService;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +53,13 @@ public class CategoryService {
         categoryRepositoryQuery
             .findAll(parentId, filterByParent, status, pageable)
             .map(CategoryResponse::from));
+  }
+
+  /** 삭제된 카테고리 목록 조회 */
+  @Transactional(readOnly = true)
+  public List<CategoryResponse> getDeletedCategories() {
+    currentUserService.requireAdminOrOperator();
+    return categoryRepositoryQuery.findDeletedAll().stream().map(CategoryResponse::from).toList();
   }
 
   /** 카테고리 기본 정보 수정 */
