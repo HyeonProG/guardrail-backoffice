@@ -12,10 +12,12 @@ import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserResponse;
 import com.hyeon.guardrail.user.dto.UserStatusUpdateRequest;
+import com.hyeon.guardrail.user.dto.UserTemporaryPasswordIssueResponse;
 import com.hyeon.guardrail.user.dto.UserUpdateRequest;
 import com.hyeon.guardrail.user.repository.UserRepository;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -109,6 +111,23 @@ public class UserService {
     currentUserService.requireAdminOrOperator();
     User user = findActiveUser(userId);
     user.delete();
+  }
+
+  /** 사용자 임시 비밀번호 재발급 */
+  @Transactional
+  public UserTemporaryPasswordIssueResponse issueTemporaryPassword(UUID userId) {
+    currentUserService.requireAdminOrOperator();
+    User user = findActiveUser(userId);
+    String temporaryPassword = generateInitialPassword();
+
+    authService.saveInitialPassword(user.getId(), temporaryPassword);
+    mailSender.send(
+        user.getEmail(),
+        "Guardrail 임시 비밀번호 발급",
+        "email=" + user.getEmail() + ", temporaryPassword=" + temporaryPassword);
+
+    return new UserTemporaryPasswordIssueResponse(
+        user.getId(), user.getEmail(), true, LocalDateTime.now());
   }
 
   private String generateInitialPassword() {

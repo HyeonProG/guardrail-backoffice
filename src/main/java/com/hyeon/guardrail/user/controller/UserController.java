@@ -7,6 +7,7 @@ import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserResponse;
 import com.hyeon.guardrail.user.dto.UserStatusUpdateRequest;
+import com.hyeon.guardrail.user.dto.UserTemporaryPasswordIssueResponse;
 import com.hyeon.guardrail.user.dto.UserUpdateRequest;
 import com.hyeon.guardrail.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,5 +87,14 @@ public class UserController {
   public BaseResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
     userService.deleteUser(userId);
     return BaseResponseEntity.success("사용자가 삭제되었습니다.");
+  }
+
+  /** 사용자 임시 비밀번호 재발급 */
+  @Operation(summary = "임시 비밀번호 재발급", description = "사용자에게 임시 비밀번호를 재발급하고 이메일 발송을 기록합니다.")
+  @PostMapping("/{userId}/temporary-password")
+  public BaseResponseEntity<UserTemporaryPasswordIssueResponse> issueTemporaryPassword(
+      @PathVariable UUID userId) {
+    return BaseResponseEntity.success(
+        userService.issueTemporaryPassword(userId), "임시 비밀번호가 발급되었습니다.");
   }
 }
