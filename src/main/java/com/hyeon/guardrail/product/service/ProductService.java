@@ -96,14 +96,14 @@ public class ProductService {
   /** 상품 목록 조회 */
   @Transactional(readOnly = true)
   public PageResponse<ProductResponse> getProducts(
-      UUID categoryId, ProductStatus status, Pageable pageable) {
+      UUID categoryId, ProductStatus status, Boolean approvedOnly, Pageable pageable) {
     UUID ownerId =
         currentUserService.getCurrentUserRole() == com.hyeon.guardrail.user.domain.UserRole.STAFF
             ? currentUserService.getCurrentUserId()
             : null;
     return PageResponse.from(
         productRepositoryQuery
-            .findAll(categoryId, status, ownerId, pageable)
+            .findAll(categoryId, status, approvedOnly, ownerId, pageable)
             .map(this::toResponse));
   }
 

@@ -31,6 +31,7 @@ public class CategoryService {
   /** 카테고리 생성 */
   @Transactional
   public CategoryResponse createCategory(CategoryCreateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateParentExists(request.getParentId());
     validateNameNotDuplicated(request.getParentId(), request.getName());
 
@@ -65,6 +66,7 @@ public class CategoryService {
   /** 카테고리 기본 정보 수정 */
   @Transactional
   public CategoryResponse updateCategory(UUID categoryId, CategoryUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateParentExists(request.getParentId());
     validateNameNotDuplicated(categoryId, request.getParentId(), request.getName());
 

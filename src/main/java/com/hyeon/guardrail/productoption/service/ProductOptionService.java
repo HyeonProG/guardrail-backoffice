@@ -41,6 +41,7 @@ public class ProductOptionService {
   @Transactional
   public ProductOptionResponse createProductOption(
       UUID categoryId, ProductOptionCreateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     validateProductOptionNameNotDuplicated(categoryId, request.getName(), null);
     int nextSortOrder = productOptionRepositoryQuery.findNextSortOrderByCategoryId(categoryId);
@@ -86,6 +87,7 @@ public class ProductOptionService {
   @Transactional
   public ProductOptionResponse updateProductOption(
       UUID categoryId, UUID productOptionId, ProductOptionUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     ProductOption productOption = findProductOption(categoryId, productOptionId);
     validateProductOptionNameNotDuplicated(categoryId, request.getName(), productOptionId);
@@ -118,6 +120,7 @@ public class ProductOptionService {
   @Transactional
   public ProductOptionItemResponse createProductOptionItem(
       UUID categoryId, UUID productOptionId, ProductOptionItemCreateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
     validateAdditionalPrice(request.getAdditionalPrice());
@@ -156,6 +159,7 @@ public class ProductOptionService {
       UUID productOptionId,
       UUID productOptionItemId,
       ProductOptionItemUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =

@@ -45,7 +45,11 @@ public class ProductRepositoryQuery {
 
   /** 삭제되지 않은 상품 목록 조회 */
   public Page<Product> findAll(
-      UUID categoryId, ProductStatus status, UUID ownerId, Pageable pageable) {
+      UUID categoryId,
+      ProductStatus status,
+      Boolean approvedOnly,
+      UUID ownerId,
+      Pageable pageable) {
     QProduct product = QProduct.product;
     QProductHistory productHistory = QProductHistory.productHistory;
     BooleanBuilder condition = new BooleanBuilder();
@@ -57,6 +61,12 @@ public class ProductRepositoryQuery {
 
     if (status != null) {
       condition.and(product.status.eq(status));
+    } else if (approvedOnly != null) {
+      if (Boolean.TRUE.equals(approvedOnly)) {
+        condition.and(product.status.eq(ProductStatus.APPROVED));
+      } else {
+        condition.and(product.status.ne(ProductStatus.APPROVED));
+      }
     }
 
     if (ownerId != null) {
