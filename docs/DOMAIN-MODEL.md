@@ -30,11 +30,6 @@
 `Product`는 `Category`를 객체 연관관계 없이 `categoryId`로 참조한다.
 상품 등록 시 선택된 옵션은 선택한 카테고리에 연결된 `ProductOption` 마스터 데이터를 사용한다.
 
-### ProductContent
-AI 설명 생성, 운영자 검수, 관리자 승인 반영 흐름을 관리한다.
-`ProductContentDraft`와 `ProductContentHistory`는 `Product`를 객체 연관관계 없이 `productId`로 참조한다.
-현재 범위에서 AI는 텍스트 설명만 생성하고, 상품 이미지는 `FileAttachment`로 직접 등록한다.
-
 ### ProductOption
 카테고리별로 미리 관리되는 옵션 그룹과 옵션 선택값 마스터 데이터를 관리한다.
 `ProductOptionItem`은 `ProductOption`을 객체 연관관계 없이 `productOptionId`로 참조한다.
@@ -59,7 +54,4 @@ AI 설명 생성, 운영자 검수, 관리자 승인 반영 흐름을 관리한�
 - UserPasswordHistory
 
 ### 설명 생성 결과
-설명 생성 결과는 `ProductContentDraft`에 영속 저장한다.
-
-### 검증 결과
-운영자 검수와 관리자 승인 결과는 `ProductContentDraft.status`와 `ProductContentHistory`로 관리한다.
+AI 설명 생성 결과는 별도 초안 테이블에 저장하지 않고 현재 상품의 `description` 필드에 바로 반영한다.

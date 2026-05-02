@@ -106,11 +106,10 @@ com.hyeon.guardrail.common.ai
 - 모델 연결 실패, 응답 파싱 실패는 구분 가능한 메시지로 기록한다.
 - 실패한 생성 요청은 상품 설명 초안을 저장하지 않고 실패 응답으로 종료한다.
 
-## 9. ProductContent 연계 기준
-- `ProductContentService`는 `AiContentGenerator`를 호출해 설명 초안을 생성한다.
-- AI 응답 원문은 `ProductContentDraft.content`에 저장한다.
-- 생성 성공 시 `ProductContentSource = AI`, `ProductContentStatus = GENERATED`로 저장한다.
-- 생성 후 운영자 검수와 관리자 승인 흐름은 `ProductContent` 도메인 규칙을 따른다.
+## 9. Product 연계 기준
+- `ProductService`는 `AiContentGenerator`를 호출해 상품 설명 초안을 생성한다.
+- AI 응답은 별도 초안 테이블에 저장하지 않고 현재 상품의 `description` 필드에 바로 반영한다.
+- 생성 후 직원이 설명을 검토하고, 최종 승인 책임은 상품 승인 요청 흐름에서 관리한다.
 
 ## 10. 로컬 실행 기준
 - 로컬에서 무료로 설명 생성 기능을 시험할 때는 `Ollama`를 사용한다.

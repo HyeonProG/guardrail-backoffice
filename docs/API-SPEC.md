@@ -444,10 +444,10 @@ response result:
 규칙:
 - 관리자는 이 목록을 별도 승인 요청 관리 화면에서 조회한다.
 
-## 7.4 상품 설명 초안 API 기준
-### 설명 초안 생성 API
+## 7.4 상품 설명 AI 생성 API 기준
+### 상품 설명 AI 생성 API
 ```http
-POST /api/v1/products/{productId}/contents/generate
+PATCH /api/v1/products/{productId}/description/generate
 ```
 
 request body:
@@ -458,39 +458,14 @@ request body:
 - `featureKeywords`
 
 response result:
-- `ProductContentDraftResponse`
+- `ProductResponse`
 
 규칙:
-- 상품 설명은 직접 입력하거나 AI 초안 생성 후 적용할 수 있다.
-- AI는 상품명, 카테고리명, 옵션 요약, 특징 키워드만 입력으로 사용한다.
+- 상품 설명은 직접 입력하거나 AI 초안 생성으로 즉시 현재 `description` 필드에 반영할 수 있다.
+- AI는 상품명, 카테고리명, 특징 키워드를 입력으로 사용한다.
+- 현재 구현에서는 옵션값은 AI 요청 입력으로 사용하지 않는다.
 - 이미지 데이터는 설명 생성 request에 포함하지 않는다.
-
-### 설명 초안 적용 API
-```http
-PATCH /api/v1/products/{productId}/contents/{draftId}/apply
-```
-
-request body:
-- `actorId`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- 선택한 초안 내용을 현재 `Product.description`에 반영한다.
-- 적용은 승인 요청이 아니며, 상품 상태를 변경하지 않는다.
-
-### 설명 초안 목록 조회 API
-```http
-GET /api/v1/products/{productId}/contents
-```
-
-response result:
-- `List<ProductContentDraftResponse>`
-
-규칙:
-- 목록은 생성일시 내림차순으로 조회한다.
-- 생성, 수정, 적용 이력을 함께 사용할 수 있다.
+- 별도 설명 초안 테이블은 사용하지 않는다.
 
 ## 7.3.1 상품 옵션 API 기준
 ### 옵션 그룹 생성 API
@@ -636,132 +611,6 @@ DELETE /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productO
 response result:
 - `null`
 
-## 7.4 상품 설명 생성/검수 API 기준
-### 설명 초안 생성 API
-```http
-POST /api/v1/products/{productId}/contents/generate
-```
-
-request body:
-- `actorId`
-- `productName`
-- `categoryName`
-- `optionSummary`
-- `featureKeywords`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- 생성 결과는 `ProductContentDraft`에 저장한다.
-- 생성 직후 상태는 `GENERATED`다.
-- 생성 출처는 `AI`로 저장한다.
-- `featureKeywords`는 설명 생성에 사용할 핵심 특징 목록이다.
-- 상품 이미지는 설명 생성 request에 포함하지 않는다.
-
-### 설명 초안 목록 조회 API
-```http
-GET /api/v1/products/{productId}/contents?status=GENERATED
-```
-
-query:
-- `status`
-
-response result:
-- `List<ProductContentDraftResponse>`
-
-규칙:
-- 목록 조회는 `deleted = false` 기준으로만 수행한다.
-
-### 설명 초안 상세 조회 API
-```http
-GET /api/v1/products/{productId}/contents/{draftId}
-```
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- 삭제되지 않은 초안만 조회할 수 있다.
-
-### 설명 초안 수정 API
-```http
-PUT /api/v1/products/{productId}/contents/{draftId}
-```
-
-request body:
-- `content`
-- `actorId`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- 운영자 검수 수정 흐름으로 처리한다.
-- `APPROVED` 상태 초안은 수정할 수 없다.
-- 승인 이후 설명 수정은 `PUT /api/v1/products/{productId}` 기본 정보 수정 API에서 처리한다.
-- 수정 시 `EDITED` 이력을 저장한다.
-
-### 설명 승인 요청 API
-```http
-PATCH /api/v1/products/{productId}/contents/{draftId}/submit
-```
-
-request body:
-- `actorId`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- `GENERATED`, `REJECTED` 상태에서만 요청할 수 있다.
-- 요청 시 상태를 `READY_FOR_APPROVAL`로 변경한다.
-- 요청 시 `SUBMITTED` 이력을 저장한다.
-
-### 설명 승인 API
-```http
-PATCH /api/v1/products/{productId}/contents/{draftId}/approve
-```
-
-request body:
-- `actorId`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- `READY_FOR_APPROVAL` 상태에서만 승인할 수 있다.
-- 승인 시 `Product.description`에 최종 설명을 반영한다.
-- 승인 시 `APPROVED` 이력을 저장한다.
-
-### 설명 반려 API
-```http
-PATCH /api/v1/products/{productId}/contents/{draftId}/reject
-```
-
-request body:
-- `actorId`
-- `reason`
-
-response result:
-- `ProductContentDraftResponse`
-
-규칙:
-- `READY_FOR_APPROVAL` 상태에서만 반려할 수 있다.
-- `reason`은 필수다.
-- 반려 시 `REJECTED` 이력을 저장한다.
-
-### 설명 이력 조회 API
-```http
-GET /api/v1/products/{productId}/contents/{draftId}/histories
-```
-
-response result:
-- `List<ProductContentHistoryResponse>`
-
-규칙:
-- 생성, 수정, 제출, 승인, 반려, 재생성 흐름을 시간순으로 조회한다.
-
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
 
@@ -826,7 +675,6 @@ DTO 이름은 목적이 드러나도록 작성한다.
 - `UserResponse`
 - `ProductCreateRequest`
 - `ProductStatusUpdateRequest`
-- `ProductContentApproveRequest`
 - `ProductResponse`
 
 규칙:
