@@ -61,11 +61,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(authentication);
       filterChain.doFilter(request, response);
     } catch (JwtException | IllegalArgumentException exception) {
-      log.debug(
-          "JWT parse failed [{} {}] type={}",
+      log.error(
+          "JWT parse failed [{} {}] type={} segments={} startsWithEyJ={} startsWithBearer={}",
           request.getMethod(),
           request.getRequestURI(),
-          exception.getClass().getSimpleName());
+          exception.getClass().getSimpleName(),
+          token.split("\\.").length,
+          token.startsWith("eyJ"),
+          token.startsWith("Bearer "));
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "유효하지 않은 인증 토큰입니다.");
     } finally {
       SecurityContextHolder.clearContext();
