@@ -10,12 +10,27 @@ const REFRESH_TOKEN_EXPIRED_AT_KEY = 'guardrail.backoffice.refreshTokenExpiredAt
 const TEMPORARY_PASSWORD_KEY = 'guardrail.backoffice.temporaryPassword';
 const TEMP_PASSWORD_PROMPT_DISMISSED_KEY = 'guardrail.backoffice.temporaryPasswordPromptDismissed';
 
+const normalizeJwtToken = (value: string | null) => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim().replace(/^"|"$/g, '');
+  const segments = trimmed.split('.');
+
+  if (segments.length !== 3 || segments.some((segment) => !segment)) {
+    return null;
+  }
+
+  return trimmed;
+};
+
 export const authStorage = {
   getAccessToken() {
-    return window.localStorage.getItem(ACCESS_TOKEN_KEY);
+    return normalizeJwtToken(window.localStorage.getItem(ACCESS_TOKEN_KEY));
   },
   getRefreshToken() {
-    return window.localStorage.getItem(REFRESH_TOKEN_KEY);
+    return normalizeJwtToken(window.localStorage.getItem(REFRESH_TOKEN_KEY));
   },
   getSessionId() {
     return window.localStorage.getItem(SESSION_ID_KEY);
