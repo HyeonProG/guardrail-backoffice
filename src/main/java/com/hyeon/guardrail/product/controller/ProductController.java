@@ -62,9 +62,10 @@ public class ProductController {
       @RequestParam(required = false) UUID categoryId,
       @RequestParam(required = false) ProductStatus status,
       @RequestParam(required = false) Boolean approvedOnly,
+      @RequestParam(required = false) Boolean myOnly,
       @PageableDefault(size = 20) Pageable pageable) {
     return BaseResponseEntity.success(
-        productService.getProducts(categoryId, status, approvedOnly, pageable));
+        productService.getProducts(categoryId, status, approvedOnly, myOnly, pageable));
   }
 
   /** 상품 수정 */

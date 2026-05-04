@@ -18,7 +18,14 @@ export function ProductsPage() {
 
   const productsQuery = useQuery({
     queryKey: ['products', 'pre-approval', page, sortDirection],
-    queryFn: () => getProducts({ page, size: 20, sort: `updatedAt,${sortDirection}`, approvedOnly: false })
+    queryFn: () =>
+      getProducts({
+        page,
+        size: 20,
+        sort: `updatedAt,${sortDirection}`,
+        approvedOnly: false,
+        myOnly: true
+      })
   });
   const categoriesQuery = useQuery({
     queryKey: ['categories', 'active-options'],

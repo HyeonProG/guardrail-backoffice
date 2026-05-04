@@ -50,7 +50,6 @@ public class AuthService {
 
   private static final int INITIAL_PASSWORD_EXPIRATION_DAYS = 7;
   private static final int BCRYPT_MAX_BYTES = 72;
-  private static final String BEARER_PREFIX = "Bearer ";
   private static final String SHA256_PREFIX = "{sha256}";
   private static final String SESSION_ID_CLAIM = "sessionId";
 
@@ -177,14 +176,7 @@ public class AuthService {
 
   /** 로그아웃 */
   @Transactional
-  public LogoutResponse logout(String authorizationHeader, UUID sessionId) {
-    Claims claims = parseAccessClaims(extractAccessToken(authorizationHeader));
-    UUID tokenSessionId = UUID.fromString(claims.get(SESSION_ID_CLAIM, String.class));
-
-    if (!sessionId.equals(tokenSessionId)) {
-      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
-    }
-
+  public LogoutResponse logout(UUID sessionId) {
     UserSession session = findSession(sessionId);
     session.revoke();
 
@@ -307,28 +299,12 @@ public class AuthService {
         .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "세션을 찾을 수 없습니다."));
   }
 
-  private Claims parseAccessClaims(String accessToken) {
-    try {
-      return jwtService.parseAccessToken(accessToken);
-    } catch (JwtException | IllegalArgumentException exception) {
-      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
-    }
-  }
-
   private Claims parseRefreshClaims(String refreshToken) {
     try {
       return jwtService.parseRefreshToken(refreshToken);
     } catch (JwtException | IllegalArgumentException exception) {
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
     }
-  }
-
-  private String extractAccessToken(String authorizationHeader) {
-    if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
-      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증이 필요합니다.");
-    }
-
-    return authorizationHeader.substring(BEARER_PREFIX.length());
   }
 
   private String hashRefreshToken(String refreshToken) {

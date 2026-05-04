@@ -217,13 +217,9 @@ class AuthServiceTest {
             LocalDateTime.now(),
             LocalDateTime.now().plusDays(1));
     ReflectionTestUtils.setField(session, "id", sessionId);
-    Claims claims = mock(Claims.class);
-
-    when(claims.get("sessionId", String.class)).thenReturn(sessionId.toString());
-    when(jwtService.parseAccessToken("access-token")).thenReturn(claims);
     when(authRepositoryQuery.findSessionById(sessionId)).thenReturn(Optional.of(session));
 
-    LogoutResponse response = authService.logout("Bearer access-token", sessionId);
+    LogoutResponse response = authService.logout(sessionId);
 
     assertThat(response.getSessionId()).isEqualTo(sessionId);
     assertThat(response.getStatus()).isEqualTo(SessionStatus.REVOKED);

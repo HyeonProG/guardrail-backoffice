@@ -27,6 +27,7 @@ export async function getProducts(params: {
   categoryId?: string;
   status?: ProductStatus | '';
   approvedOnly?: boolean;
+  myOnly?: boolean;
 } = {}) {
   const response = await apiClient.get('/api/v1/products', {
     params: {
@@ -35,7 +36,8 @@ export async function getProducts(params: {
       sort: params.sort ?? 'createdAt,desc',
       categoryId: params.categoryId || undefined,
       status: params.status || undefined,
-      approvedOnly: params.approvedOnly
+      approvedOnly: params.approvedOnly,
+      myOnly: params.myOnly
     }
   });
   return unwrapResult<PageResponse<Product>>(response);

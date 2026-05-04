@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,14 +59,10 @@ public class AuthController {
   }
 
   /** 로그아웃 */
-  @Operation(summary = "로그아웃", description = "액세스 토큰과 세션을 검증하고 세션을 철회합니다.")
-  @SecurityRequirement(name = "bearerAuth")
+  @Operation(summary = "로그아웃", description = "세션을 종료하고 로그아웃 처리합니다.")
   @PostMapping("/logout")
-  public BaseResponseEntity<LogoutResponse> logout(
-      @RequestHeader("Authorization") String authorizationHeader,
-      @Valid @RequestBody LogoutRequest request) {
-    return BaseResponseEntity.success(
-        authService.logout(authorizationHeader, request.getSessionId()), "로그아웃되었습니다.");
+  public BaseResponseEntity<LogoutResponse> logout(@Valid @RequestBody LogoutRequest request) {
+    return BaseResponseEntity.success(authService.logout(request.getSessionId()), "로그아웃되었습니다.");
   }
 
   /** 사용자 비밀번호 이력 조회 */

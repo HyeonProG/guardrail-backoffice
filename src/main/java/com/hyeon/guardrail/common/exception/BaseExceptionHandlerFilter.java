@@ -32,11 +32,20 @@ public class BaseExceptionHandlerFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (BaseException exception) {
       log.error(
-          "BaseException -> {}({})", exception.getStatus(), exception.getMessage(), exception);
+          "BaseException -> {}({}) [{} {}]",
+          exception.getStatus(),
+          exception.getMessage(),
+          request.getMethod(),
+          request.getRequestURI(),
+          exception);
       writeErrorResponse(
           response, new BaseResponseEntity<>(exception.getStatus(), exception.getMessage()));
     } catch (AuthenticationException exception) {
-      log.error("AuthenticationException", exception);
+      log.error(
+          "AuthenticationException [{} {}]",
+          request.getMethod(),
+          request.getRequestURI(),
+          exception);
       writeErrorResponse(response, new BaseResponseEntity<>(BaseResponseStatus.UNAUTHORIZED));
     }
   }
