@@ -128,7 +128,8 @@ public class AuthService {
         accessToken.getExpiredAt(),
         refreshToken.getExpiredAt(),
         user.getId(),
-        user.getRole());
+        user.getRole(),
+        passwordHistory.isTemporary());
   }
 
   /** 토큰 재발급 */

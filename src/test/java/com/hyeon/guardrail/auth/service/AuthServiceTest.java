@@ -152,6 +152,7 @@ class AuthServiceTest {
     assertThat(response.getAccessToken()).isEqualTo("access-token");
     assertThat(response.getRefreshToken()).isEqualTo("refresh-token");
     assertThat(response.getSessionId()).isEqualTo(sessionId);
+    assertThat(response.isTemporaryPassword()).isFalse();
     verify(loginHistoryRepository).save(any(UserLoginHistory.class));
     verify(sessionRepository).save(any(UserSession.class));
   }

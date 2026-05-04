@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { logout } from '@/features/auth/api/login';
 import { authStorage } from '@/features/auth/model/authStorage';
-import { getPasswordHistories } from '@/entities/user/api/userApi';
 import { Modal } from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import { Header } from '@/widgets/layout/Header';
@@ -11,24 +9,13 @@ import { navigationGroups } from '@/widgets/layout/model/navigation';
 
 export function AppLayout() {
   const navigate = useNavigate();
-  const userId = authStorage.getActorId() ?? '';
   const [temporaryPasswordModalOpen, setTemporaryPasswordModalOpen] = useState(false);
 
-  const passwordHistoriesQuery = useQuery({
-    queryKey: ['layout-password-histories', userId],
-    queryFn: () => getPasswordHistories(userId, { skipAuthRedirect: true }),
-    enabled: Boolean(userId)
-  });
-
   useEffect(() => {
-    const latestPasswordHistory = passwordHistoriesQuery.data?.[0];
-    if (
-      latestPasswordHistory?.temporary &&
-      !authStorage.isTemporaryPasswordPromptDismissed()
-    ) {
+    if (authStorage.isTemporaryPassword() && !authStorage.isTemporaryPasswordPromptDismissed()) {
       setTemporaryPasswordModalOpen(true);
     }
-  }, [passwordHistoriesQuery.data]);
+  }, []);
 
   const handleLogout = async () => {
     const sessionId = authStorage.getSessionId();

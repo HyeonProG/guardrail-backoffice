@@ -6,4 +6,5 @@ export type Session = {
   refreshTokenExpiredAt: string;
   userId: string;
   role: string;
+  temporaryPassword: boolean;
 };

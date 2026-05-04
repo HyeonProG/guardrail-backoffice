@@ -33,4 +33,7 @@ public class LoginResponse {
 
   @Schema(description = "사용자 역할", example = "STAFF")
   private UserRole role;
+
+  @Schema(description = "임시 비밀번호 로그인 여부", example = "false")
+  private boolean temporaryPassword;
 }
