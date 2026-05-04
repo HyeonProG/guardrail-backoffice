@@ -1,6 +1,11 @@
 import axios from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { env } from '@/shared/config/env';
 import { authStorage } from '@/features/auth/model/authStorage';
+
+export type ApiRequestConfig = AxiosRequestConfig & {
+  skipAuthRedirect?: boolean;
+};
 
 export const apiClient = axios.create({
   baseURL: env.apiBaseUrl,
@@ -27,8 +32,9 @@ apiClient.interceptors.response.use(
     const requestUrl = String(error.config?.url ?? '');
     const isLoginRequest = requestUrl.includes('/api/v1/auth/login');
     const isLogoutRequest = requestUrl.includes('/api/v1/auth/logout');
+    const skipAuthRedirect = Boolean((error.config as ApiRequestConfig | undefined)?.skipAuthRedirect);
 
-    if (status === 401 && !isLoginRequest && !isLogoutRequest) {
+    if (status === 401 && !isLoginRequest && !isLogoutRequest && !skipAuthRedirect) {
       authStorage.clear();
       const nextUrl = `${window.location.origin}/login?reason=session-expired`;
 

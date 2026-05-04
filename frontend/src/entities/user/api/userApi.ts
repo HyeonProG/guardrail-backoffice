@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/apiClient';
+import type { ApiRequestConfig } from '@/shared/api/apiClient';
 import { unwrapResult } from '@/shared/api/unwrap';
 import type {
   ChangePasswordResponse,
@@ -7,8 +8,8 @@ import type {
   UserRole
 } from '@/entities/user/model/types';
 
-export async function getUser(userId: string) {
-  const response = await apiClient.get(`/api/v1/users/${userId}`);
+export async function getUser(userId: string, config?: ApiRequestConfig) {
+  const response = await apiClient.get(`/api/v1/users/${userId}`, config);
   return unwrapResult<User>(response);
 }
 
@@ -24,8 +25,8 @@ export async function updateUser(
   return unwrapResult<User>(response);
 }
 
-export async function getPasswordHistories(userId: string) {
-  const response = await apiClient.get(`/api/v1/auth/users/${userId}/password-histories`);
+export async function getPasswordHistories(userId: string, config?: ApiRequestConfig) {
+  const response = await apiClient.get(`/api/v1/auth/users/${userId}/password-histories`, config);
   return unwrapResult<PasswordHistory[]>(response);
 }
 

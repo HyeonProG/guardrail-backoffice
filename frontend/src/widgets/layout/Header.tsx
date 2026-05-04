@@ -24,7 +24,7 @@ export function Header({ groups, onLogout }: HeaderProps) {
 
   const userQuery = useQuery({
     queryKey: ['header-user', userId],
-    queryFn: () => getUser(userId),
+    queryFn: () => getUser(userId, { skipAuthRedirect: true }),
     enabled: Boolean(userId)
   });
 

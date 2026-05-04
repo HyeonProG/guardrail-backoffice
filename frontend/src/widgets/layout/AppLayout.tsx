@@ -16,7 +16,7 @@ export function AppLayout() {
 
   const passwordHistoriesQuery = useQuery({
     queryKey: ['layout-password-histories', userId],
-    queryFn: () => getPasswordHistories(userId),
+    queryFn: () => getPasswordHistories(userId, { skipAuthRedirect: true }),
     enabled: Boolean(userId)
   });
 
