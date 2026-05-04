@@ -13,17 +13,17 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.stereotype.Component;
 
-/** Ollama 기반 상품 설명 생성 구현체 */
+/** OpenAI 기반 상품 설명 생성 구현체 */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OllamaContentGenerator implements AiContentGenerator {
+public class OpenAiContentGenerator implements AiContentGenerator {
 
   private final ChatModel chatModel;
   private final AiProperties aiProperties;
   private final ProductDescriptionPromptFactory promptFactory;
 
-  /** Spring AI OllamaChatModel을 사용한 상품 설명 생성 */
+  /** Spring AI OpenAI ChatModel을 사용한 상품 설명 생성 */
   @Override
   public ProductDescriptionGenerateResult generateProductDescription(
       ProductDescriptionGenerateCommand command) {
@@ -39,9 +39,9 @@ public class OllamaContentGenerator implements AiContentGenerator {
     } catch (AiClientException exception) {
       throw exception;
     } catch (Exception exception) {
-      log.warn("Ollama request failed.");
+      log.warn("OpenAI request failed.");
       throw new AiClientException(
-          BaseResponseStatus.INTERNAL_SERVER_ERROR, "Ollama 호출에 실패했습니다.", exception);
+          BaseResponseStatus.INTERNAL_SERVER_ERROR, "OpenAI 호출에 실패했습니다.", exception);
     }
   }
 
@@ -54,7 +54,7 @@ public class OllamaContentGenerator implements AiContentGenerator {
   private void validateDescription(String description) {
     if (description == null || description.isBlank()) {
       throw new AiClientException(
-          BaseResponseStatus.INTERNAL_SERVER_ERROR, "Ollama 응답에서 설명을 찾을 수 없습니다.");
+          BaseResponseStatus.INTERNAL_SERVER_ERROR, "OpenAI 응답에서 설명을 찾을 수 없습니다.");
     }
   }
 }

@@ -3,7 +3,7 @@
 ## 1. 목적
 이 문서는 Guardrail 프로젝트에서 AI 기반 상품 설명 생성 기능을 어떤 방식으로 연동할지 정의한다.
 
-정책 범위는 Ollama 연결 방식, Spring AI 공통 클라이언트 구조, 프롬프트 입력값, 실패 처리 기준을 포함한다.
+정책 범위는 OpenAI 연결 방식, Spring AI 공통 클라이언트 구조, 프롬프트 입력값, 실패 처리 기준을 포함한다.
 
 ## 2. 현재 범위
 - AI는 상품 설명 텍스트 생성만 담당한다.
@@ -13,12 +13,11 @@
 
 ## 3. 실행 기준
 ### 3.1 기본 실행 대상
-현재 기본 AI 실행 대상은 `Ollama`다.
+현재 기본 AI 실행 대상은 `OpenAI API`다.
 
 규칙:
-- 로컬 개발과 1차 테스트는 `Ollama`를 기본으로 사용한다.
-- 현재 구현 범위는 `Spring AI + Ollama` 조합으로 고정한다.
-- 도메인 서비스는 Ollama HTTP 호출 세부 구현을 직접 다루지 않는다.
+- 현재 구현 범위는 `Spring AI + OpenAI` 조합으로 고정한다.
+- 도메인 서비스는 OpenAI HTTP 호출 세부 구현을 직접 다루지 않는다.
 
 ## 4. 설정 주입 기준
 ### 4.1 설정 키
@@ -27,11 +26,12 @@
 ```yaml
 spring:
   ai:
-    ollama:
-      base-url: http://localhost:11434
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: https://api.openai.com
       chat:
         options:
-          model: gemma3
+          model: gpt-5.4-mini
 
 app:
   ai:
@@ -40,19 +40,20 @@ app:
 
 규칙:
 - `enabled`는 AI 기능 전체 사용 여부를 제어한다.
-- `spring.ai.ollama.base-url`은 Ollama 서버 주소다.
-- `spring.ai.ollama.chat.options.model`은 설명 생성에 사용할 기본 모델명이다.
+- `spring.ai.openai.api-key`는 OpenAI API 키다.
+- `spring.ai.openai.base-url`은 OpenAI API 기본 주소다.
+- `spring.ai.openai.chat.options.model`은 설명 생성에 사용할 기본 모델명이다.
 - `app.ai.enabled`는 애플리케이션 레벨 AI 기능 사용 여부를 제어한다.
 
-### 4.2 Ollama 기본 기준
-로컬 개발과 데모 검증은 아래 기준으로 고정한다.
+### 4.2 OpenAI 기본 기준
+배포와 시연 환경은 아래 기준으로 고정한다.
 
-- base-url: `http://localhost:11434`
-- model: `gemma3`
+- base-url: `https://api.openai.com`
+- model: `gpt-5.4-mini`
 
 설명:
-- 실제 실행 전에는 로컬에서 `ollama pull gemma3`로 모델을 받아둔다.
-- 애플리케이션은 Spring AI가 제공하는 Ollama 연동 기능을 사용한다.
+- 실제 실행 전에는 OpenAI API 키를 발급해 `OPENAI_API_KEY` 또는 `spring.ai.openai.api-key`로 주입한다.
+- 애플리케이션은 Spring AI가 제공하는 OpenAI 연동 기능을 사용한다.
 
 ## 5. 공통 AI 클라이언트 구조
 AI 연동 코드는 `common.ai` 하위에 둔다.
@@ -68,18 +69,18 @@ com.hyeon.guardrail.common.ai
 │   └── AiClientException.java
 ├── generator
 │   ├── AiContentGenerator.java
-│   └── OllamaContentGenerator.java
+│   └── OpenAiContentGenerator.java
 └── support
     └── ProductDescriptionPromptFactory.java
 ```
 
 구성 규칙:
 - `AiContentGenerator`는 상품 설명 생성 공통 인터페이스다.
-- `OllamaContentGenerator`는 Spring AI Ollama 연동 구현체다.
+- `OpenAiContentGenerator`는 Spring AI OpenAI 연동 구현체다.
 - `ProductDescriptionPromptFactory`는 프롬프트 조합 책임만 가진다.
 - `common.ai.dto`는 외부 API request/response DTO가 아니라 내부 AI 호출 command/result를 표현한다.
 - 도메인 서비스는 `AiContentGenerator`만 의존한다.
-- 외부 Ollama 호출 상세 구현은 도메인 패키지에 두지 않는다.
+- 외부 OpenAI 호출 상세 구현은 도메인 패키지에 두지 않는다.
 
 ## 6. 상품 설명 생성 입력 기준
 설명 생성 입력값은 아래 기준으로 고정한다.
@@ -112,17 +113,17 @@ com.hyeon.guardrail.common.ai
 - AI 응답은 별도 초안 테이블에 저장하지 않고 현재 상품의 `description` 필드에 바로 반영한다.
 - 생성 후 직원이 설명을 검토하고, 최종 승인 책임은 상품 승인 요청 흐름에서 관리한다.
 
-## 10. 로컬 실행 기준
-- 로컬에서 무료로 설명 생성 기능을 시험할 때는 `Ollama`를 사용한다.
-- 권장 기본 모델은 `gemma3`다.
+## 10. 실행 기준
+- 배포 환경에서는 `OpenAI API`를 사용한다.
+- 권장 기본 모델은 `gpt-5.4-mini`다.
 - 예시 실행 순서:
-  1. `ollama pull gemma3`
-  2. `ollama serve`
-  3. `application.yml`의 `spring.ai.ollama`, `app.ai.enabled` 설정 확인
+  1. OpenAI API 키 발급
+  2. `OPENAI_API_KEY` 또는 `application.yml`의 `spring.ai.openai.api-key` 설정
+  3. `application.yml`의 `spring.ai.openai`, `app.ai.enabled` 설정 확인
   4. 상품 설명 생성 API 또는 UI에서 설명 생성 테스트
 
 ## 11. 테스트 기준
 - 외부 AI API를 직접 호출하는 테스트는 기본 검증 흐름에 포함하지 않는다.
 - 단위 테스트에서는 `AiContentGenerator`를 mock으로 대체한다.
 - 통합 테스트에서는 고정 응답 stub 또는 fake 구현을 사용한다.
-- 실제 Ollama 연동 검증은 별도 수동 또는 전용 통합 환경에서 수행한다.
+- 실제 OpenAI 연동 검증은 별도 수동 또는 전용 통합 환경에서 수행한다.

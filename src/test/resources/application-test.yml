@@ -22,11 +22,12 @@ spring:
       mode: never
 
   ai:
-    ollama:
-      base-url: http://localhost:11434
+    openai:
+      api-key: test-openai-key
+      base-url: https://api.openai.com
       chat:
         options:
-          model: gemma3
+          model: gpt-5.4-mini
           temperature: 0.2
 
 # 테스트 로그 기본 설정

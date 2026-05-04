@@ -9,7 +9,7 @@ plugins {
 
 // Project metadata
 group = 'com.hyeon'
-version = '0.9.2'
+version = '0.9.3'
 description = 'guardrail'
 
 // Java toolchain
@@ -44,7 +44,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
     implementation 'software.amazon.awssdk:s3'
 
     // API documentation
