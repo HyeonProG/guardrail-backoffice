@@ -1,0 +1,340 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { getCategories } from '@/entities/category/api/categoryApi';
+import { getFileAttachments } from '@/entities/file/api/fileAttachmentApi';
+import {
+  deleteProduct,
+  getProduct,
+  getProductHistories,
+  updateProductStatus
+} from '@/entities/product/api/productApi';
+import type { ProductStatus } from '@/entities/product/model/types';
+import type { UserRole } from '@/entities/user/model/types';
+import { authStorage } from '@/features/auth/model/authStorage';
+import { resolveFileUrl } from '@/shared/lib/fileUrl';
+import { formatDateTime, shortId } from '@/shared/lib/format';
+import { getProductHistoryTypeLabel, getProductStatusLabel } from '@/shared/lib/productText';
+import { requireActorId } from '@/shared/lib/session';
+import { Button } from '@/shared/ui/Button';
+import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { TextField } from '@/shared/ui/TextField';
+
+const productStatuses: ProductStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'INACTIVE'];
+
+export function ProductDetailPage() {
+  const { productId = '' } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const currentRole = (authStorage.getRole() as UserRole | null) ?? null;
+  const canManageDangerousActions = currentRole === 'ADMIN' || currentRole === 'OPERATOR';
+  const [nextStatus, setNextStatus] = useState<ProductStatus>('PENDING');
+  const [reason, setReason] = useState('');
+  const [imageIndex, setImageIndex] = useState(0);
+
+  const productQuery = useQuery({
+    queryKey: ['products', productId],
+    queryFn: () => getProduct(productId),
+    enabled: Boolean(productId)
+  });
+  const historiesQuery = useQuery({
+    queryKey: ['products', productId, 'histories'],
+    queryFn: () => getProductHistories(productId),
+    enabled: Boolean(productId)
+  });
+  const categoriesQuery = useQuery({
+    queryKey: ['categories', 'active-options'],
+    queryFn: () => getCategories({ status: 'ACTIVE', size: 100 })
+  });
+  const attachmentsQuery = useQuery({
+    queryKey: ['products', productId, 'attachments'],
+    queryFn: () => getFileAttachments('PRODUCT', productId),
+    enabled: Boolean(productId)
+  });
+
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+    queryClient.invalidateQueries({ queryKey: ['products', productId] });
+  };
+  const statusMutation = useMutation({
+    mutationFn: () =>
+      updateProductStatus(productId, {
+        status: nextStatus,
+        actorId: requireActorId(),
+        reason: reason || undefined
+      }),
+    onSuccess: () => {
+      setReason('');
+      refresh();
+      queryClient.invalidateQueries({ queryKey: ['products', productId, 'histories'] });
+    }
+  });
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteProduct(productId),
+    onSuccess: () => navigate('/products', { replace: true })
+  });
+
+  const categories = categoriesQuery.data?.content ?? [];
+  const attachments = useMemo(
+    () => [...(attachmentsQuery.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
+    [attachmentsQuery.data]
+  );
+  const canStaffEditPendingProduct =
+    currentRole === 'STAFF' &&
+    (productQuery.data?.status === 'DRAFT' ||
+      productQuery.data?.status === 'PENDING' ||
+      productQuery.data?.status === 'REJECTED');
+  const currentImage = attachments[imageIndex] ?? null;
+  const currentCategoryName =
+    categories.find((category) => category.id === productQuery.data?.categoryId)?.name ?? '-';
+  const canDeleteProduct =
+    productQuery.data?.status === 'DRAFT' || productQuery.data?.status === 'REJECTED';
+
+  useEffect(() => {
+    if (imageIndex >= attachments.length) {
+      setImageIndex(0);
+    }
+  }, [attachments.length, imageIndex]);
+
+  return (
+    <div className="space-y-6">
+      <section className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-ink">상품 상세</h2>
+          <p className="mt-1 text-sm text-slate-600">상품 정보와 이미지, 선택 항목, 변경 이력을 한 화면에서 확인합니다.</p>
+        </div>
+        <div className="flex gap-3">
+          {canManageDangerousActions || canStaffEditPendingProduct ? (
+            <Link className="text-sm font-medium text-slate-900 underline" to={`/products/${productId}/edit`}>
+              상품 수정
+            </Link>
+          ) : null}
+          <Link className="text-sm font-medium text-slate-900 underline" to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}>
+            상품 옵션 관리
+          </Link>
+        </div>
+      </section>
+
+      <ErrorMessage error={productQuery.error ?? historiesQuery.error ?? categoriesQuery.error ?? attachmentsQuery.error} />
+
+      {productQuery.data ? (
+        <section className={canManageDangerousActions ? 'grid gap-5 xl:grid-cols-[1.1fr_0.9fr]' : 'grid gap-5'}>
+          <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Product Overview</p>
+                <h3 className="mt-2 text-2xl font-semibold text-slate-950">{productQuery.data.name}</h3>
+              </div>
+              <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white">
+                {getProductStatusLabel(productQuery.data.status)}
+              </span>
+            </div>
+
+            <div className="grid gap-6 p-6 lg:grid-cols-[1.05fr_0.95fr]">
+              <div className="space-y-4">
+                <div className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-slate-100">
+                  <div className="aspect-[4/3]">
+                    {currentImage ? (
+                      <img
+                        alt={productQuery.data.name}
+                        className="h-full w-full object-cover"
+                        src={resolveFileUrl(currentImage.filePath) ?? undefined}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-sm font-medium text-slate-400">
+                        등록된 이미지가 없습니다.
+                      </div>
+                    )}
+                  </div>
+                  {attachments.length > 1 ? (
+                    <>
+                      <button
+                        className="absolute left-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-black/75"
+                        type="button"
+                        onClick={() => setImageIndex((current) => (current === 0 ? attachments.length - 1 : current - 1))}
+                      >
+                        ‹
+                      </button>
+                      <button
+                        className="absolute right-3 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-lg text-white transition hover:bg-black/75"
+                        type="button"
+                        onClick={() => setImageIndex((current) => (current + 1) % attachments.length)}
+                      >
+                        ›
+                      </button>
+                    </>
+                  ) : null}
+                </div>
+
+                {attachments.length > 1 ? (
+                  <div className="grid grid-cols-5 gap-3">
+                    {attachments.map((attachment, index) => (
+                      <button
+                        key={attachment.id}
+                        className={`overflow-hidden rounded-2xl border ${
+                          index === imageIndex ? 'border-slate-950 ring-2 ring-slate-200' : 'border-slate-200'
+                        }`}
+                        type="button"
+                        onClick={() => setImageIndex(index)}
+                      >
+                        <div className="aspect-square bg-slate-100">
+                          <img
+                            alt={`${productQuery.data.name} ${index + 1}`}
+                            className="h-full w-full object-cover"
+                            src={resolveFileUrl(attachment.filePath) ?? undefined}
+                          />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">카테고리</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{currentCategoryName}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">수량</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{productQuery.data.quantity}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">상품 번호</p>
+                    <p className="mt-2 font-mono text-sm text-slate-700">{shortId(productQuery.data.id)}</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">수정일</p>
+                    <p className="mt-2 text-base font-semibold text-slate-950">{formatDateTime(productQuery.data.updatedAt)}</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-base font-semibold text-slate-950">선택 항목</h3>
+                    <span className="text-xs font-medium text-slate-400">{productQuery.data.selectedOptions.length}개</span>
+                  </div>
+                  {productQuery.data.selectedOptions.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {productQuery.data.selectedOptions.map((selectedOption) => (
+                        <div
+                          key={`${selectedOption.productOptionId}-${selectedOption.productOptionItemId}`}
+                          className="rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                        >
+                          <span className="font-medium text-slate-950">{selectedOption.productOptionName}</span>
+                          <span className="mx-1 text-slate-400">·</span>
+                          <span>{selectedOption.productOptionItemName}</span>
+                          {selectedOption.additionalPrice > 0 ? (
+                            <span className="ml-2 text-xs text-slate-500">+{selectedOption.additionalPrice.toLocaleString()}원</span>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-4 text-sm text-slate-500">선택된 항목이 없습니다.</p>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                  <h3 className="text-base font-semibold text-slate-950">상품 설명</h3>
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">
+                    {productQuery.data.description?.trim() || '등록된 설명이 없습니다.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {canManageDangerousActions ? (
+            <div className="space-y-5">
+              <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명, 수량을 변경할 수 있습니다.
+                </p>
+                <div className="mt-4">
+                  <Link
+                    className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700"
+                    to={`/products/${productId}/edit`}
+                  >
+                    수정 페이지로 이동
+                  </Link>
+                </div>
+              </div>
+              <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                <h3 className="text-base font-semibold text-ink">상태 변경</h3>
+                <div className="mt-4 space-y-3">
+                  <p className="text-sm text-slate-600">현재 상태: {getProductStatusLabel(productQuery.data.status)}</p>
+                  <select
+                    className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
+                    value={nextStatus}
+                    onChange={(event) => setNextStatus(event.target.value as ProductStatus)}
+                  >
+                    {productStatuses.map((status) => (
+                      <option key={status} value={status}>
+                        {getProductStatusLabel(status)}
+                      </option>
+                    ))}
+                  </select>
+                  <TextField label="사유" value={reason} onChange={(event) => setReason(event.target.value)} />
+                  <ErrorMessage error={statusMutation.error} />
+                  <Button type="button" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate()}>
+                    상태 변경
+                  </Button>
+                </div>
+              </div>
+              {canDeleteProduct ? (
+                <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-sm">
+                  <h3 className="text-base font-semibold text-red-700">완전 삭제</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    잘못 등록한 상품을 완전히 삭제합니다. 상품 정보와 이미지, 이력이 함께 제거됩니다.
+                  </p>
+                  <div className="mt-4">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      disabled={deleteMutation.isPending}
+                      onClick={() => deleteMutation.mutate()}
+                    >
+                      완전 삭제
+                    </Button>
+                  </div>
+                  <ErrorMessage error={deleteMutation.error} />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
+        <div className="border-b border-slate-200/70 px-6 py-5">
+          <h3 className="text-base font-semibold text-ink">변경 이력</h3>
+        </div>
+        <table className="w-full min-w-[760px] text-left text-sm">
+          <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+            <tr>
+              <th className="px-4 py-3">이력 번호</th>
+              <th className="px-4 py-3">변경 내용</th>
+              <th className="px-4 py-3">담당자</th>
+              <th className="px-4 py-3">사유</th>
+              <th className="px-4 py-3">일시</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {(historiesQuery.data ?? []).map((history) => (
+              <tr key={history.id}>
+                <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(history.id)}</td>
+                <td className="px-4 py-3">{getProductHistoryTypeLabel(history.type)}</td>
+                <td className="px-4 py-3">{history.actorName}</td>
+                <td className="px-4 py-3 text-slate-600">{history.reason ?? '-'}</td>
+                <td className="px-4 py-3 text-slate-600">{formatDateTime(history.createdAt)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
