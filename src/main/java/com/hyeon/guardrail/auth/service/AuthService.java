@@ -101,25 +101,27 @@ public class AuthService {
         passwordHistory.isTemporary() ? LoginType.TEMP_PASSWORD : LoginType.PASSWORD;
     saveLoginHistory(user.getId(), loginType, LoginResult.SUCCESS, ipAddress);
 
-    UUID sessionId = UUID.randomUUID();
     String accessTokenId = UUID.randomUUID().toString();
-    TokenIssueResponse accessToken =
-        jwtService.issueAccessToken(user.getId(), user.getRole(), sessionId, accessTokenId);
-    TokenIssueResponse refreshToken = jwtService.issueRefreshToken(user.getId(), sessionId);
-    String refreshTokenHash = hashRefreshToken(refreshToken.getToken());
-
     UserSession session =
         new UserSession(
             user.getId(),
             accessTokenId,
-            refreshTokenHash,
+            "",
             request.getDeviceType(),
             ipAddress,
             SessionStatus.ACTIVE,
             LocalDateTime.now(),
-            refreshToken.getExpiredAt());
+            LocalDateTime.now());
 
     UserSession savedSession = sessionRepository.save(session);
+    TokenIssueResponse accessToken =
+        jwtService.issueAccessToken(
+            user.getId(), user.getRole(), savedSession.getId(), accessTokenId);
+    TokenIssueResponse refreshToken =
+        jwtService.issueRefreshToken(user.getId(), savedSession.getId());
+    String refreshTokenHash = hashRefreshToken(refreshToken.getToken());
+    savedSession.refreshToken(
+        accessTokenId, refreshTokenHash, LocalDateTime.now(), refreshToken.getExpiredAt());
 
     return new LoginResponse(
         accessToken.getToken(),
