@@ -95,7 +95,7 @@ public class ProductController {
   }
 
   /** 상품 삭제 */
-  @Operation(summary = "상품 삭제", description = "상품을 soft delete 처리합니다.")
+  @Operation(summary = "상품 삭제", description = "상품을 완전히 삭제합니다.")
   @DeleteMapping("/{productId}")
   public BaseResponseEntity<Void> deleteProduct(@PathVariable UUID productId) {
     productService.deleteProduct(productId);
