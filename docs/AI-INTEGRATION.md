@@ -6,7 +6,7 @@
 정책 범위는 Ollama 연결 방식, Spring AI 공통 클라이언트 구조, 프롬프트 입력값, 실패 처리 기준을 포함한다.
 
 ## 2. 현재 범위
-- AI는 상품 설명 텍스트 초안 생성만 담당한다.
+- AI는 상품 설명 텍스트 생성만 담당한다.
 - 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 등록한다.
 - 현재 범위에서는 업로드된 이미지를 AI 입력으로 사용하지 않는다.
 - 현재 범위에서는 AI가 추가 이미지를 생성하거나 이미지 위에 설명 문구를 합성하지 않는다.
@@ -92,6 +92,7 @@ com.hyeon.guardrail.common.ai
 규칙:
 - `featureKeywords`는 특징 키워드 목록이다.
 - `optionSummary`는 옵션 구조를 설명 생성용 문자열로 요약한 값이다.
+- 현재 기본 프론트 UX에서는 `optionSummary`를 비워서 전달하며, 선택 항목은 AI 입력에 사용하지 않는다.
 - 현재 범위에서는 이미지 URL, 파일 경로, 바이너리 데이터는 입력값에 포함하지 않는다.
 
 ## 7. 프롬프트 구성 기준
@@ -104,10 +105,10 @@ com.hyeon.guardrail.common.ai
 ## 8. 실패 처리 기준
 - AI 호출 실패는 공통 `BaseException` 또는 `AiClientException`으로 감싼다.
 - 모델 연결 실패, 응답 파싱 실패는 구분 가능한 메시지로 기록한다.
-- 실패한 생성 요청은 상품 설명 초안을 저장하지 않고 실패 응답으로 종료한다.
+- 실패한 생성 요청은 상품 설명을 변경하지 않고 실패 응답으로 종료한다.
 
 ## 9. Product 연계 기준
-- `ProductService`는 `AiContentGenerator`를 호출해 상품 설명 초안을 생성한다.
+- `ProductService`는 `AiContentGenerator`를 호출해 상품 설명 문구를 생성한다.
 - AI 응답은 별도 초안 테이블에 저장하지 않고 현재 상품의 `description` 필드에 바로 반영한다.
 - 생성 후 직원이 설명을 검토하고, 최종 승인 책임은 상품 승인 요청 흐름에서 관리한다.
 
@@ -118,7 +119,7 @@ com.hyeon.guardrail.common.ai
   1. `ollama pull gemma3`
   2. `ollama serve`
   3. `application.yml`의 `spring.ai.ollama`, `app.ai.enabled` 설정 확인
-  4. 상품 설명 초안 생성 API 또는 UI에서 설명 생성 테스트
+  4. 상품 설명 생성 API 또는 UI에서 설명 생성 테스트
 
 ## 11. 테스트 기준
 - 외부 AI API를 직접 호출하는 테스트는 기본 검증 흐름에 포함하지 않는다.

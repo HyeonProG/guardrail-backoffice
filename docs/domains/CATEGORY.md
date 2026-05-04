@@ -74,7 +74,8 @@
 - response: `BaseResponseEntity<PageResponse<CategoryResponse>>`
 - 규칙:
   - 목록 조회는 `deleted = false` 기준으로만 조회한다.
-  - `parentId = null` 조건은 최상위 카테고리 조회를 의미한다.
+  - `parentId`가 request에 포함되면 해당 부모 기준으로 필터링한다.
+  - `parentId`가 request에 없으면 전체 카테고리 목록을 조회한다.
   - `status`는 `ACTIVE`, `INACTIVE`만 허용한다.
 
 ### 카테고리 상세 조회

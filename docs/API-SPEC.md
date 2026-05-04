@@ -335,7 +335,8 @@ response result:
 - 상품명은 등록 화면에서 직접 입력한다.
 - 카테고리는 사전 생성된 목록에서 선택한다.
 - 옵션은 별도 상품 옵션 관리 메뉴에서 카테고리별로 사전 생성된 값을 화면에서 선택해 사용한다.
-- 옵션 선택값은 현재 상품 생성 API request에 직접 포함하지 않고, 선택된 카테고리 기준 화면 데이터와 설명 생성 입력값에 활용한다.
+- 선택한 옵션값 ID 목록은 `selectedOptionItemIds`로 request body에 포함한다.
+- 서버는 `selectedOptionItemIds`를 `ProductSelectedOption` 스냅샷으로 저장한다.
 - `description`은 선택 값이다.
 - 상품 생성은 최종 등록이 아니라 직원 작성 중 초안 저장 단계다.
 
@@ -379,6 +380,7 @@ request body:
 - `name`
 - `description`
 - `quantity`
+- `selectedOptionItemIds`
 - `actorId`
 
 response result:
@@ -386,6 +388,7 @@ response result:
 
 규칙:
 - 기본 정보 수정은 `categoryId`, `name`, `description`, `quantity`만 처리한다.
+- `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
 - 상태 변경은 별도 API에서 처리한다.
 - 수정 시 `UPDATED` 이력을 저장한다.
 - 카테고리는 `deleted = false` 상태여야 한다.
@@ -420,7 +423,9 @@ response result:
 - `null`
 
 규칙:
-- soft delete로 처리한다.
+- hard delete로 처리한다.
+- `DRAFT`, `REJECTED` 상태에서만 삭제할 수 있다.
+- 삭제 시 상품 이력, 선택 항목 스냅샷, 상품 대상 파일 메타데이터를 함께 정리한다.
 
 ### 상품 이력 목록 조회 API
 ```http
@@ -463,7 +468,7 @@ response result:
 규칙:
 - 상품 설명은 직접 입력하거나 AI 초안 생성으로 즉시 현재 `description` 필드에 반영할 수 있다.
 - AI는 상품명, 카테고리명, 특징 키워드를 입력으로 사용한다.
-- 현재 구현에서는 옵션값은 AI 요청 입력으로 사용하지 않는다.
+- 현재 구현과 기본 UI 기준에서는 옵션값은 AI 요청 입력으로 사용하지 않는다.
 - 이미지 데이터는 설명 생성 request에 포함하지 않는다.
 - 별도 설명 초안 테이블은 사용하지 않는다.
 
