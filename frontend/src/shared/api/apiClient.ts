@@ -34,13 +34,7 @@ apiClient.interceptors.response.use(
     const isLogoutRequest = requestUrl.includes('/api/v1/auth/logout');
     const skipAuthRedirect = Boolean((error.config as ApiRequestConfig | undefined)?.skipAuthRedirect);
 
-    if (
-      status === 401 &&
-      !isLoginRequest &&
-      !isLogoutRequest &&
-      !skipAuthRedirect &&
-      authStorage.isAccessTokenExpired()
-    ) {
+    if (status === 401 && !isLoginRequest && !isLogoutRequest && !skipAuthRedirect) {
       authStorage.clear();
       const nextUrl = `${window.location.origin}/login?reason=session-expired`;
 

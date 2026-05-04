@@ -40,7 +40,8 @@ public class JwtService {
   /** 액세스 토큰 발급 */
   public TokenIssueResponse issueAccessToken(
       UUID userId, UserRole role, UUID sessionId, String accessTokenId) {
-    LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(accessTokenExpirationSeconds);
+    LocalDateTime now = LocalDateTime.now(ZONE_ID);
+    LocalDateTime expiredAt = now.plusSeconds(accessTokenExpirationSeconds);
     String token =
         Jwts.builder()
             .subject(userId.toString())
@@ -48,7 +49,7 @@ public class JwtService {
             .claim(ROLE_CLAIM, role.name())
             .claim(SESSION_ID_CLAIM, sessionId.toString())
             .claim(ACCESS_TOKEN_ID_CLAIM, accessTokenId)
-            .issuedAt(toDate(LocalDateTime.now()))
+            .issuedAt(toDate(now))
             .expiration(toDate(expiredAt))
             .signWith(secretKey)
             .compact();
@@ -58,13 +59,14 @@ public class JwtService {
 
   /** 리프레시 토큰 발급 */
   public TokenIssueResponse issueRefreshToken(UUID userId, UUID sessionId) {
-    LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(refreshTokenExpirationSeconds);
+    LocalDateTime now = LocalDateTime.now(ZONE_ID);
+    LocalDateTime expiredAt = now.plusSeconds(refreshTokenExpirationSeconds);
     String token =
         Jwts.builder()
             .subject(userId.toString())
             .claim(USER_ID_CLAIM, userId.toString())
             .claim(SESSION_ID_CLAIM, sessionId.toString())
-            .issuedAt(toDate(LocalDateTime.now()))
+            .issuedAt(toDate(now))
             .expiration(toDate(expiredAt))
             .signWith(secretKey)
             .compact();

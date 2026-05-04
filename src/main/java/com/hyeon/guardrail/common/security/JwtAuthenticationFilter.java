@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /** Bearer JWT를 검증하고 SecurityContext에 로그인 사용자 정보를 적재한다. */
-@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -42,14 +40,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증 토큰이 필요합니다.");
     }
 
-    String token = normalizeToken(authorizationHeader.substring(7));
+    String token = authorizationHeader.substring(7);
 
     try {
-      log.debug(
-          "JWT authenticate [{} {}] segments={}",
-          request.getMethod(),
-          request.getRequestURI(),
-          token.split("\\.").length);
       Claims claims = jwtService.parseAccessToken(token);
       UUID userId = UUID.fromString(String.valueOf(claims.get("userId")));
       UserRole role = UserRole.valueOf(String.valueOf(claims.get("role")));
@@ -61,29 +54,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(authentication);
       filterChain.doFilter(request, response);
     } catch (JwtException | IllegalArgumentException exception) {
-      log.error(
-          "JWT parse failed [{} {}] type={} segments={} startsWithEyJ={} startsWithBearer={}",
-          request.getMethod(),
-          request.getRequestURI(),
-          exception.getClass().getSimpleName(),
-          token.split("\\.").length,
-          token.startsWith("eyJ"),
-          token.startsWith("Bearer "));
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "유효하지 않은 인증 토큰입니다.");
     } finally {
       SecurityContextHolder.clearContext();
     }
-  }
-
-  private String normalizeToken(String token) {
-    String normalized = token.trim();
-
-    if ((normalized.startsWith("\"") && normalized.endsWith("\""))
-        || (normalized.startsWith("'") && normalized.endsWith("'"))) {
-      normalized = normalized.substring(1, normalized.length() - 1).trim();
-    }
-
-    return normalized;
   }
 
   @Override
