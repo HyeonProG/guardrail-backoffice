@@ -45,7 +45,7 @@ public class FileAttachmentController {
   }
 
   /** 파일 업로드 */
-  @Operation(summary = "파일 업로드", description = "실제 파일 업로드와 파일 첨부 메타데이터 생성을 함께 처리합니다.")
+  @Operation(summary = "파일 업로드", description = "S3 업로드와 파일 첨부 메타데이터 생성을 함께 처리합니다.")
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public BaseResponseEntity<FileAttachmentResponse> uploadFileAttachment(
       @RequestParam FileTargetType targetType,
@@ -85,7 +85,7 @@ public class FileAttachmentController {
   }
 
   /** 파일 첨부 삭제 */
-  @Operation(summary = "파일 첨부 삭제", description = "파일 첨부를 soft delete 처리합니다.")
+  @Operation(summary = "파일 첨부 삭제", description = "파일 첨부를 숨김 처리합니다.")
   @DeleteMapping("/{fileAttachmentId}")
   public BaseResponseEntity<Void> deleteFileAttachment(@PathVariable UUID fileAttachmentId) {
     fileAttachmentService.deleteFileAttachment(fileAttachmentId);

@@ -44,8 +44,14 @@ app:
       - http://localhost:5173
   upload:
     max-file-size-mb: 10
-    storage-root-path: uploads/products
-    public-url-prefix: /uploads/products
     allowed-content-types: image/jpeg,image/png,image/webp
+  storage:
+    s3:
+      bucket: guardrail-test-assets
+      region: ap-northeast-2
+      endpoint:
+      access-key:
+      secret-key:
+      public-base-url: https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com
   ai:
     enabled: true

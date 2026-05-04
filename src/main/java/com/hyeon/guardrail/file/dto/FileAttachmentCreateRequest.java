@@ -36,7 +36,7 @@ public class FileAttachmentCreateRequest {
   private String originalFileName;
 
   @NotBlank
-  @Schema(description = "저장 위치", example = "/uploads/products/product-main.jpg")
+  @Schema(description = "저장 위치", example = "https://cdn.guardrail.com/products/product-main.jpg")
   private String filePath;
 
   @Min(1)

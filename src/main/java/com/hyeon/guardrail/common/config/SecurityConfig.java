@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -48,11 +49,14 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
+                    .requestMatchers(HttpMethod.OPTIONS, "/**")
+                    .permitAll()
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
                     .permitAll()
                     .requestMatchers("/uploads/**")
                     .permitAll()
-                    .requestMatchers("/api/v1/auth/login", "/api/v1/auth/token/refresh")
+                    .requestMatchers(
+                        "/api/v1/auth/login", "/api/v1/auth/token/refresh", "/api/v1/auth/logout")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

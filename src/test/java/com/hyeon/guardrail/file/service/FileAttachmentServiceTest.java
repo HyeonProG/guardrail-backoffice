@@ -16,6 +16,7 @@ import com.hyeon.guardrail.file.dto.FileAttachmentCreateRequest;
 import com.hyeon.guardrail.file.dto.FileAttachmentUpdateRequest;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepositoryQuery;
+import com.hyeon.guardrail.file.support.StoredFileResult;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /** 파일 첨부 서비스 단위 테스트 */
@@ -34,6 +36,7 @@ class FileAttachmentServiceTest {
   @Mock private FileAttachmentRepository fileAttachmentRepository;
   @Mock private FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
   @Mock private CurrentUserService currentUserService;
+  @Mock private FileStorageService fileStorageService;
 
   @InjectMocks private FileAttachmentService fileAttachmentService;
 
@@ -41,8 +44,10 @@ class FileAttachmentServiceTest {
   @BeforeEach
   void setUp() {
     ReflectionTestUtils.setField(fileAttachmentService, "maxFileSizeMb", 10L);
-    ReflectionTestUtils.setField(fileAttachmentService, "storageRootPath", "uploads/products");
-    ReflectionTestUtils.setField(fileAttachmentService, "publicUrlPrefix", "/uploads/products");
+    ReflectionTestUtils.setField(
+        fileAttachmentService,
+        "publicBaseUrl",
+        "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com");
     ReflectionTestUtils.setField(
         fileAttachmentService,
         "allowedContentTypes",
@@ -59,7 +64,7 @@ class FileAttachmentServiceTest {
             targetId,
             "product-main.jpg",
             "main.jpg",
-            "/uploads/products/product-main.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
             1024L,
             "image/jpeg",
             1);
@@ -82,7 +87,7 @@ class FileAttachmentServiceTest {
             UUID.randomUUID(),
             "product-main.jpg",
             "main.jpg",
-            "/uploads/products/product-main.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
             11L * 1024L * 1024L,
             "image/jpeg",
             1);
@@ -101,7 +106,7 @@ class FileAttachmentServiceTest {
             UUID.randomUUID(),
             "product-main.gif",
             "main.gif",
-            "/uploads/products/product-main.gif",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.gif",
             1024L,
             "image/gif",
             1);
@@ -120,7 +125,7 @@ class FileAttachmentServiceTest {
             UUID.randomUUID(),
             "product-main.jpg",
             "main.jpg",
-            "/tmp/product-main.jpg",
+            "https://example.com/product-main.jpg",
             1024L,
             "image/jpeg",
             1);
@@ -140,7 +145,7 @@ class FileAttachmentServiceTest {
             UUID.randomUUID(),
             "product-main.jpg",
             "main.jpg",
-            "/uploads/products/product-main.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
             1024L,
             "image/jpeg",
             1,
@@ -166,7 +171,7 @@ class FileAttachmentServiceTest {
             targetId,
             "product-sub.jpg",
             "sub.jpg",
-            "/uploads/products/product-sub.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-sub.jpg",
             1024L,
             "image/jpeg",
             2,
@@ -196,7 +201,7 @@ class FileAttachmentServiceTest {
             targetId,
             "product-sub.jpg",
             "sub.jpg",
-            "/uploads/products/product-sub.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-sub.jpg",
             1024L,
             "image/jpeg",
             2,
@@ -205,7 +210,7 @@ class FileAttachmentServiceTest {
         new FileAttachmentUpdateRequest(
             "product-main.jpg",
             "main.jpg",
-            "/uploads/products/product-main.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
             1024L,
             "image/jpeg",
             1);
@@ -231,7 +236,7 @@ class FileAttachmentServiceTest {
             UUID.randomUUID(),
             "product-main.jpg",
             "main.jpg",
-            "/uploads/products/product-main.jpg",
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
             1024L,
             "image/jpeg",
             1,
@@ -243,5 +248,32 @@ class FileAttachmentServiceTest {
     fileAttachmentService.deleteFileAttachment(fileAttachmentId);
 
     assertThat(fileAttachment.isDeleted()).isTrue();
+  }
+
+  /** 업로드는 S3 저장 결과를 파일 첨부 메타데이터로 저장 */
+  @Test
+  void uploadFileAttachmentStoresUploadedFileMetadata() {
+    UUID targetId = UUID.randomUUID();
+    MockMultipartFile file =
+        new MockMultipartFile("file", "main.jpg", "image/jpeg", "sample".getBytes());
+    when(fileStorageService.upload(FileTargetType.PRODUCT, targetId, file))
+        .thenReturn(
+            new StoredFileResult(
+                "stored-main.jpg",
+                "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/%s/stored-main.jpg"
+                    .formatted(targetId),
+                "products/%s/stored-main.jpg".formatted(targetId)));
+    when(fileAttachmentRepository.save(any(FileAttachment.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    var response =
+        fileAttachmentService.uploadFileAttachment(FileTargetType.PRODUCT, targetId, file, 1);
+
+    assertThat(response.getFileName()).isEqualTo("stored-main.jpg");
+    assertThat(response.getFilePath())
+        .isEqualTo(
+            "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/%s/stored-main.jpg"
+                .formatted(targetId));
+    verify(fileStorageService).upload(FileTargetType.PRODUCT, targetId, file);
   }
 }

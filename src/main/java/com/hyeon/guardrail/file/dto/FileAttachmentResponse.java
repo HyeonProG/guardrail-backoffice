@@ -30,7 +30,7 @@ public class FileAttachmentResponse {
   @Schema(description = "원본 파일명", example = "main.jpg")
   private String originalFileName;
 
-  @Schema(description = "저장 위치", example = "/uploads/products/product-main.jpg")
+  @Schema(description = "저장 위치", example = "https://cdn.guardrail.com/products/product-main.jpg")
   private String filePath;
 
   @Schema(description = "파일 크기", example = "1048576")

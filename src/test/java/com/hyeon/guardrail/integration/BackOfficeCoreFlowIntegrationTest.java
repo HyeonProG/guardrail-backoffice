@@ -125,7 +125,7 @@ public class BackOfficeCoreFlowIntegrationTest {
                 fileTargetId,
                 "product-main.jpg",
                 "main.jpg",
-                "/uploads/products/product-main.jpg",
+                "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main.jpg",
                 1024L,
                 "image/jpeg",
                 1));
@@ -145,7 +145,7 @@ public class BackOfficeCoreFlowIntegrationTest {
                         fileTargetId,
                         "product-main-copy.jpg",
                         "main-copy.jpg",
-                        "/uploads/products/product-main-copy.jpg",
+                        "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/product-main-copy.jpg",
                         1024L,
                         "image/jpeg",
                         1)))

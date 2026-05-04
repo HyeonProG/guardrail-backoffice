@@ -11,11 +11,7 @@ import com.hyeon.guardrail.file.dto.FileAttachmentResponse;
 import com.hyeon.guardrail.file.dto.FileAttachmentUpdateRequest;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepositoryQuery;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.hyeon.guardrail.file.support.StoredFileResult;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -34,15 +30,13 @@ public class FileAttachmentService {
   private final FileAttachmentRepository fileAttachmentRepository;
   private final FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
   private final CurrentUserService currentUserService;
+  private final FileStorageService fileStorageService;
 
   @Value("${app.upload.max-file-size-mb}")
   private long maxFileSizeMb;
 
-  @Value("${app.upload.storage-root-path}")
-  private String storageRootPath;
-
-  @Value("${app.upload.public-url-prefix}")
-  private String publicUrlPrefix;
+  @Value("${app.storage.s3.public-base-url}")
+  private String publicBaseUrl;
 
   @Value("#{'${app.upload.allowed-content-types}'.split(',')}")
   private List<String> allowedContentTypes;
@@ -78,34 +72,19 @@ public class FileAttachmentService {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "업로드할 파일이 필요합니다.");
     }
 
+    validateFileMetadata(file.getSize(), file.getContentType());
+    validateSortOrderNotDuplicated(targetType, targetId, sortOrder);
+    StoredFileResult storedFile = fileStorageService.upload(targetType, targetId, file);
     String originalFileName =
         file.getOriginalFilename() == null ? "upload" : file.getOriginalFilename();
-    String sanitizedOriginalName = originalFileName.replaceAll("\\s+", "-");
-    String extension = extractExtension(sanitizedOriginalName);
-    String generatedFileName = UUID.randomUUID() + extension;
-    String filePath = buildPublicFilePath(targetId, generatedFileName);
-
-    validateFileMetadata(file.getSize(), file.getContentType());
-    validateStoragePath(filePath);
-    validateSortOrderNotDuplicated(targetType, targetId, sortOrder);
-
-    Path absoluteDirectory = resolveStorageDirectory(targetId);
-    Path absoluteFilePath = absoluteDirectory.resolve(generatedFileName).normalize();
-
-    try {
-      Files.createDirectories(absoluteDirectory);
-      file.transferTo(absoluteFilePath);
-    } catch (IOException exception) {
-      throw new UncheckedIOException("파일을 저장하는 중 오류가 발생했습니다.", exception);
-    }
 
     FileAttachment fileAttachment =
         new FileAttachment(
             targetType,
             targetId,
-            generatedFileName,
+            storedFile.getStoredFileName(),
             originalFileName,
-            filePath,
+            storedFile.getFilePath(),
             file.getSize(),
             file.getContentType(),
             sortOrder,
@@ -190,24 +169,9 @@ public class FileAttachmentService {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "저장 위치는 필수입니다.");
     }
 
-    if (!filePath.startsWith(publicUrlPrefix)) {
+    if (!filePath.startsWith(publicBaseUrl)) {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "허용되지 않은 저장 위치입니다.");
     }
-  }
-
-  private Path resolveStorageDirectory(UUID targetId) {
-    return Paths.get(storageRootPath).toAbsolutePath().normalize().resolve(targetId.toString());
-  }
-
-  private String buildPublicFilePath(UUID targetId, String fileName) {
-    return "%s/%s/%s".formatted(publicUrlPrefix, targetId, fileName);
-  }
-
-  private String extractExtension(String fileName) {
-    if (fileName == null || !fileName.contains(".")) {
-      return "";
-    }
-    return "." + fileName.substring(fileName.lastIndexOf('.') + 1);
   }
 
   private void validateSortOrderNotDuplicated(

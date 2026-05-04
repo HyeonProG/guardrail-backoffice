@@ -25,7 +25,9 @@ public class FileAttachmentUpdateRequest {
   private String originalFileName;
 
   @NotBlank
-  @Schema(description = "저장 위치", example = "/uploads/products/product-main-updated.jpg")
+  @Schema(
+      description = "저장 위치",
+      example = "https://cdn.guardrail.com/products/product-main-updated.jpg")
   private String filePath;
 
   @Min(1)

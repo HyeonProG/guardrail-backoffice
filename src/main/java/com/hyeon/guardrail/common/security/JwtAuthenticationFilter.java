@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,11 +63,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
     String path = request.getRequestURI();
-    return path.startsWith("/swagger-ui")
+    return HttpMethod.OPTIONS.matches(request.getMethod())
+        || path.startsWith("/swagger-ui")
         || path.startsWith("/api-docs")
         || path.startsWith("/uploads/")
         || "/swagger-ui.html".equals(path)
         || "/api/v1/auth/login".equals(path)
+        || "/api/v1/auth/logout".equals(path)
         || "/api/v1/auth/token/refresh".equals(path);
   }
 }
