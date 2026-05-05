@@ -10,4 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Render API docs
-        run: curl -fsS https://guardrail-backoffice.onrender.com/api-docs > /dev/null
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsS --max-time 30 https://guardrail-backoffice.onrender.com/api-docs > /dev/null; then
+              exit 0
+            fi
+            sleep 20
+          done
+          exit 1
