@@ -24,9 +24,6 @@ public class ProductSelectedOptionResponse {
   @Schema(description = "옵션값명")
   private String productOptionItemName;
 
-  @Schema(description = "추가 금액")
-  private int additionalPrice;
-
   @Schema(description = "정렬 순서")
   private int sortOrder;
 
@@ -37,7 +34,6 @@ public class ProductSelectedOptionResponse {
         productSelectedOption.getProductOptionName(),
         productSelectedOption.getProductOptionItemId(),
         productSelectedOption.getProductOptionItemName(),
-        productSelectedOption.getAdditionalPrice(),
         productSelectedOption.getSortOrder());
   }
 }

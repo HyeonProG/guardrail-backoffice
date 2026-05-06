@@ -354,7 +354,6 @@ export function ProductCreatePage() {
                                     }}
                                   />
                                   <span>{item.name}</span>
-                                  {item.additionalPrice > 0 ? <span>(+{item.additionalPrice.toLocaleString()}원)</span> : null}
                                 </label>
                               );
                             })}

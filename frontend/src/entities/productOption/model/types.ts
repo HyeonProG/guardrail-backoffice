@@ -4,7 +4,6 @@ export type ProductOptionItem = {
   id: string;
   productOptionId: string;
   name: string;
-  additionalPrice: number;
   sortOrder: number;
   status: ProductOptionStatus;
   createdAt: string;

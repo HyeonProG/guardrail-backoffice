@@ -225,9 +225,6 @@ export function ProductDetailPage() {
                           <span className="font-medium text-slate-950">{selectedOption.productOptionName}</span>
                           <span className="mx-1 text-slate-400">·</span>
                           <span>{selectedOption.productOptionItemName}</span>
-                          {selectedOption.additionalPrice > 0 ? (
-                            <span className="ml-2 text-xs text-slate-500">+{selectedOption.additionalPrice.toLocaleString()}원</span>
-                          ) : null}
                         </div>
                       ))}
                     </div>

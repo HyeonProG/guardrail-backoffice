@@ -26,9 +26,6 @@ public class ProductOptionItem extends SoftDeleteEntity {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @Column(name = "additional_price", nullable = false)
-  private int additionalPrice;
-
   @Column(name = "sort_order", nullable = false)
   private int sortOrder;
 
@@ -37,9 +34,8 @@ public class ProductOptionItem extends SoftDeleteEntity {
   private ProductOptionStatus status;
 
   /** 옵션값 기본 정보를 수정 */
-  public void updateBasicInfo(String name, int additionalPrice) {
+  public void updateBasicInfo(String name) {
     this.name = name;
-    this.additionalPrice = additionalPrice;
   }
 
   /** 옵션값 활성화 */

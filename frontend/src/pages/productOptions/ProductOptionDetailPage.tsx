@@ -51,11 +51,11 @@ export function ProductOptionDetailPage() {
   });
   const createItemForm = useForm<ProductOptionItemFormValues>({
     resolver: zodResolver(productOptionItemSchema),
-    defaultValues: { name: '', additionalPrice: 0 }
+    defaultValues: { name: '' }
   });
   const editItemForm = useForm<ProductOptionItemFormValues>({
     resolver: zodResolver(productOptionItemSchema),
-    values: { name: editingItem?.name ?? '', additionalPrice: editingItem?.additionalPrice ?? 0 }
+    values: { name: editingItem?.name ?? '' }
   });
 
   const sortedItems = useMemo(
@@ -91,7 +91,7 @@ export function ProductOptionDetailPage() {
       createProductOptionItem(categoryId, productOptionId, { ...values, status: 'ACTIVE', actorId: requireActorId() }),
     onSuccess: () => {
       setCreateItemModalOpen(false);
-      createItemForm.reset({ name: '', additionalPrice: 0 });
+      createItemForm.reset({ name: '' });
       refresh();
     }
   });
@@ -179,7 +179,6 @@ export function ProductOptionDetailPage() {
                 <tr>
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">선택 항목 이름</th>
-                  <th className="px-4 py-3">추가 금액</th>
                   {currentRole !== 'STAFF' ? <th className="px-4 py-3">상태</th> : null}
                   <th className="px-4 py-3">수정일</th>
                   <th className="px-4 py-3">액션</th>
@@ -190,7 +189,6 @@ export function ProductOptionDetailPage() {
                   <tr key={item.id}>
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(item.id)}</td>
                     <td className="px-4 py-3 font-medium text-ink">{item.name}</td>
-                    <td className="px-4 py-3">{item.additionalPrice.toLocaleString()}원</td>
                     {currentRole !== 'STAFF' ? <td className="px-4 py-3">{item.status}</td> : null}
                     <td className="px-4 py-3 text-slate-600">{formatDateTime(item.updatedAt)}</td>
                     <td className="space-x-2 px-4 py-3">
@@ -253,18 +251,11 @@ export function ProductOptionDetailPage() {
           description="현재 옵션에 연결할 선택 항목을 추가합니다."
           onClose={() => {
             setCreateItemModalOpen(false);
-            createItemForm.reset({ name: '', additionalPrice: 0 });
+            createItemForm.reset({ name: '' });
           }}
         >
           <form className="space-y-4" onSubmit={createItemForm.handleSubmit((values) => createItemMutation.mutate(values))}>
             <TextField label="선택 항목 이름" error={createItemForm.formState.errors.name?.message} {...createItemForm.register('name')} />
-            <TextField
-              label="추가 금액"
-              type="number"
-              min={0}
-              error={createItemForm.formState.errors.additionalPrice?.message}
-              {...createItemForm.register('additionalPrice')}
-            />
             <p className="rounded-md border border-dashed border-border bg-slate-50 px-3 py-2 text-xs text-slate-500">
               정렬 순서는 생성 시 자동으로 부여됩니다.
             </p>
@@ -285,7 +276,7 @@ export function ProductOptionDetailPage() {
         <Modal
           open={editItemModalOpen}
           title="선택 항목 수정"
-          description="선택 항목 이름과 추가 금액을 수정합니다."
+          description="선택 항목 이름을 수정합니다."
           onClose={() => {
             setEditItemModalOpen(false);
             setEditingItem(null);
@@ -293,13 +284,6 @@ export function ProductOptionDetailPage() {
         >
           <form className="space-y-4" onSubmit={editItemForm.handleSubmit((values) => updateItemMutation.mutate(values))}>
             <TextField label="선택 항목 이름" error={editItemForm.formState.errors.name?.message} {...editItemForm.register('name')} />
-            <TextField
-              label="추가 금액"
-              type="number"
-              min={0}
-              error={editItemForm.formState.errors.additionalPrice?.message}
-              {...editItemForm.register('additionalPrice')}
-            />
             <ErrorMessage error={updateItemMutation.error} />
             <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
               <Button

@@ -106,8 +106,7 @@ class ProductOptionServiceTest {
     UUID categoryId = UUID.randomUUID();
     UUID productOptionId = UUID.randomUUID();
     ProductOptionItemCreateRequest request =
-        new ProductOptionItemCreateRequest(
-            "블랙", 1000, ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionItemCreateRequest("블랙", ProductOptionStatus.ACTIVE, UUID.randomUUID());
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -125,27 +124,6 @@ class ProductOptionServiceTest {
     verify(productOptionItemRepository, never()).save(any(ProductOptionItem.class));
   }
 
-  /** 추가 금액은 0 이상만 허용한다. */
-  @Test
-  void createProductOptionItemRejectsNegativeAdditionalPrice() {
-    UUID categoryId = UUID.randomUUID();
-    UUID productOptionId = UUID.randomUUID();
-    ProductOptionItemCreateRequest request =
-        new ProductOptionItemCreateRequest("블랙", -1, ProductOptionStatus.ACTIVE, UUID.randomUUID());
-
-    when(categoryRepositoryQuery.findById(categoryId))
-        .thenReturn(Optional.of(category(categoryId)));
-    when(productOptionRepositoryQuery.findById(categoryId, productOptionId))
-        .thenReturn(
-            Optional.of(new ProductOption(categoryId, "색상", 1, ProductOptionStatus.ACTIVE)));
-
-    assertThatThrownBy(
-            () ->
-                productOptionService.createProductOptionItem(categoryId, productOptionId, request))
-        .isInstanceOf(BaseException.class);
-    verify(productOptionItemRepository, never()).save(any(ProductOptionItem.class));
-  }
-
   /** 옵션값 상태 변경은 기본 정보 수정과 분리되어 상태만 변경한다. */
   @Test
   void updateProductOptionItemStatusChangesOnlyStatus() {
@@ -155,7 +133,7 @@ class ProductOptionServiceTest {
     ProductOption productOption =
         new ProductOption(categoryId, "색상", 1, ProductOptionStatus.ACTIVE);
     ProductOptionItem productOptionItem =
-        new ProductOptionItem(productOptionId, "블랙", 1000, 1, ProductOptionStatus.ACTIVE);
+        new ProductOptionItem(productOptionId, "블랙", 1, ProductOptionStatus.ACTIVE);
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -174,7 +152,6 @@ class ProductOptionServiceTest {
 
     assertThat(response.getStatus()).isEqualTo(ProductOptionStatus.INACTIVE);
     assertThat(response.getName()).isEqualTo("블랙");
-    assertThat(response.getAdditionalPrice()).isEqualTo(1000);
   }
 
   /** 옵션값 기본 정보 수정은 같은 옵션 그룹 안에서 자기 자신을 제외하고 이름 중복만 검사한다. */
@@ -186,7 +163,7 @@ class ProductOptionServiceTest {
     ProductOption productOption =
         new ProductOption(categoryId, "색상", 1, ProductOptionStatus.ACTIVE);
     ProductOptionItem productOptionItem =
-        new ProductOptionItem(productOptionId, "블랙", 1000, 1, ProductOptionStatus.ACTIVE);
+        new ProductOptionItem(productOptionId, "블랙", 1, ProductOptionStatus.ACTIVE);
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -203,10 +180,9 @@ class ProductOptionServiceTest {
             categoryId,
             productOptionId,
             productOptionItemId,
-            new ProductOptionItemUpdateRequest("블랙", 1000, UUID.randomUUID()));
+            new ProductOptionItemUpdateRequest("블랙", UUID.randomUUID()));
 
     assertThat(response.getName()).isEqualTo("블랙");
-    assertThat(response.getAdditionalPrice()).isEqualTo(1000);
     assertThat(response.getSortOrder()).isEqualTo(1);
     verify(productOptionItemRepositoryQuery)
         .existsByProductOptionIdAndName(productOptionId, "블랙", productOptionItemId);

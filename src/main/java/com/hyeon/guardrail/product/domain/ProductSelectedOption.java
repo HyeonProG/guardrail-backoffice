@@ -33,9 +33,6 @@ public class ProductSelectedOption extends BaseEntity {
   @Column(name = "product_option_item_name", nullable = false)
   private String productOptionItemName;
 
-  @Column(name = "additional_price", nullable = false)
-  private int additionalPrice;
-
   @Column(name = "sort_order", nullable = false)
   private int sortOrder;
 }

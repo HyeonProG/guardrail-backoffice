@@ -10,7 +10,6 @@ export type ProductOptionPayload = {
 
 export type ProductOptionItemPayload = {
   name: string;
-  additionalPrice: number;
   status: ProductOptionStatus;
   actorId: string;
 };

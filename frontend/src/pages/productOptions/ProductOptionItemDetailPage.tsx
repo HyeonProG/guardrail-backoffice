@@ -58,10 +58,6 @@ export function ProductOptionItemDetailPage() {
               <p className="text-xs font-medium text-slate-500">선택 항목 ID</p>
               <p className="mt-2 font-mono text-sm text-slate-700">{shortId(item.id)}</p>
             </div>
-            <div className="rounded-lg border border-border bg-slate-50 p-4">
-              <p className="text-xs font-medium text-slate-500">추가 금액</p>
-              <p className="mt-2 text-base font-semibold text-slate-950">{item.additionalPrice.toLocaleString()}원</p>
-            </div>
             {currentRole !== 'STAFF' ? (
               <div className="rounded-lg border border-border bg-slate-50 p-4">
                 <p className="text-xs font-medium text-slate-500">상태</p>

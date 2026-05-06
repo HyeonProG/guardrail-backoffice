@@ -365,7 +365,6 @@ public class ProductService {
                       option.getName(),
                       item.getId(),
                       item.getName(),
-                      item.getAdditionalPrice(),
                       item.getSortOrder());
                 })
             .toList();

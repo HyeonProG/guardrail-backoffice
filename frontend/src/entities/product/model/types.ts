@@ -5,7 +5,6 @@ export type ProductSelectedOption = {
   productOptionName: string;
   productOptionItemId: string;
   productOptionItemName: string;
-  additionalPrice: number;
   sortOrder: number;
 };
 

@@ -123,18 +123,13 @@ public class ProductOptionService {
     currentUserService.requireAdminOrOperator();
     validateCategoryExists(categoryId);
     findProductOption(categoryId, productOptionId);
-    validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(productOptionId, request.getName(), null);
     int nextSortOrder =
         productOptionItemRepositoryQuery.findNextSortOrderByProductOptionId(productOptionId);
 
     ProductOptionItem productOptionItem =
         new ProductOptionItem(
-            productOptionId,
-            request.getName(),
-            request.getAdditionalPrice(),
-            nextSortOrder,
-            request.getStatus());
+            productOptionId, request.getName(), nextSortOrder, request.getStatus());
 
     return ProductOptionItemResponse.from(productOptionItemRepository.save(productOptionItem));
   }
@@ -164,10 +159,9 @@ public class ProductOptionService {
     findProductOption(categoryId, productOptionId);
     ProductOptionItem productOptionItem =
         findProductOptionItem(productOptionId, productOptionItemId);
-    validateAdditionalPrice(request.getAdditionalPrice());
     validateProductOptionItemNameNotDuplicated(
         productOptionId, request.getName(), productOptionItemId);
-    productOptionItem.updateBasicInfo(request.getName(), request.getAdditionalPrice());
+    productOptionItem.updateBasicInfo(request.getName());
 
     return ProductOptionItemResponse.from(productOptionItem);
   }
@@ -230,12 +224,6 @@ public class ProductOptionService {
     if (productOptionItemRepositoryQuery.existsByProductOptionIdAndName(
         productOptionId, name, excludedId)) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 옵션값명입니다.");
-    }
-  }
-
-  private void validateAdditionalPrice(int additionalPrice) {
-    if (additionalPrice < 0) {
-      throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "추가 금액은 0 이상이어야 합니다.");
     }
   }
 

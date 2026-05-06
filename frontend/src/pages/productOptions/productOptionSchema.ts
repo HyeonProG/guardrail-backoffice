@@ -5,8 +5,7 @@ export const productOptionSchema = z.object({
 });
 
 export const productOptionItemSchema = z.object({
-  name: z.string().min(1, '선택 항목 이름을 입력해 주세요.'),
-  additionalPrice: z.coerce.number().int().min(0, '추가 금액은 0 이상이어야 합니다.')
+  name: z.string().min(1, '선택 항목 이름을 입력해 주세요.')
 });
 
 export type ProductOptionFormValues = z.infer<typeof productOptionSchema>;

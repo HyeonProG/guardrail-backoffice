@@ -29,7 +29,6 @@
 - 옵션 선택값 UUID PK
 - 옵션 그룹 ID
 - 옵션값명
-- 추가 금액
 - 정렬 순서
 - 옵션값 상태
 - 생성일시, 수정일시, 삭제 여부
@@ -65,7 +64,6 @@
 | `id` | UUID PK |
 | `productOptionId` | 옵션 그룹 UUID |
 | `name` | 옵션값명 |
-| `additionalPrice` | 추가 금액 |
 | `sortOrder` | 옵션값 정렬 순서 |
 | `status` | 옵션값 상태 |
 | `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
@@ -87,7 +85,6 @@
 - `INACTIVE`는 운영상 비활성 상태를 의미하고, `deleted = true`는 soft delete 상태를 의미한다.
 - 옵션 그룹 기본 정보 수정과 상태 변경은 별도 유스케이스로 분리한다.
 - 옵션값 기본 정보 수정과 상태 변경은 별도 유스케이스로 분리한다.
-- `additionalPrice`는 0 이상만 허용한다.
 - `ACTIVE` 상태 옵션과 옵션값만 상품 등록/상품 설명 생성 화면에서 선택 대상으로 사용한다.
 - 상품은 카테고리에 연결된 옵션 마스터를 직접 영속 연결하지 않는다.
 - 현재 범위에서는 상품 등록/상품 설명 생성 화면에서 선택한 옵션값을 조합해 화면과 설명 생성 입력값에만 사용한다.
@@ -166,9 +163,8 @@
 - request: `ProductOptionItemCreateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `additionalPrice`, `status`, `actorId`를 request body로 받는다.
+  - `name`, `status`, `actorId`를 request body로 받는다.
   - 같은 옵션 그룹 안에서 옵션값명은 중복될 수 없다.
-  - `additionalPrice`는 0 이상이어야 한다.
   - 정렬 순서는 생성 시 자동 부여한다.
 
 ### 옵션값 목록 조회
@@ -184,7 +180,7 @@
 - request: `ProductOptionItemUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `additionalPrice`, `actorId`를 request body로 받는다.
+  - `name`, `actorId`를 request body로 받는다.
   - 상태 변경은 이 API에서 처리하지 않는다.
   - 정렬 순서는 수정 대상이 아니다.
 

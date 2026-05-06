@@ -482,7 +482,6 @@ POST /api/v1/categories/{categoryId}/options
 
 request body:
 - `name`
-- `sortOrder`
 - `status`
 - `actorId`
 
@@ -561,7 +560,6 @@ POST /api/v1/categories/{categoryId}/options/{productOptionId}/items
 
 request body:
 - `name`
-- `additionalPrice`
 - `sortOrder`
 - `status`
 - `actorId`
@@ -571,7 +569,8 @@ response result:
 
 규칙:
 - 옵션값은 선택한 카테고리에 속한 옵션 그룹에 종속된다.
-- 같은 옵션 그룹 안에서 옵션값명과 `sortOrder`는 미삭제 기준으로 중복될 수 없다.
+- 같은 옵션 그룹 안에서 옵션값명은 미삭제 기준으로 중복될 수 없다.
+- 정렬 순서는 생성 시 자동 부여한다.
 
 ### 옵션값 목록 조회 API
 ```http
@@ -591,8 +590,6 @@ PUT /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOpti
 
 request body:
 - `name`
-- `additionalPrice`
-- `sortOrder`
 - `actorId`
 
 response result:
