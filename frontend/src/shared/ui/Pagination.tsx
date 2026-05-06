@@ -27,7 +27,7 @@ function buildPageNumbers(currentPage: number, totalPages: number) {
 }
 
 export function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
-  if (totalPages <= 1) {
+  if (totalPages === 0) {
     return null;
   }
 
