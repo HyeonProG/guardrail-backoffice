@@ -78,11 +78,11 @@ export function DashboardPage() {
 
   const stats = useMemo(
     () => [
-      { label: '승인 완료 상품', value: approvedProducts.length, accent: 'from-emerald-500 to-teal-500' },
+      { label: '승인 완료 상품', value: approvedProducts.length, accent: 'from-emerald-500 to-teal-500', badge: '상품' },
       ...(canReviewApprovals
-        ? [{ label: '승인 요청 건수', value: pendingProducts.length, accent: 'from-amber-500 to-orange-500' }]
+        ? [{ label: '승인 요청 건수', value: pendingProducts.length, accent: 'from-amber-500 to-orange-500', badge: '요청' }]
         : []),
-      { label: '등록 카테고리', value: categories.length, accent: 'from-sky-500 to-indigo-500' }
+      { label: '등록 카테고리', value: categories.length, accent: 'from-sky-500 to-indigo-500', badge: '기준 정보' }
     ],
     [approvedProducts.length, canReviewApprovals, pendingProducts.length, categories.length]
   );
@@ -94,11 +94,8 @@ export function DashboardPage() {
           <div className="animate-fade-up">
             <p className="text-sm font-medium uppercase tracking-[0.3em] text-slate-300">Guardrail Backoffice</p>
             <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-tight">
-              상품 운영 현황을 한눈에 확인하는 대시보드
+              상품 운영 현황 대시보드
             </h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-              승인 완료 상품, 승인 대기 요청, 기준 정보 관리 화면으로 빠르게 이동하며 현재 운영 상태를 확인할 수 있습니다.
-            </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 className="inline-flex items-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg"
@@ -125,7 +122,7 @@ export function DashboardPage() {
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 <div className={`inline-flex rounded-full bg-gradient-to-r ${stat.accent} px-3 py-1 text-xs font-semibold`}>
-                  LIVE
+                  {stat.badge}
                 </div>
                 <p className="mt-4 text-sm text-slate-300">{stat.label}</p>
                 <p className="mt-2 text-3xl font-semibold text-white">{stat.value}</p>
@@ -150,7 +147,7 @@ export function DashboardPage() {
         ))}
       </section>
 
-      <section className={canReviewApprovals ? 'grid gap-6 xl:grid-cols-[1.3fr_0.7fr]' : 'grid gap-6'}>
+      <section className="grid gap-6">
         <div className="table-shell">
           <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
             <div>
@@ -198,26 +195,6 @@ export function DashboardPage() {
             <div className="px-6 py-12 text-sm text-slate-500">승인 완료된 상품이 아직 없습니다.</div>
           ) : null}
         </div>
-
-        {canReviewApprovals ? (
-          <div className="space-y-6">
-            <section className="surface-card p-6">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-950">승인 요청 현황</h2>
-                  <p className="mt-1 text-sm text-slate-500">관리자 검토를 기다리는 상품 요청 건수입니다.</p>
-                </div>
-                <Link className="ghost-link" to="/approval-requests">
-                  검토하러 가기
-                </Link>
-              </div>
-              <div className="mt-5 rounded-2xl bg-slate-950 px-5 py-6 text-white">
-                <p className="text-sm text-slate-300">승인 대기 요청</p>
-                <p className="mt-2 text-4xl font-semibold">{pendingProducts.length}</p>
-              </div>
-            </section>
-          </div>
-        ) : null}
       </section>
 
       <ErrorMessage error={approvedProductsQuery.error ?? pendingProductsQuery.error ?? categoriesQuery.error} />

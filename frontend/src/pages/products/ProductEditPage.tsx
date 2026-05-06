@@ -202,10 +202,10 @@ export function ProductEditPage() {
         throw new Error('키워드를 입력해 주세요.');
       }
 
-      const product = await updateMutation.mutateAsync(form.getValues());
-      return generateProductDescription(product.id, {
+      const values = form.getValues();
+      return generateProductDescription(productId, {
         actorId: requireActorId(),
-        productName: form.getValues('name'),
+        productName: values.name,
         categoryName: selectedCategory?.name ?? '',
         optionSummary: '',
         featureKeywords: keywordText
@@ -292,7 +292,10 @@ export function ProductEditPage() {
               상품 기본 정보와 선택 항목, 이미지, 설명을 수정할 수 있습니다. 설명은 직접 작성하거나 AI 문구를 바로 반영할 수 있습니다.
             </p>
           </div>
-          <Link className="ghost-link" to={`/products/${productId}`}>
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+            to={`/products/${productId}`}
+          >
             상품 상세로 돌아가기
           </Link>
         </div>

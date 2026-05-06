@@ -263,10 +263,23 @@ export function ProductCreatePage() {
         throw new Error('키워드를 입력해 주세요.');
       }
 
-      const product = await upsertProductMutation.mutateAsync(form.getValues());
+      const values = form.getValues();
+      const product = draftProduct
+        ? draftProduct
+        : await createProduct({
+            ...values,
+            description: values.description?.trim() ?? '',
+            selectedOptionItemIds: values.selectedOptionItemIds,
+            actorId: requireActorId()
+          });
+
+      if (!draftProduct) {
+        await registerPendingImages(product.id);
+      }
+
       return generateProductDescription(product.id, {
         actorId: requireActorId(),
-        productName: form.getValues('name'),
+        productName: values.name,
         categoryName: selectedCategory?.name ?? '',
         optionSummary: '',
         featureKeywords: keywordText
@@ -281,6 +294,7 @@ export function ProductCreatePage() {
       setAttachmentNotice('AI 문구를 설명란에 반영했습니다.');
       await queryClient.invalidateQueries({ queryKey: ['products'] });
       await queryClient.invalidateQueries({ queryKey: ['products', product.id] });
+      await queryClient.invalidateQueries({ queryKey: ['file-attachments', 'PRODUCT', product.id] });
     }
   });
 
@@ -303,7 +317,10 @@ export function ProductCreatePage() {
             <h2 className="page-title">상품 생성</h2>
             <p className="page-description">카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.</p>
           </div>
-          <Link className="ghost-link" to="/products">
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+            to="/products"
+          >
             상품 목록으로
           </Link>
         </div>

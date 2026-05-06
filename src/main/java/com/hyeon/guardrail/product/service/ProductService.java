@@ -37,8 +37,11 @@ import com.hyeon.guardrail.productoption.repository.ProductOptionRepositoryQuery
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -116,13 +119,22 @@ public class ProductService {
     validateApprovedProductEditable(product);
     validateCategoryExists(request.getCategoryId());
 
-    product.updateBasicInfo(
-        request.getCategoryId(), request.getName(), normalizeDescription(request.getDescription()));
+    String normalizedDescription = normalizeDescription(request.getDescription());
+    boolean basicInfoChanged =
+        isBasicInfoChanged(
+            product, request.getCategoryId(), request.getName(), normalizedDescription);
+    boolean selectedOptionsChanged =
+        request.getSelectedOptionItemIds() != null
+            && isSelectedOptionsChanged(productId, request.getSelectedOptionItemIds());
+
+    product.updateBasicInfo(request.getCategoryId(), request.getName(), normalizedDescription);
     if (request.getSelectedOptionItemIds() != null) {
       syncSelectedOptions(productId, request.getCategoryId(), request.getSelectedOptionItemIds());
     }
 
-    saveHistory(productId, request.getActorId(), ProductHistoryType.UPDATED, null);
+    if (basicInfoChanged || selectedOptionsChanged) {
+      saveHistory(productId, request.getActorId(), ProductHistoryType.UPDATED, null);
+    }
     return toResponse(product);
   }
 
@@ -318,6 +330,22 @@ public class ProductService {
 
   private void saveHistory(UUID productId, UUID actorId, ProductHistoryType type, String reason) {
     productHistoryRepository.save(new ProductHistory(productId, actorId, type, reason));
+  }
+
+  private boolean isBasicInfoChanged(
+      Product product, UUID categoryId, String name, String normalizedDescription) {
+    return !Objects.equals(product.getCategoryId(), categoryId)
+        || !Objects.equals(product.getName(), name)
+        || !Objects.equals(product.getDescription(), normalizedDescription);
+  }
+
+  private boolean isSelectedOptionsChanged(UUID productId, Collection<UUID> selectedOptionItemIds) {
+    Set<UUID> currentOptionIds =
+        productSelectedOptionRepositoryQuery.findAllByProductId(productId).stream()
+            .map(ProductSelectedOption::getProductOptionItemId)
+            .collect(Collectors.toSet());
+    Set<UUID> nextOptionIds = new HashSet<>(selectedOptionItemIds);
+    return !currentOptionIds.equals(nextOptionIds);
   }
 
   private ProductResponse toResponse(Product product) {

@@ -19,7 +19,6 @@ export function LoginPage() {
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700">{env.appName}</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink">관리자 로그인</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500">상품 등록, 승인 요청, 기준 정보 관리를 위한 운영 콘솔에 접속합니다.</p>
         </div>
         {sessionExpired ? (
           <div className="mb-6 rounded-[20px] border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fff7d6_100%)] px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">

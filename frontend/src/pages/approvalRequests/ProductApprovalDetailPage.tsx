@@ -1,18 +1,24 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getFileAttachments } from '@/entities/file/api/fileAttachmentApi';
-import { getProduct, getProductHistories } from '@/entities/product/api/productApi';
+import { getProduct, getProductHistories, updateProductStatus } from '@/entities/product/api/productApi';
 import { getCategories } from '@/entities/category/api/categoryApi';
 import { formatDateTime, shortId } from '@/shared/lib/format';
 import { resolveFileUrl } from '@/shared/lib/fileUrl';
 import { getProductHistoryTypeLabel, getProductStatusLabel } from '@/shared/lib/productText';
+import { requireActorId } from '@/shared/lib/session';
+import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { TextField } from '@/shared/ui/TextField';
 
-/** 승인 요청 상품 읽기 전용 상세 페이지 */
+/** 승인 요청 상품 상세 페이지 */
 export function ProductApprovalDetailPage() {
   const { productId = '' } = useParams();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [previewIndex, setPreviewIndex] = useState(0);
+  const [rejectReason, setRejectReason] = useState('');
   const productQuery = useQuery({
     queryKey: ['products', productId],
     queryFn: () => getProduct(productId),
@@ -49,22 +55,56 @@ export function ProductApprovalDetailPage() {
     setPreviewIndex(0);
   }, [productId]);
 
+  const refresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['products'] });
+    await queryClient.invalidateQueries({ queryKey: ['products', productId] });
+    await queryClient.invalidateQueries({ queryKey: ['products', productId, 'histories'] });
+  };
+
+  const approveMutation = useMutation({
+    mutationFn: () =>
+      updateProductStatus(productId, {
+        status: 'APPROVED',
+        actorId: requireActorId()
+      }),
+    onSuccess: async () => {
+      await refresh();
+      navigate('/approval-requests', { replace: true });
+    }
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: () =>
+      updateProductStatus(productId, {
+        status: 'REJECTED',
+        actorId: requireActorId(),
+        reason: rejectReason.trim()
+      }),
+    onSuccess: async () => {
+      await refresh();
+      navigate('/approval-requests', { replace: true });
+    }
+  });
+
   return (
     <div className="space-y-6">
       <section className="page-header">
         <div>
           <p className="section-kicker">Review Detail</p>
           <h2 className="page-title">승인 요청 상품 상세</h2>
-          <p className="page-description">승인 대기 중인 상품 정보를 읽기 전용으로 확인합니다.</p>
+          <p className="page-description">승인 대기 상품의 상세 정보와 변경 이력을 확인하고 여기서 바로 승인 또는 반려합니다.</p>
         </div>
-        <Link className="ghost-link" to="/approval-requests">
+        <Link
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+          to="/approval-requests"
+        >
           승인 요청 관리로 돌아가기
         </Link>
       </section>
 
       <ErrorMessage error={productQuery.error ?? attachmentsQuery.error ?? historiesQuery.error ?? categoriesQuery.error} />
 
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-5">
           <div className="surface-card-muted p-5">
             <h3 className="text-base font-semibold text-ink">상품 기본 정보</h3>
@@ -134,12 +174,44 @@ export function ProductApprovalDetailPage() {
           </div>
         </div>
 
-        <div className="surface-card-muted p-5">
-          <h3 className="text-base font-semibold text-ink">기본 정보</h3>
-          <div className="mt-4 space-y-3 text-sm text-slate-600">
-            <p>상품 번호: {product ? shortId(product.id) : '-'}</p>
-            <p>마지막 수정일: {product ? formatDateTime(product.updatedAt) : '-'}</p>
-            <p>카테고리: {categoryName}</p>
+        <div className="space-y-5">
+          <div className="surface-card-muted p-5">
+            <h3 className="text-base font-semibold text-ink">기본 정보</h3>
+            <div className="mt-4 space-y-3 text-sm text-slate-600">
+              <p>상품 번호: {product ? shortId(product.id) : '-'}</p>
+              <p>마지막 수정일: {product ? formatDateTime(product.updatedAt) : '-'}</p>
+              <p>카테고리: {categoryName}</p>
+            </div>
+          </div>
+
+          <div className="surface-card p-5">
+            <h3 className="text-base font-semibold text-ink">승인 처리</h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              상품 내용을 검토한 뒤 여기서 바로 승인하거나 반려할 수 있습니다.
+            </p>
+            <div className="mt-4 space-y-3">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-700">
+                현재 상태: <span className="font-semibold text-slate-950">{product ? getProductStatusLabel(product.status) : '-'}</span>
+              </div>
+              <Button type="button" disabled={approveMutation.isPending || rejectMutation.isPending} onClick={() => approveMutation.mutate()}>
+                승인
+              </Button>
+              <TextField
+                label="반려 사유"
+                placeholder="반려 사유를 입력해 주세요."
+                value={rejectReason}
+                onChange={(event) => setRejectReason(event.target.value)}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={approveMutation.isPending || rejectMutation.isPending || !rejectReason.trim()}
+                onClick={() => rejectMutation.mutate()}
+              >
+                반려
+              </Button>
+              <ErrorMessage error={approveMutation.error ?? rejectMutation.error} />
+            </div>
           </div>
         </div>
       </section>
