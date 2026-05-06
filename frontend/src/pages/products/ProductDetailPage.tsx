@@ -91,7 +91,7 @@ export function ProductDetailPage() {
     productQuery.data?.status === 'DRAFT' ||
     productQuery.data?.status === 'PENDING' ||
     productQuery.data?.status === 'REJECTED';
-  const canShowActionPanel = canManageDangerousActions || (canStaffEditPendingProduct && canDeleteProduct);
+  const canShowActionPanel = canManageDangerousActions;
 
   useEffect(() => {
     if (imageIndex >= attachments.length) {
@@ -106,7 +106,7 @@ export function ProductDetailPage() {
           <h2 className="text-xl font-semibold text-ink">상품 상세</h2>
           <p className="mt-1 text-sm text-slate-600">상품 정보와 이미지, 선택 항목, 변경 이력을 한 화면에서 확인합니다.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
           {canManageDangerousActions || canStaffEditPendingProduct ? (
             <Link className="text-sm font-medium text-slate-900 underline" to={`/products/${productId}/edit`}>
               상품 수정
@@ -118,7 +118,8 @@ export function ProductDetailPage() {
           {canDeleteProduct ? (
             <Button
               type="button"
-              variant="ghost"
+              variant="secondary"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
               disabled={deleteMutation.isPending}
               onClick={() => deleteMutation.mutate()}
             >
