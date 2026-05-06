@@ -10,6 +10,7 @@ import { getProductStatusLabel } from '@/shared/lib/productText';
 import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { Pagination } from '@/shared/ui/Pagination';
 import { TextField } from '@/shared/ui/TextField';
 
 /** 승인 요청 관리 페이지 */
@@ -17,10 +18,11 @@ export function ApprovalRequestsPage() {
   const queryClient = useQueryClient();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [page, setPage] = useState(0);
 
   const pendingProductsQuery = useQuery({
-    queryKey: ['products', 'approval-requests'],
-    queryFn: () => getProducts({ status: 'PENDING', size: 100 })
+    queryKey: ['products', 'approval-requests', page],
+    queryFn: () => getProducts({ status: 'PENDING', page, size: 10 })
   });
 
   const refresh = () => {
@@ -153,6 +155,15 @@ export function ApprovalRequestsPage() {
               ))}
             </tbody>
           </table>
+          {products.length > 0 ? (
+            <div className="border-t border-slate-200/70 px-6 py-4">
+              <Pagination
+                currentPage={page}
+                totalPages={pendingProductsQuery.data?.totalPages ?? 0}
+                onPageChange={setPage}
+              />
+            </div>
+          ) : null}
           {products.length === 0 && !pendingProductsQuery.isLoading ? (
             <div className="p-5 text-sm text-slate-600">현재 승인 대기 중인 상품이 없습니다.</div>
           ) : null}
