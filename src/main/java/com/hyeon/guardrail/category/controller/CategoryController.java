@@ -69,7 +69,7 @@ public class CategoryController {
   }
 
   /** 삭제된 카테고리 목록 조회 */
-  @Operation(summary = "삭제된 카테고리 목록 조회", description = "soft delete 처리된 카테고리 목록을 조회합니다.")
+  @Operation(summary = "삭제된 카테고리 목록 조회", description = "삭제 처리된 카테고리 목록을 조회합니다.")
   @GetMapping("/deleted")
   public BaseResponseEntity<List<CategoryResponse>> getDeletedCategories() {
     return BaseResponseEntity.success(categoryService.getDeletedCategories());
@@ -85,7 +85,7 @@ public class CategoryController {
   }
 
   /** 카테고리 상태 변경 */
-  @Operation(summary = "카테고리 상태 변경", description = "카테고리 상태를 ACTIVE 또는 INACTIVE로 변경합니다.")
+  @Operation(summary = "카테고리 상태 변경", description = "카테고리 상태를 활성 또는 비활성으로 변경합니다.")
   @PatchMapping("/{categoryId}/status")
   public BaseResponseEntity<CategoryResponse> updateCategoryStatus(
       @PathVariable UUID categoryId, @Valid @RequestBody CategoryStatusUpdateRequest request) {
@@ -94,7 +94,7 @@ public class CategoryController {
   }
 
   /** 카테고리 삭제 */
-  @Operation(summary = "카테고리 삭제", description = "카테고리를 soft delete 처리합니다.")
+  @Operation(summary = "카테고리 삭제", description = "카테고리를 삭제 처리합니다.")
   @DeleteMapping("/{categoryId}")
   public BaseResponseEntity<Void> deleteCategory(@PathVariable UUID categoryId) {
     categoryService.deleteCategory(categoryId);
@@ -102,7 +102,7 @@ public class CategoryController {
   }
 
   /** 카테고리 복구 */
-  @Operation(summary = "카테고리 복구", description = "soft delete 처리된 카테고리를 복구합니다.")
+  @Operation(summary = "카테고리 복구", description = "삭제 처리된 카테고리를 복구합니다.")
   @PatchMapping("/{categoryId}/restore")
   public BaseResponseEntity<CategoryResponse> restoreCategory(@PathVariable UUID categoryId) {
     return BaseResponseEntity.success(

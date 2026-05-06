@@ -1,27 +1,34 @@
 package com.hyeon.guardrail.common.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 /** Controller 공통 성공 응답 래퍼 */
-@Getter
 @Schema(description = "공통 성공 응답 구조")
 public class BaseResponseEntity<T> {
 
+  @Getter
+  @JsonIgnore
   @Schema(hidden = true)
   private final HttpStatusCode httpStatusCode;
 
+  @Getter(onMethod_ = @JsonProperty("isSuccess"))
   @Schema(description = "요청 성공 여부", example = "true")
   private final boolean isSuccess;
 
+  @Getter
   @Schema(description = "응답 메시지", example = "요청이 정상 처리되었습니다.")
   private final String message;
 
+  @Getter
   @Schema(description = "응답 코드", example = "200")
   private final int code;
 
+  @Getter
   @Schema(description = "응답 데이터")
   private final T result;
 

@@ -73,7 +73,7 @@ public class UserController {
   }
 
   /** 사용자 상태 변경 */
-  @Operation(summary = "사용자 상태 변경", description = "사용자 상태를 ACTIVE 또는 INACTIVE로 변경합니다.")
+  @Operation(summary = "사용자 상태 변경", description = "사용자 상태를 활성 또는 비활성으로 변경합니다.")
   @PatchMapping("/{userId}/status")
   public BaseResponseEntity<UserResponse> updateUserStatus(
       @PathVariable UUID userId, @Valid @RequestBody UserStatusUpdateRequest request) {
@@ -82,7 +82,7 @@ public class UserController {
   }
 
   /** 사용자 삭제 */
-  @Operation(summary = "사용자 삭제", description = "사용자를 soft delete 처리합니다.")
+  @Operation(summary = "사용자 삭제", description = "사용자를 삭제 처리합니다.")
   @DeleteMapping("/{userId}")
   public BaseResponseEntity<Void> deleteUser(@PathVariable UUID userId) {
     userService.deleteUser(userId);

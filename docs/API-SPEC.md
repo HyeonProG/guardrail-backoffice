@@ -53,9 +53,9 @@ Controller 성공 응답은 기본적으로 `BaseResponseEntity<T>`를 사용한
 예:
 
 ```java
-return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS);
-return new BaseResponseEntity<>(BaseResponseStatus.SUCCESS, response);
-return new BaseResponseEntity<>(BaseResponseStatus.CREATED, response, "사용자가 생성되었습니다.");
+return BaseResponseEntity.success();
+return BaseResponseEntity.success(response);
+return BaseResponseEntity.created(response, "사용자가 생성되었습니다.");
 ```
 
 데이터가 없는 성공 응답은 `result`를 `null`로 반환한다.
@@ -151,6 +151,7 @@ response result:
 - `refreshTokenExpiredAt`
 - `userId`
 - `role`
+- `temporaryPassword`
 
 규칙:
 - 로그인 요청의 IP는 서버 요청 정보에서 추출한다.
@@ -186,7 +187,6 @@ POST /api/v1/auth/logout
 ```
 
 request:
-- Authorization 헤더의 access token
 - request body의 `sessionId`
 
 response result:
@@ -196,6 +196,7 @@ response result:
 규칙:
 - 로그아웃 시 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
 - `REVOKED` 상태 세션은 토큰 재발급을 허용하지 않는다.
+- 로그아웃 API는 세션 식별을 위해 request body의 `sessionId`만 사용한다.
 
 ## 7.2 카테고리 API 기준
 ### 카테고리 생성 API
@@ -236,7 +237,8 @@ response result:
 
 규칙:
 - 목록 조회는 `deleted = false` 기준으로만 수행한다.
-- `parentId`가 없으면 최상위 카테고리 목록 조회를 의미한다.
+- `parentId`가 query에 포함되면 해당 부모 카테고리 기준으로 목록을 필터링한다.
+- `parentId`가 query에 없으면 전체 카테고리 목록을 조회한다.
 - `status`는 필요 시 필터로 사용한다.
 
 ### 카테고리 상세 조회 API

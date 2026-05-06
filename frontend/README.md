@@ -24,7 +24,7 @@ VITE_APP_NAME=Guardrail Backoffice
 ## 인증 저장 정책
 
 - 로그인 요청은 `email`, `password`, `deviceType=WEB`를 전송합니다.
-- 로그인 성공 시 `accessToken`, `refreshToken`, `sessionId`, `userId`, `role`을 localStorage에 저장합니다.
+- 로그인 성공 시 `accessToken`, `refreshToken`, `sessionId`, `userId`, `role`, `temporaryPassword`를 localStorage에 저장합니다.
 - 현재 보호 라우트는 `accessToken` 존재 여부로만 접근을 제어합니다.
 - 로그아웃은 `/api/v1/auth/logout` 호출 후 저장된 인증 정보를 삭제합니다.
 

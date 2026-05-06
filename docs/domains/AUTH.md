@@ -133,7 +133,7 @@
 - 리프레시 토큰은 길이와 검증 정책에 맞는 해시 값으로 저장한다.
 - 로그인 요청은 `email`, `password`, `deviceType`을 사용한다.
 - 로그인 요청의 IP는 request body가 아니라 서버 요청 정보에서 추출해 저장한다.
-- 로그인 성공 응답은 `accessToken`, `refreshToken`, `sessionId`, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `userId`, `role`을 포함한다.
+- 로그인 성공 응답은 `accessToken`, `refreshToken`, `sessionId`, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `userId`, `role`, `temporaryPassword`를 포함한다.
 - access token에는 `userId`, `role`, `sessionId`, `accessTokenId`를 포함한다.
 - refresh token에는 `userId`, `sessionId`를 포함한다.
 - 로그인 성공 시 `UserSession`을 `ACTIVE` 상태로 생성하고 refresh token은 검증 가능한 해시 값으로 저장한다.
@@ -141,7 +141,7 @@
 - 토큰 재발급 성공 시 새로운 access token, refresh token, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `sessionId`를 응답한다.
 - 토큰 재발급 시 세션 상태가 `ACTIVE`이고 세션 만료 시간이 지나지 않았으며 저장된 refresh token 해시 검증이 통과해야 한다.
 - 토큰 재발급 성공 시 세션의 refresh token hash, refreshedAt, expiredAt을 갱신한다.
-- 로그아웃 요청은 Authorization 헤더의 access token과 `sessionId`를 함께 사용한다.
+- 로그아웃 요청은 request body의 `sessionId`를 사용한다.
 - 로그아웃 성공 응답은 `sessionId`, `status`를 포함한다.
 - 로그아웃 시 대상 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
 - 존재하지 않는 이메일 로그인 실패는 로그인 이력을 저장하지 않고 즉시 인증 실패로 종료한다.
@@ -176,7 +176,7 @@
 7. 새 토큰 정보와 세션 식별 정보를 응답한다.
 
 ### 6.3 로그아웃
-1. Authorization 헤더의 access token과 `sessionId`를 검증한다.
+1. request body의 `sessionId`로 대상 세션을 식별한다.
 2. 대상 세션을 조회한다.
 3. 세션 상태를 `REVOKED`로 변경한다.
 4. 로그아웃 후 해당 세션으로는 재발급을 허용하지 않는다.

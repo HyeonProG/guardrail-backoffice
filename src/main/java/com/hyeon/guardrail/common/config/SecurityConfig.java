@@ -67,7 +67,7 @@ public class SecurityConfig {
     return http.build();
   }
 
-  /** 프론트엔드 개발 서버 접근 허용용 CORS 설정 */
+  /** 프론트엔드 클라이언트 접근 허용용 CORS 설정 */
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();

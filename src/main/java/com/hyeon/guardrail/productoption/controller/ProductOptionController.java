@@ -90,7 +90,7 @@ public class ProductOptionController {
   }
 
   /** 옵션 그룹 삭제 */
-  @Operation(summary = "옵션 그룹 삭제", description = "옵션 그룹을 soft delete 처리합니다.")
+  @Operation(summary = "옵션 그룹 삭제", description = "옵션 그룹을 삭제 처리합니다.")
   @DeleteMapping("/{productOptionId}")
   public BaseResponseEntity<Void> deleteProductOption(
       @PathVariable UUID categoryId, @PathVariable UUID productOptionId) {
@@ -150,7 +150,7 @@ public class ProductOptionController {
   }
 
   /** 옵션값 삭제 */
-  @Operation(summary = "옵션값 삭제", description = "옵션값을 soft delete 처리합니다.")
+  @Operation(summary = "옵션값 삭제", description = "옵션값을 삭제 처리합니다.")
   @DeleteMapping("/{productOptionId}/items/{productOptionItemId}")
   public BaseResponseEntity<Void> deleteProductOptionItem(
       @PathVariable UUID categoryId,
