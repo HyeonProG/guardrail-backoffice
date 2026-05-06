@@ -91,6 +91,7 @@ export function ProductDetailPage() {
     productQuery.data?.status === 'DRAFT' ||
     productQuery.data?.status === 'PENDING' ||
     productQuery.data?.status === 'REJECTED';
+  const canShowActionPanel = canManageDangerousActions || (canStaffEditPendingProduct && canDeleteProduct);
 
   useEffect(() => {
     if (imageIndex >= attachments.length) {
@@ -120,7 +121,7 @@ export function ProductDetailPage() {
       <ErrorMessage error={productQuery.error ?? historiesQuery.error ?? categoriesQuery.error ?? attachmentsQuery.error} />
 
       {productQuery.data ? (
-        <section className={canManageDangerousActions ? 'grid gap-5 xl:grid-cols-[1.1fr_0.9fr]' : 'grid gap-5'}>
+        <section className={canShowActionPanel ? 'grid gap-5 xl:grid-cols-[1.1fr_0.9fr]' : 'grid gap-5'}>
           <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
               <div>
@@ -241,44 +242,48 @@ export function ProductDetailPage() {
             </div>
           </div>
 
-          {canManageDangerousActions ? (
+          {canShowActionPanel ? (
             <div className="space-y-5">
-              <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
-                <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명을 변경할 수 있습니다.
-                </p>
-                <div className="mt-4">
-                  <Link
-                    className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700"
-                    to={`/products/${productId}/edit`}
-                  >
-                    수정 페이지로 이동
-                  </Link>
-                </div>
-              </div>
-              <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
-                <h3 className="text-base font-semibold text-ink">상태 변경</h3>
-                <div className="mt-4 space-y-3">
-                  <p className="text-sm text-slate-600">현재 상태: {getProductStatusLabel(productQuery.data.status)}</p>
-                  <select
-                    className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
-                    value={nextStatus}
-                    onChange={(event) => setNextStatus(event.target.value as ProductStatus)}
-                  >
-                    {productStatuses.map((status) => (
-                      <option key={status} value={status}>
-                        {getProductStatusLabel(status)}
-                      </option>
-                    ))}
-                  </select>
-                  <TextField label="사유" value={reason} onChange={(event) => setReason(event.target.value)} />
-                  <ErrorMessage error={statusMutation.error} />
-                  <Button type="button" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate()}>
-                    상태 변경
-                  </Button>
-                </div>
-              </div>
+              {canManageDangerousActions ? (
+                <>
+                  <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명을 변경할 수 있습니다.
+                    </p>
+                    <div className="mt-4">
+                      <Link
+                        className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700"
+                        to={`/products/${productId}/edit`}
+                      >
+                        수정 페이지로 이동
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                    <h3 className="text-base font-semibold text-ink">상태 변경</h3>
+                    <div className="mt-4 space-y-3">
+                      <p className="text-sm text-slate-600">현재 상태: {getProductStatusLabel(productQuery.data.status)}</p>
+                      <select
+                        className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
+                        value={nextStatus}
+                        onChange={(event) => setNextStatus(event.target.value as ProductStatus)}
+                      >
+                        {productStatuses.map((status) => (
+                          <option key={status} value={status}>
+                            {getProductStatusLabel(status)}
+                          </option>
+                        ))}
+                      </select>
+                      <TextField label="사유" value={reason} onChange={(event) => setReason(event.target.value)} />
+                      <ErrorMessage error={statusMutation.error} />
+                      <Button type="button" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate()}>
+                        상태 변경
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : null}
               {canDeleteProduct ? (
                 <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-sm">
                   <h3 className="text-base font-semibold text-red-700">완전 삭제</h3>
