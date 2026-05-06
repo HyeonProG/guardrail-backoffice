@@ -423,7 +423,7 @@ response result:
 
 규칙:
 - hard delete로 처리한다.
-- `DRAFT`, `REJECTED` 상태에서만 삭제할 수 있다.
+- `DRAFT`, `PENDING`, `REJECTED` 상태에서만 삭제할 수 있다.
 - 삭제 시 상품 이력, 선택 항목 스냅샷, 상품 대상 파일 메타데이터를 함께 정리한다.
 
 ### 상품 이력 목록 조회 API

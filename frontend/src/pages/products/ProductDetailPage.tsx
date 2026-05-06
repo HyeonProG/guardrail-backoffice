@@ -88,7 +88,9 @@ export function ProductDetailPage() {
   const currentCategoryName =
     categories.find((category) => category.id === productQuery.data?.categoryId)?.name ?? '-';
   const canDeleteProduct =
-    productQuery.data?.status === 'DRAFT' || productQuery.data?.status === 'REJECTED';
+    productQuery.data?.status === 'DRAFT' ||
+    productQuery.data?.status === 'PENDING' ||
+    productQuery.data?.status === 'REJECTED';
 
   useEffect(() => {
     if (imageIndex >= attachments.length) {

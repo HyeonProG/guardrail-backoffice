@@ -218,12 +218,13 @@ public class ProductService {
 
   private void validateProductHardDeletable(Product product) {
     if (product.getStatus() == ProductStatus.DRAFT
+        || product.getStatus() == ProductStatus.PENDING
         || product.getStatus() == ProductStatus.REJECTED) {
       return;
     }
 
     throw new BaseException(
-        BaseResponseStatus.CONFLICT, "상품은 DRAFT 또는 REJECTED 상태에서만 완전 삭제할 수 있습니다.");
+        BaseResponseStatus.CONFLICT, "상품은 DRAFT, PENDING 또는 REJECTED 상태에서만 완전 삭제할 수 있습니다.");
   }
 
   private Product findProduct(UUID productId) {
