@@ -5,8 +5,8 @@ import { getCategories } from '@/entities/category/api/categoryApi';
 import { getFileAttachments } from '@/entities/file/api/fileAttachmentApi';
 import { getProducts } from '@/entities/product/api/productApi';
 import { resolveFileUrl } from '@/shared/lib/fileUrl';
-import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { Pagination } from '@/shared/ui/Pagination';
 
 /** 승인 완료 상품 목록 페이지 */
 export function ApprovedProductsPage() {
@@ -118,26 +118,12 @@ export function ApprovedProductsPage() {
               ))}
             </div>
 
-            <div className="flex items-center justify-end border-t border-slate-200/70 px-6 py-4">
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={page === 0}
-                  onClick={() => setPage((current) => Math.max(0, current - 1))}
-                >
-                  이전
-                </Button>
-                <span className="min-w-16 text-center text-sm font-medium text-slate-700">{page + 1}</span>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={productsQuery.data ? page + 1 >= productsQuery.data.totalPages : true}
-                  onClick={() => setPage((current) => current + 1)}
-                >
-                  다음
-                </Button>
-              </div>
+            <div className="border-t border-slate-200/70 px-6 py-4">
+              <Pagination
+                currentPage={page}
+                totalPages={productsQuery.data?.totalPages ?? 0}
+                onPageChange={setPage}
+              />
             </div>
           </>
         ) : null}

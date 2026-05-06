@@ -18,6 +18,7 @@ import { categorySchema, type CategoryFormValues } from '@/pages/categories/cate
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
+import { Pagination } from '@/shared/ui/Pagination';
 import { TextField } from '@/shared/ui/TextField';
 import { formatDateTime, shortId } from '@/shared/lib/format';
 
@@ -82,6 +83,8 @@ export function CategoriesPage() {
   const saveMutation = useMutation({
     mutationFn: (values: CategoryFormValues) => createCategory(values),
     onSuccess: () => {
+      setCreateModalOpen(false);
+      setPage(0);
       form.reset({ parentId: '', name: '' });
       refresh();
     }
@@ -251,26 +254,12 @@ export function CategoriesPage() {
             <div className="p-5 text-sm text-slate-600">조회된 카테고리가 없습니다.</div>
           ) : null}
           {visibleCategories.length > 0 ? (
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-4 py-4">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={page === 0}
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-              >
-                이전
-              </Button>
-              <span className="min-w-16 text-center text-sm font-medium text-slate-700">
-                {page + 1}
-              </span>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={categoriesQuery.data ? page + 1 >= categoriesQuery.data.totalPages : true}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                다음
-              </Button>
+            <div className="border-t border-slate-200 px-4 py-4">
+              <Pagination
+                currentPage={page}
+                totalPages={categoriesQuery.data?.totalPages ?? 0}
+                onPageChange={setPage}
+              />
             </div>
           ) : null}
         </div>

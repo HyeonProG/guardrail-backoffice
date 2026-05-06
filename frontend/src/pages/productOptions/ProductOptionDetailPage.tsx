@@ -18,6 +18,7 @@ import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
+import { Pagination } from '@/shared/ui/Pagination';
 import { TextField } from '@/shared/ui/TextField';
 
 /** 상품 옵션 상세 페이지 */
@@ -70,6 +71,7 @@ export function ProductOptionDetailPage() {
     () => sortedItems.slice(itemPage * pageSize, (itemPage + 1) * pageSize),
     [sortedItems, itemPage]
   );
+  const totalItemPages = Math.ceil(sortedItems.length / pageSize);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['product-options', categoryId] });
@@ -217,24 +219,12 @@ export function ProductOptionDetailPage() {
             </table>
             {sortedItems.length === 0 ? <div className="p-5 text-sm text-slate-600">등록된 선택 항목이 없습니다.</div> : null}
             {sortedItems.length > 0 ? (
-              <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-4 py-4">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={itemPage === 0}
-                  onClick={() => setItemPage((current) => Math.max(0, current - 1))}
-                >
-                  이전
-                </Button>
-                <span className="min-w-16 text-center text-sm font-medium text-slate-700">{itemPage + 1}</span>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={(itemPage + 1) * pageSize >= sortedItems.length}
-                  onClick={() => setItemPage((current) => current + 1)}
-                >
-                  다음
-                </Button>
+              <div className="border-t border-slate-200 px-4 py-4">
+                <Pagination
+                  currentPage={itemPage}
+                  totalPages={totalItemPages}
+                  onPageChange={setItemPage}
+                />
               </div>
             ) : null}
           </section>

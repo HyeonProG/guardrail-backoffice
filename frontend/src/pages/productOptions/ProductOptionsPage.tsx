@@ -14,6 +14,7 @@ import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
+import { Pagination } from '@/shared/ui/Pagination';
 import { TextField } from '@/shared/ui/TextField';
 import { getProductOptions } from '@/entities/productOption/api/productOptionApi';
 
@@ -69,6 +70,7 @@ export function ProductOptionsPage() {
     () => sortedOptions.slice(page * pageSize, (page + 1) * pageSize),
     [sortedOptions, page]
   );
+  const totalPages = Math.ceil(sortedOptions.length / pageSize);
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['product-options', categoryId] });
@@ -204,26 +206,8 @@ export function ProductOptionsPage() {
             <div className="p-5 text-sm text-slate-600">등록된 옵션이 없습니다.</div>
           ) : null}
           {sortedOptions.length > 0 ? (
-            <div className="flex items-center justify-end gap-2 border-t border-slate-200 px-4 py-4">
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={page === 0}
-                onClick={() => setPage((current) => Math.max(0, current - 1))}
-              >
-                이전
-              </Button>
-              <span className="min-w-16 text-center text-sm font-medium text-slate-700">
-                {page + 1}
-              </span>
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={(page + 1) * pageSize >= sortedOptions.length}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                다음
-              </Button>
+            <div className="border-t border-slate-200 px-4 py-4">
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </div>
           ) : null}
           <ErrorMessage error={optionsQuery.error} />
