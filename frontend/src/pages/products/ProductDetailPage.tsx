@@ -115,6 +115,16 @@ export function ProductDetailPage() {
           <Link className="text-sm font-medium text-slate-900 underline" to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}>
             상품 옵션 관리
           </Link>
+          {canDeleteProduct ? (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+            >
+              삭제
+            </Button>
+          ) : null}
         </div>
       </section>
 
@@ -284,25 +294,7 @@ export function ProductDetailPage() {
                   </div>
                 </>
               ) : null}
-              {canDeleteProduct ? (
-                <div className="rounded-[28px] border border-red-100 bg-white p-6 shadow-sm">
-                  <h3 className="text-base font-semibold text-red-700">완전 삭제</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    잘못 등록한 상품을 완전히 삭제합니다. 상품 정보와 이미지, 이력이 함께 제거됩니다.
-                  </p>
-                  <div className="mt-4">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      disabled={deleteMutation.isPending}
-                      onClick={() => deleteMutation.mutate()}
-                    >
-                      완전 삭제
-                    </Button>
-                  </div>
-                  <ErrorMessage error={deleteMutation.error} />
-                </div>
-              ) : null}
+              <ErrorMessage error={deleteMutation.error} />
             </div>
           ) : null}
         </section>
