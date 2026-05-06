@@ -60,10 +60,11 @@ public class CategoryController {
   @GetMapping
   public BaseResponseEntity<PageResponse<CategoryResponse>> getCategories(
       @RequestParam(required = false) UUID parentId,
+      @RequestParam(defaultValue = "false") boolean rootOnly,
       @RequestParam(required = false) CategoryStatus status,
       @PageableDefault(size = 20) Pageable pageable,
       HttpServletRequest request) {
-    boolean filterByParent = request.getParameterMap().containsKey("parentId");
+    boolean filterByParent = rootOnly || request.getParameterMap().containsKey("parentId");
     return BaseResponseEntity.success(
         categoryService.getCategories(parentId, filterByParent, status, pageable));
   }

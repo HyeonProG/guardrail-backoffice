@@ -31,6 +31,7 @@ export function CategoriesPage() {
   const canManageDangerousActions = currentRole === 'ADMIN' || currentRole === 'OPERATOR';
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [page, setPage] = useState(0);
+  const [currentParentId, setCurrentParentId] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'desc' | 'asc'>('desc');
   const [statusFilter, setStatusFilter] = useState<CategoryStatus | ''>(
     currentRole === 'STAFF' ? 'ACTIVE' : ''
@@ -46,12 +47,24 @@ export function CategoriesPage() {
   } | null>(null);
 
   const categoriesQuery = useQuery({
-    queryKey: ['categories', statusFilter, page, sortDirection],
-    queryFn: () => getCategories({ status: statusFilter, page, size: pageSize, sort: `updatedAt,${sortDirection}` })
+    queryKey: ['categories', statusFilter, page, sortDirection, currentParentId],
+    queryFn: () =>
+      getCategories({
+        status: statusFilter,
+        page,
+        size: pageSize,
+        sort: `updatedAt,${sortDirection}`,
+        parentId: currentParentId ?? undefined,
+        rootOnly: currentParentId === null
+      })
   });
   const activeCategoriesQuery = useQuery({
     queryKey: ['categories', 'active-options'],
     queryFn: () => getCategories({ status: 'ACTIVE', size: 100 })
+  });
+  const allCategoriesQuery = useQuery({
+    queryKey: ['categories', 'all-options'],
+    queryFn: () => getCategories({ size: 200, sort: 'name,asc' })
   });
   const deletedCategoriesQuery = useQuery({
     queryKey: ['categories', 'deleted'],
@@ -62,10 +75,28 @@ export function CategoriesPage() {
   const categories = categoriesQuery.data?.content ?? [];
   const visibleCategories =
     currentRole === 'STAFF' ? categories.filter((category) => category.status === 'ACTIVE') : categories;
+  const allCategories = allCategoriesQuery.data?.content ?? [];
   const parentOptions = useMemo(
     () => (activeCategoriesQuery.data?.content ?? []).filter((category) => category.id !== editingCategory?.id),
     [activeCategoriesQuery.data?.content, editingCategory?.id]
   );
+  const currentParent = allCategories.find((category) => category.id === currentParentId) ?? null;
+  const breadcrumb = useMemo(() => {
+    const chain: Category[] = [];
+    let parentId = currentParentId;
+
+    while (parentId) {
+      const current = allCategories.find((category) => category.id === parentId);
+      if (!current) {
+        break;
+      }
+
+      chain.unshift(current);
+      parentId = current.parentId;
+    }
+
+    return chain;
+  }, [allCategories, currentParentId]);
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
@@ -85,7 +116,7 @@ export function CategoriesPage() {
     onSuccess: () => {
       setCreateModalOpen(false);
       setPage(0);
-      form.reset({ parentId: '', name: '' });
+      form.reset({ parentId: currentParentId ?? '', name: '' });
       refresh();
     }
   });
@@ -123,11 +154,52 @@ export function CategoriesPage() {
     setEditModalOpen(true);
   };
 
+  const moveToDepth = (parentId: string | null) => {
+    setCurrentParentId(parentId);
+    setPage(0);
+  };
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-ink">카테고리 관리</h2>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+            {currentParentId !== null ? (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => moveToDepth(currentParent?.parentId ?? null)}
+                >
+                  뒤로가기
+                </Button>
+                <span>/</span>
+              </>
+            ) : null}
+            <button
+              type="button"
+              className={currentParentId === null ? 'font-semibold text-ink' : 'hover:text-ink'}
+              onClick={() => moveToDepth(null)}
+            >
+              최상위
+            </button>
+            {breadcrumb.map((category) => (
+              <div key={category.id} className="flex items-center gap-2">
+                <span>/</span>
+                <button
+                  type="button"
+                  className={category.id === currentParentId ? 'font-semibold text-ink' : 'hover:text-ink'}
+                  onClick={() => moveToDepth(category.id)}
+                >
+                  {category.name}
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-sm text-slate-600">
+            {currentParent ? `${currentParent.name} 하위 카테고리 목록입니다.` : '최상위 카테고리 목록입니다.'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {currentRole !== 'STAFF' ? (
@@ -165,7 +237,13 @@ export function CategoriesPage() {
             </select>
           </label>
           {canManageDangerousActions ? (
-            <Button type="button" onClick={() => setCreateModalOpen(true)}>
+            <Button
+              type="button"
+              onClick={() => {
+                form.reset({ parentId: currentParentId ?? '', name: '' });
+                setCreateModalOpen(true);
+              }}
+            >
               카테고리 생성
             </Button>
           ) : null}
@@ -205,6 +283,9 @@ export function CategoriesPage() {
                   {currentRole !== 'STAFF' ? <td className="px-4 py-3">{category.status}</td> : null}
                   <td className="px-4 py-3 text-slate-600">{formatDateTime(category.updatedAt)}</td>
                   <td className="space-x-2 px-4 py-3">
+                    <Button type="button" variant="secondary" onClick={() => moveToDepth(category.id)}>
+                      하위 보기
+                    </Button>
                     {canManageDangerousActions ? (
                       <>
                         <Button type="button" variant="secondary" onClick={() => startEdit(category)}>
@@ -273,7 +354,7 @@ export function CategoriesPage() {
           description="상위 카테고리와 카테고리명을 입력해 새 카테고리를 생성합니다."
           onClose={() => {
             setCreateModalOpen(false);
-            form.reset({ parentId: '', name: '' });
+            form.reset({ parentId: currentParentId ?? '', name: '' });
           }}
         >
           <form
@@ -308,7 +389,7 @@ export function CategoriesPage() {
                 variant="secondary"
                 onClick={() => {
                   setCreateModalOpen(false);
-                  form.reset({ parentId: '', name: '' });
+                  form.reset({ parentId: currentParentId ?? '', name: '' });
                 }}
               >
                 취소

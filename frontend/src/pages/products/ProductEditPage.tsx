@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getCategories } from '@/entities/category/api/categoryApi';
+import type { Category } from '@/entities/category/model/types';
 import {
   deleteFileAttachment,
   getFileAttachments,
@@ -39,6 +40,7 @@ export function ProductEditPage() {
     currentRole === 'ADMIN' || currentRole === 'OPERATOR' || currentRole === 'STAFF';
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
+  const [categoryParentId, setCategoryParentId] = useState<string | null>(null);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [attachmentNotice, setAttachmentNotice] = useState<string | null>(null);
   const [previewIndex, setPreviewIndex] = useState(0);
@@ -78,14 +80,41 @@ export function ProductEditPage() {
     () => (categoriesQuery.data?.content ?? []).find((category) => category.id === selectedCategoryId) ?? null,
     [categoriesQuery.data?.content, selectedCategoryId]
   );
+  const allCategories = categoriesQuery.data?.content ?? [];
+  const currentCategoryParent = allCategories.find((category) => category.id === categoryParentId) ?? null;
+  const categoryBreadcrumb = useMemo(() => {
+    const chain: Category[] = [];
+    let parentId = categoryParentId;
+
+    while (parentId) {
+      const current = allCategories.find((category) => category.id === parentId);
+      if (!current) {
+        break;
+      }
+
+      chain.unshift(current);
+      parentId = current.parentId;
+    }
+
+    return chain;
+  }, [allCategories, categoryParentId]);
   const filteredCategories = useMemo(() => {
     const keyword = categorySearch.trim().toLowerCase();
-    const categories = categoriesQuery.data?.content ?? [];
+    const categories = allCategories.filter((category) => category.parentId === categoryParentId);
     if (!keyword) {
       return categories;
     }
     return categories.filter((category) => category.name.toLowerCase().includes(keyword));
-  }, [categoriesQuery.data?.content, categorySearch]);
+  }, [allCategories, categoryParentId, categorySearch]);
+  const childCategoryIds = useMemo(
+    () =>
+      new Set(
+        allCategories
+          .filter((category) => category.parentId != null)
+          .map((category) => category.parentId as string)
+      ),
+    [allCategories]
+  );
   const optionGroups = optionPreviewQuery.data ?? [];
   const uploadedAttachments = [...(attachmentsQuery.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
   const pendingPreviewUrls = useMemo(
@@ -121,6 +150,20 @@ export function ProductEditPage() {
       });
     }
   }, [form, productQuery.data]);
+
+  useEffect(() => {
+    if (!categoryModalOpen) {
+      return;
+    }
+
+    if (!selectedCategoryId) {
+      setCategoryParentId(null);
+      return;
+    }
+
+    const selected = allCategories.find((category) => category.id === selectedCategoryId);
+    setCategoryParentId(selected?.parentId ?? null);
+  }, [allCategories, categoryModalOpen, selectedCategoryId]);
 
   useEffect(() => {
     return () => {
@@ -275,7 +318,10 @@ export function ProductEditPage() {
                 <button
                   className="flex h-12 w-full items-center justify-between rounded-lg border border-border bg-white px-4 text-left text-sm text-ink transition hover:border-slate-400"
                   type="button"
-                  onClick={() => setCategoryModalOpen(true)}
+                  onClick={() => {
+                    setCategorySearch('');
+                    setCategoryModalOpen(true);
+                  }}
                 >
                   <span>{selectedCategory?.name ?? '카테고리 선택'}</span>
                   <span className="text-slate-400">선택</span>
@@ -549,13 +595,49 @@ export function ProductEditPage() {
       <Modal
         open={categoryModalOpen}
         title="카테고리 선택"
-        description="카테고리명을 검색하고 선택할 수 있습니다."
-        onClose={() => setCategoryModalOpen(false)}
+        description="depth를 따라 이동하면서 카테고리를 선택할 수 있습니다."
+        onClose={() => {
+          setCategoryModalOpen(false);
+          setCategorySearch('');
+        }}
       >
         <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
+            {categoryParentId !== null ? (
+              <>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setCategoryParentId(currentCategoryParent?.parentId ?? null)}
+                >
+                  뒤로가기
+                </Button>
+                <span>/</span>
+              </>
+            ) : null}
+            <button
+              type="button"
+              className={categoryParentId === null ? 'font-semibold text-ink' : 'hover:text-ink'}
+              onClick={() => setCategoryParentId(null)}
+            >
+              최상위
+            </button>
+            {categoryBreadcrumb.map((category) => (
+              <div key={category.id} className="flex items-center gap-2">
+                <span>/</span>
+                <button
+                  type="button"
+                  className={category.id === categoryParentId ? 'font-semibold text-ink' : 'hover:text-ink'}
+                  onClick={() => setCategoryParentId(category.id)}
+                >
+                  {category.name}
+                </button>
+              </div>
+            ))}
+          </div>
           <TextField
             label="카테고리 검색"
-            placeholder="카테고리명을 입력해 검색"
+            placeholder="현재 depth에서 카테고리명 검색"
             value={categorySearch}
             onChange={(event) => setCategorySearch(event.target.value)}
           />
@@ -565,23 +647,33 @@ export function ProductEditPage() {
             ) : (
               <div className="divide-y divide-border">
                 {filteredCategories.map((category) => (
-                  <button
+                  <div
                     key={category.id}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left transition hover:bg-slate-50"
-                    type="button"
-                    onClick={() => {
-                      form.setValue('categoryId', category.id, { shouldValidate: true });
-                      setCategoryModalOpen(false);
-                    }}
+                    className="flex items-center justify-between gap-3 px-4 py-3 transition hover:bg-slate-50"
                   >
-                    <div>
+                    <button
+                      className="min-w-0 flex-1 text-left"
+                      type="button"
+                      onClick={() => {
+                        form.setValue('categoryId', category.id, { shouldValidate: true });
+                        setCategoryModalOpen(false);
+                        setCategorySearch('');
+                      }}
+                    >
                       <p className="text-sm font-medium text-ink">{category.name}</p>
                       <p className="mt-1 text-xs text-slate-500">{category.status}</p>
+                    </button>
+                    <div className="flex items-center gap-2">
+                      {childCategoryIds.has(category.id) ? (
+                        <Button type="button" variant="secondary" onClick={() => setCategoryParentId(category.id)}>
+                          하위 보기
+                        </Button>
+                      ) : null}
+                      {selectedCategoryId === category.id ? (
+                        <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white">선택됨</span>
+                      ) : null}
                     </div>
-                    {selectedCategoryId === category.id ? (
-                      <span className="rounded-full bg-slate-900 px-3 py-1 text-xs font-medium text-white">선택됨</span>
-                    ) : null}
-                  </button>
+                  </div>
                 ))}
               </div>
             )}

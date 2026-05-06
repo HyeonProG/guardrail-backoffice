@@ -8,6 +8,7 @@ export type CategoryListParams = {
   size?: number;
   sort?: string;
   parentId?: string;
+  rootOnly?: boolean;
   status?: CategoryStatus | '';
 };
 
@@ -20,6 +21,7 @@ export async function getCategories(params: CategoryListParams = {}) {
       size: params.size ?? 20,
       sort: params.sort ?? 'createdAt,desc',
       parentId: params.parentId || undefined,
+      rootOnly: params.rootOnly || undefined,
       status: params.status || undefined
     }
   });
