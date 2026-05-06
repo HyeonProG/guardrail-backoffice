@@ -18,6 +18,7 @@ import { getProductHistoryTypeLabel, getProductStatusLabel } from '@/shared/lib/
 import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { Modal } from '@/shared/ui/Modal';
 import { TextField } from '@/shared/ui/TextField';
 
 const productStatuses: ProductStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'INACTIVE'];
@@ -31,6 +32,7 @@ export function ProductDetailPage() {
   const [nextStatus, setNextStatus] = useState<ProductStatus>('PENDING');
   const [reason, setReason] = useState('');
   const [imageIndex, setImageIndex] = useState(0);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const productQuery = useQuery({
     queryKey: ['products', productId],
@@ -121,7 +123,7 @@ export function ProductDetailPage() {
               variant="secondary"
               className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
               disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate()}
+              onClick={() => setDeleteConfirmOpen(true)}
             >
               삭제
             </Button>
@@ -328,6 +330,33 @@ export function ProductDetailPage() {
           </tbody>
         </table>
       </section>
+
+      <Modal
+        open={deleteConfirmOpen}
+        title="상품 삭제 확인"
+        description="이 상품을 완전히 삭제하시겠습니까? 상품 정보, 이미지, 이력이 함께 제거되며 되돌릴 수 없습니다."
+        onClose={() => setDeleteConfirmOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-6 text-red-700">
+            삭제 가능 상태인 상품만 제거할 수 있습니다. 실행 후에는 복구할 수 없습니다.
+          </div>
+          <ErrorMessage error={deleteMutation.error} />
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setDeleteConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button
+              type="button"
+              className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300"
+              disabled={deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+            >
+              삭제하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
