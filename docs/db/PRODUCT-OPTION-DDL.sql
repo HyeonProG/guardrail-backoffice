@@ -16,7 +16,6 @@ create table product_option_items (
     deleted boolean not null default false,
     product_option_id uuid not null,
     name varchar(255) not null,
-    additional_price integer not null,
     sort_order integer not null,
     status varchar(255) not null
 );
@@ -44,7 +43,3 @@ create unique index uk_product_option_items_option_id_sort_order_not_deleted
 
 -- 옵션 그룹은 categories.id를 category_id 값으로 참조하는 카테고리별 마스터 데이터로 관리한다.
 -- 옵션값은 product_option_items.product_option_id = product_options.id 값으로 연결한다.
--- additional_price는 애플리케이션 검증과 DB check 제약으로 0 이상만 허용한다.
-alter table product_option_items
-    add constraint chk_product_option_items_additional_price
-    check (additional_price >= 0);

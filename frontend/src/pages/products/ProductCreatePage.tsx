@@ -48,7 +48,7 @@ export function ProductCreatePage() {
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { categoryId: '', name: '', description: '', quantity: 0, selectedOptionItemIds: [] }
+    defaultValues: { categoryId: '', name: '', description: '', selectedOptionItemIds: [] }
   });
   const selectedCategoryId = form.watch('categoryId');
   const descriptionValue = form.watch('description') ?? '';
@@ -249,7 +249,7 @@ export function ProductCreatePage() {
   }
 
   async function generateDescription() {
-    const valid = await form.trigger(['categoryId', 'name', 'quantity', 'description']);
+    const valid = await form.trigger(['categoryId', 'name', 'description']);
     if (!valid) {
       return;
     }
@@ -300,16 +300,14 @@ export function ProductCreatePage() {
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-semibold text-ink">상품 생성</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.
-            </p>
+            <p className="mt-1 text-sm text-slate-600">카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.</p>
           </div>
           <Link className="text-sm font-medium text-slate-900 underline" to="/products">
             상품 목록으로
           </Link>
         </div>
         <div className="rounded-lg border border-border bg-white/80 px-4 py-3 text-sm text-slate-600 shadow-sm">
-          상품명과 카테고리, 수량을 입력하고 필요하면 이미지를 먼저 추가하세요. 설명은 직접 작성하거나 입력한 내용을 바탕으로 AI 문구를 바로 반영할 수 있습니다.
+          상품명과 카테고리를 입력하고 필요하면 이미지를 먼저 추가하세요. 설명은 직접 작성하거나 입력한 내용을 바탕으로 AI 문구를 바로 반영할 수 있습니다.
         </div>
       </section>
 
@@ -605,14 +603,6 @@ export function ProductCreatePage() {
                 <p>업로드 예정 이미지: {pendingImages.length}건</p>
               </div>
             </div>
-
-            <TextField
-              label="수량"
-              type="number"
-              min={0}
-              error={form.formState.errors.quantity?.message}
-              {...form.register('quantity')}
-            />
 
             <ErrorMessage
               error={

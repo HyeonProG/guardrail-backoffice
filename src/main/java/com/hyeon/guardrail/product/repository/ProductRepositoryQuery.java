@@ -113,7 +113,6 @@ public class ProductRepositoryQuery {
       case "createdAt" -> new OrderSpecifier<>(direction, product.createdAt);
       case "updatedAt" -> new OrderSpecifier<>(direction, product.updatedAt);
       case "name" -> new OrderSpecifier<>(direction, product.name);
-      case "quantity" -> new OrderSpecifier<>(direction, product.quantity);
       case "status" -> new OrderSpecifier<>(direction, product.status);
       default -> throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "허용되지 않은 정렬 필드입니다.");
     };

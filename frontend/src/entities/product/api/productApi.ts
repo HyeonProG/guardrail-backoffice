@@ -7,7 +7,6 @@ export type ProductPayload = {
   categoryId: string;
   name: string;
   description?: string;
-  quantity: number;
   selectedOptionItemIds?: string[];
   actorId: string;
 };

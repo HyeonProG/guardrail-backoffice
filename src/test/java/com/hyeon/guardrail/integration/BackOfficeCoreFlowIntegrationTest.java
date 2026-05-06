@@ -154,7 +154,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var product =
         productService.createProduct(
             new ProductCreateRequest(
-                childCategory.getId(), "가드레일 티셔츠", "판매 페이지 상품 설명", 100, admin.getUserId()));
+                childCategory.getId(), "가드레일 티셔츠", "판매 페이지 상품 설명", admin.getUserId()));
 
     assertThat(product.getCategoryId()).isEqualTo(childCategory.getId());
     assertThat(product.getStatus()).isEqualTo(ProductStatus.DRAFT);
@@ -207,7 +207,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var product =
         productService.createProduct(
             new ProductCreateRequest(
-                category.getId(), "검수 상품", "승인 검수 대상 상품 설명", 10, admin.getUserId()));
+                category.getId(), "검수 상품", "승인 검수 대상 상품 설명", admin.getUserId()));
     productService.updateProductStatus(
         product.getId(),
         new ProductStatusUpdateRequest(ProductStatus.PENDING, admin.getUserId(), null));
@@ -261,7 +261,7 @@ public class BackOfficeCoreFlowIntegrationTest {
             () ->
                 productService.createProduct(
                     new ProductCreateRequest(
-                        category.getId(), "등록 실패 상품", "비활성 분류 상품 설명", 1, admin.getUserId())))
+                        category.getId(), "등록 실패 상품", "비활성 분류 상품 설명", admin.getUserId())))
         .isInstanceOf(BaseException.class);
   }
 
@@ -276,7 +276,7 @@ public class BackOfficeCoreFlowIntegrationTest {
     var product =
         productService.createProduct(
             new ProductCreateRequest(
-                category.getId(), "스테인리스 텀블러", "승인 전 기존 설명", 20, admin.getUserId()));
+                category.getId(), "스테인리스 텀블러", "승인 전 기존 설명", admin.getUserId()));
 
     when(aiContentGenerator.generateProductDescription(any()))
         .thenReturn(new ProductDescriptionGenerateResult("AI가 생성한 상품 설명 초안입니다."));

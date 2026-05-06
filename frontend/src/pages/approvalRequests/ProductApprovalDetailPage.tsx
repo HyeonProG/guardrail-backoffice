@@ -77,10 +77,6 @@ export function ProductApprovalDetailPage() {
                 <p className="mt-2 text-sm font-medium text-ink">{categoryName}</p>
               </div>
               <div className="rounded-lg border border-border bg-slate-50 p-4">
-                <p className="text-xs font-medium text-slate-500">수량</p>
-                <p className="mt-2 text-sm font-medium text-ink">{product?.quantity ?? '-'}</p>
-              </div>
-              <div className="rounded-lg border border-border bg-slate-50 p-4">
                 <p className="text-xs font-medium text-slate-500">상태</p>
                 <p className="mt-2 text-sm font-medium text-ink">{product ? getProductStatusLabel(product.status) : '-'}</p>
               </div>

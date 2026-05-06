@@ -68,8 +68,7 @@ class ProductServiceTest {
     UUID categoryId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
     Category category = new Category(null, "상의", CategoryStatus.INACTIVE);
-    ProductCreateRequest request =
-        new ProductCreateRequest(categoryId, "티셔츠", "상품 설명", 10, actorId);
+    ProductCreateRequest request = new ProductCreateRequest(categoryId, "티셔츠", "상품 설명", actorId);
 
     when(categoryRepositoryQuery.findById(categoryId)).thenReturn(Optional.of(category));
 
@@ -86,8 +85,7 @@ class ProductServiceTest {
     UUID actorId = UUID.randomUUID();
     UUID productId = UUID.randomUUID();
     Category category = new Category(null, "상의", CategoryStatus.ACTIVE);
-    ProductCreateRequest request =
-        new ProductCreateRequest(categoryId, "티셔츠", "상품 설명", 10, actorId);
+    ProductCreateRequest request = new ProductCreateRequest(categoryId, "티셔츠", "상품 설명", actorId);
 
     when(categoryRepositoryQuery.findById(categoryId)).thenReturn(Optional.of(category));
     when(productSelectedOptionRepositoryQuery.findAllByProductId(productId)).thenReturn(List.of());
@@ -116,7 +114,7 @@ class ProductServiceTest {
   void updateProductStatusRejectsInvalidTransition() {
     UUID productId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", 10, ProductStatus.DRAFT);
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", ProductStatus.DRAFT);
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
@@ -135,7 +133,7 @@ class ProductServiceTest {
   void updateProductStatusRequiresReasonWhenRejected() {
     UUID productId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", 10, ProductStatus.PENDING);
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", ProductStatus.PENDING);
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
@@ -153,7 +151,7 @@ class ProductServiceTest {
   void updateProductStatusStoresRejectedHistoryWithReason() {
     UUID productId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", 10, ProductStatus.PENDING);
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", ProductStatus.PENDING);
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
@@ -176,7 +174,7 @@ class ProductServiceTest {
   void updateProductStatusStoresInactivatedHistory() {
     UUID productId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", 10, ProductStatus.APPROVED);
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "상품 설명", ProductStatus.APPROVED);
     ReflectionTestUtils.setField(product, "id", productId);
 
     when(productRepositoryQuery.findById(productId)).thenReturn(Optional.of(product));
@@ -199,7 +197,7 @@ class ProductServiceTest {
   void generateProductDescriptionUpdatesDescriptionAndStoresHistory() {
     UUID productId = UUID.randomUUID();
     UUID actorId = UUID.randomUUID();
-    Product product = new Product(UUID.randomUUID(), "티셔츠", "기존 설명", 10, ProductStatus.DRAFT);
+    Product product = new Product(UUID.randomUUID(), "티셔츠", "기존 설명", ProductStatus.DRAFT);
     ReflectionTestUtils.setField(product, "id", productId);
     ProductDescriptionGenerateRequest request =
         new ProductDescriptionGenerateRequest(

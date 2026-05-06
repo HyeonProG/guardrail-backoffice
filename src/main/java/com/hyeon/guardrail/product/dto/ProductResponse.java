@@ -27,9 +27,6 @@ public class ProductResponse {
   @Schema(description = "상품 설명")
   private String description;
 
-  @Schema(description = "판매 가능 수량", example = "100")
-  private int quantity;
-
   @Schema(description = "선택된 옵션값 목록")
   private List<ProductSelectedOptionResponse> selectedOptions;
 
@@ -50,7 +47,6 @@ public class ProductResponse {
         product.getCategoryId(),
         product.getName(),
         product.getDescription(),
-        product.getQuantity(),
         selectedOptions,
         product.getStatus(),
         product.getCreatedAt(),

@@ -13,7 +13,6 @@ export type Product = {
   categoryId: string;
   name: string;
   description: string;
-  quantity: number;
   selectedOptions: ProductSelectedOption[];
   status: ProductStatus;
   createdAt: string;

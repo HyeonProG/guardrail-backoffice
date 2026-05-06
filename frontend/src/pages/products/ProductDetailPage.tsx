@@ -197,10 +197,6 @@ export function ProductDetailPage() {
                     <p className="mt-2 text-base font-semibold text-slate-950">{currentCategoryName}</p>
                   </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-500">수량</p>
-                    <p className="mt-2 text-base font-semibold text-slate-950">{productQuery.data.quantity}</p>
-                  </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">상품 번호</p>
                     <p className="mt-2 font-mono text-sm text-slate-700">{shortId(productQuery.data.id)}</p>
                   </div>
@@ -248,7 +244,7 @@ export function ProductDetailPage() {
               <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
                 <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명, 수량을 변경할 수 있습니다.
+                  운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명을 변경할 수 있습니다.
                 </p>
                 <div className="mt-4">
                   <Link

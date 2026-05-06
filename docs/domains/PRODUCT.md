@@ -15,7 +15,6 @@
 - 카테고리 ID
 - 상품명
 - 상세 설명
-- 수량
 - 상품 상태
 - 생성일시, 수정일시, 삭제 여부
 
@@ -60,7 +59,6 @@
 | `categoryId` | 카테고리 UUID |
 | `name` | 상품명 |
 | `description` | 상품 등록 폼의 현재 상세 설명 값 |
-| `quantity` | 판매 가능 수량 |
 | `status` | 상품 상태 |
 | `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
 | `updatedAt` | 수정일시, `SoftDeleteEntity` 상속 |
@@ -138,7 +136,7 @@ APPROVED -> INACTIVE
 - request: `ProductCreateRequest`
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
-  - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - `categoryId`, `name`, `description`, `actorId`를 request body로 받는다.
   - `description`은 선택 값이다.
   - 생성 시 상품 상태는 `DRAFT`로 시작한다.
   - 생성 시 `CREATED` 이력을 함께 저장한다.
@@ -173,7 +171,7 @@ APPROVED -> INACTIVE
 - request: `ProductUpdateRequest`
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
-  - `categoryId`, `name`, `description`, `quantity`, `actorId`를 request body로 받는다.
+  - `categoryId`, `name`, `description`, `actorId`를 request body로 받는다.
   - `description`은 선택 값이다.
   - `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
   - 상태 변경은 이 API에서 처리하지 않는다.

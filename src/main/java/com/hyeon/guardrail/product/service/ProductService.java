@@ -77,7 +77,6 @@ public class ProductService {
             request.getCategoryId(),
             request.getName(),
             normalizeDescription(request.getDescription()),
-            request.getQuantity(),
             ProductStatus.DRAFT);
     Product savedProduct = productRepository.save(product);
     syncSelectedOptions(
@@ -118,10 +117,7 @@ public class ProductService {
     validateCategoryExists(request.getCategoryId());
 
     product.updateBasicInfo(
-        request.getCategoryId(),
-        request.getName(),
-        normalizeDescription(request.getDescription()),
-        request.getQuantity());
+        request.getCategoryId(), request.getName(), normalizeDescription(request.getDescription()));
     if (request.getSelectedOptionItemIds() != null) {
       syncSelectedOptions(productId, request.getCategoryId(), request.getSelectedOptionItemIds());
     }

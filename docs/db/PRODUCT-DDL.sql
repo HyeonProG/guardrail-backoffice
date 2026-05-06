@@ -6,7 +6,6 @@ create table products (
     category_id uuid not null,
     name varchar(255) not null,
     description varchar(2000) not null,
-    quantity integer not null,
     status varchar(255) not null
 );
 

@@ -316,7 +316,6 @@ request body:
 - `categoryId`
 - `name`
 - `description`
-- `quantity`
 - `actorId`
 
 response result:
@@ -324,7 +323,6 @@ response result:
 - `categoryId`
 - `name`
 - `description`
-- `quantity`
 - `status`
 - `createdAt`
 - `updatedAt`
@@ -381,7 +379,6 @@ request body:
 - `categoryId`
 - `name`
 - `description`
-- `quantity`
 - `selectedOptionItemIds`
 - `actorId`
 
@@ -389,7 +386,7 @@ response result:
 - `ProductResponse`
 
 규칙:
-- 기본 정보 수정은 `categoryId`, `name`, `description`, `quantity`만 처리한다.
+- 기본 정보 수정은 `categoryId`, `name`, `description`만 처리한다.
 - `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
 - 상태 변경은 별도 API에서 처리한다.
 - 수정 시 `UPDATED` 이력을 저장한다.

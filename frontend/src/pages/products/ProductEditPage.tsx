@@ -48,7 +48,7 @@ export function ProductEditPage() {
   const [updateCompleteOpen, setUpdateCompleteOpen] = useState(false);
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
-    defaultValues: { categoryId: '', name: '', description: '', quantity: 0, selectedOptionItemIds: [] }
+    defaultValues: { categoryId: '', name: '', description: '', selectedOptionItemIds: [] }
   });
 
   const selectedCategoryId = form.watch('categoryId');
@@ -145,7 +145,6 @@ export function ProductEditPage() {
         categoryId: productQuery.data.categoryId,
         name: productQuery.data.name,
         description: productQuery.data.description,
-        quantity: productQuery.data.quantity,
         selectedOptionItemIds: productQuery.data.selectedOptions.map((option) => option.productOptionItemId)
       });
     }
@@ -565,14 +564,6 @@ export function ProductEditPage() {
                 <p>업로드 예정 이미지: {pendingImages.length}건</p>
               </div>
             </div>
-
-            <TextField
-              label="수량"
-              type="number"
-              min={0}
-              error={form.formState.errors.quantity?.message}
-              {...form.register('quantity')}
-            />
 
             <ErrorMessage
               error={

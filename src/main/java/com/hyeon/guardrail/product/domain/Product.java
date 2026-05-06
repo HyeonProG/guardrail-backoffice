@@ -31,19 +31,15 @@ public class Product extends SoftDeleteEntity {
   @Column(name = "description", nullable = false, length = 2000)
   private String description;
 
-  @Column(name = "quantity", nullable = false)
-  private int quantity;
-
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
   private ProductStatus status;
 
   /** 상품 기본 정보를 수정 */
-  public void updateBasicInfo(UUID categoryId, String name, String description, int quantity) {
+  public void updateBasicInfo(UUID categoryId, String name, String description) {
     this.categoryId = categoryId;
     this.name = name;
     this.description = description;
-    this.quantity = quantity;
   }
 
   /** 상품 설명을 반영한다 */
