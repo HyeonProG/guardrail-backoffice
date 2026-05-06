@@ -161,9 +161,10 @@ export function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">카테고리 관리</h2>
+          <p className="section-kicker">Category Tree</p>
+          <h2 className="page-title">카테고리 관리</h2>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-slate-600">
             {currentParentId !== null ? (
               <>
@@ -206,7 +207,7 @@ export function CategoriesPage() {
             <label className="text-sm font-medium text-slate-700">
               상태
               <select
-                className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+                className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
                 value={statusFilter}
                 onChange={(event) => {
                   setPage(0);
@@ -225,7 +226,7 @@ export function CategoriesPage() {
           <label className="text-sm font-medium text-slate-700">
             정렬
             <select
-              className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+              className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={sortDirection}
               onChange={(event) => {
                 setPage(0);
@@ -260,9 +261,9 @@ export function CategoriesPage() {
       </section>
 
       <section>
-        <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <div className="table-shell">
+          <table className="table-base min-w-[760px]">
+            <thead>
               <tr>
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">이름</th>
@@ -272,7 +273,7 @@ export function CategoriesPage() {
                 <th className="px-4 py-3">액션</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {visibleCategories.map((category) => (
                 <tr key={category.id}>
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(category.id)}</td>
@@ -371,8 +372,8 @@ export function CategoriesPage() {
             })}
           >
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-slate-700">상위 카테고리</span>
-              <select className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm" {...form.register('parentId')}>
+              <span className="mb-2 block text-sm font-semibold tracking-[0.01em] text-slate-700">상위 카테고리</span>
+              <select className="h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm" {...form.register('parentId')}>
                 <option value="">최상위 카테고리</option>
                 {parentOptions.map((category) => (
                   <option key={category.id} value={category.id}>
@@ -449,8 +450,8 @@ export function CategoriesPage() {
           })}
         >
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700">상위 카테고리</span>
-            <select className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm" {...editForm.register('parentId')}>
+              <span className="mb-2 block text-sm font-semibold tracking-[0.01em] text-slate-700">상위 카테고리</span>
+              <select className="h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm" {...editForm.register('parentId')}>
               <option value="">최상위 카테고리</option>
               {parentOptions.map((category) => (
                 <option key={category.id} value={category.id}>

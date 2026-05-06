@@ -67,13 +67,16 @@ export function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <section>
-        <h1 className="text-2xl font-semibold text-slate-950">사용자 관리</h1>
-        <p className="mt-2 text-sm text-slate-600">관리자와 운영자는 사용자 계정을 생성하고 상태를 관리할 수 있습니다.</p>
+      <section className="page-header">
+        <div>
+          <p className="section-kicker">Identity Control</p>
+          <h1 className="page-title">사용자 관리</h1>
+          <p className="page-description">관리자와 운영자는 사용자 계정을 생성하고 상태를 관리할 수 있습니다.</p>
+        </div>
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
-        <div className="rounded-[28px] border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+        <div className="surface-card p-6">
           <h2 className="text-lg font-semibold text-slate-950">사용자 추가</h2>
           <form
             className="mt-5 space-y-4"
@@ -89,8 +92,8 @@ export function UsersPage() {
             <TextField label="이메일" error={form.formState.errors.email?.message} {...form.register('email')} />
             <TextField label="이름" error={form.formState.errors.name?.message} {...form.register('name')} />
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-slate-700">역할</span>
-              <select className="h-10 w-full rounded-md border border-border bg-white px-3 text-sm" {...form.register('role')}>
+              <span className="mb-2 block text-sm font-semibold tracking-[0.01em] text-slate-700">역할</span>
+              <select className="h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm" {...form.register('role')}>
                 <option value="STAFF">STAFF</option>
                 <option value="OPERATOR">OPERATOR</option>
                 <option value="ADMIN">ADMIN</option>
@@ -103,14 +106,14 @@ export function UsersPage() {
           </form>
 
           {createdPassword ? (
-            <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <div className="mt-5 rounded-[22px] border border-emerald-200 bg-[linear-gradient(180deg,#ecfdf5_0%,#f4fff9_100%)] p-4 shadow-sm">
               <p className="text-sm font-semibold text-emerald-800">초기 계정 정보</p>
               <p className="mt-2 text-sm text-emerald-700">이메일: {createdEmail}</p>
               <p className="mt-1 break-all text-sm text-emerald-700">초기 비밀번호: {createdPassword}</p>
             </div>
           ) : null}
           {temporaryPasswordIssuedEmail ? (
-            <div className="mt-4 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+            <div className="mt-4 rounded-[22px] border border-sky-200 bg-[linear-gradient(180deg,#eff6ff_0%,#f6fbff_100%)] p-4 shadow-sm">
               <p className="text-sm font-semibold text-sky-800">임시 비밀번호 발급 완료</p>
               <p className="mt-2 text-sm text-sky-700">
                 {temporaryPasswordIssuedEmail} 주소로 임시 비밀번호 발송을 기록했습니다.
@@ -119,14 +122,14 @@ export function UsersPage() {
           ) : null}
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
+        <div className="table-shell">
+          <div className="table-toolbar">
             <div>
-              <h2 className="text-lg font-semibold text-slate-950">사용자 목록</h2>
-              <p className="mt-1 text-sm text-slate-500">현재 등록된 사용자 계정과 역할, 상태를 확인합니다.</p>
+              <h2 className="table-title">사용자 목록</h2>
+              <p className="table-description">현재 등록된 사용자 계정과 역할, 상태를 확인합니다.</p>
             </div>
             <select
-              className="h-10 rounded-md border border-border bg-white px-3 text-sm"
+              className="h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={statusFilter}
               onChange={(event) => setStatusFilter(event.target.value as UserStatus | '')}
             >
@@ -138,8 +141,8 @@ export function UsersPage() {
             </select>
           </div>
 
-          <table className="w-full min-w-[820px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+          <table className="table-base min-w-[820px]">
+            <thead>
               <tr>
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">이메일</th>
@@ -149,7 +152,7 @@ export function UsersPage() {
                 <th className="px-4 py-3">액션</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {users.map((user) => (
                 <tr key={user.userId}>
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(user.userId)}</td>
@@ -161,7 +164,7 @@ export function UsersPage() {
                     <div className="flex gap-2">
                       {user.status !== 'ACTIVE' ? (
                         <button
-                          className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                           onClick={() =>
                             setConfirmState({
                               title: '사용자 활성화 확인',
@@ -176,7 +179,7 @@ export function UsersPage() {
                         </button>
                       ) : (
                         <button
-                          className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                           onClick={() =>
                             setConfirmState({
                               title: '사용자 비활성화 확인',
@@ -191,7 +194,7 @@ export function UsersPage() {
                         </button>
                       )}
                       <button
-                        className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                         onClick={() => setTemporaryPasswordTarget(user)}
                         type="button"
                       >

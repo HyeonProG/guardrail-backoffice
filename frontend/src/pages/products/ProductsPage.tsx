@@ -56,16 +56,17 @@ export function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">상품 관리</h2>
-          <p className="mt-1 text-sm text-slate-500">등록 중이거나 승인 대기 중인 상품을 확인하고 관리합니다.</p>
+          <p className="section-kicker">Product Queue</p>
+          <h2 className="page-title">상품 관리</h2>
+          <p className="page-description">등록 중이거나 승인 대기 중인 상품을 확인하고 관리합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-700">
             정렬
             <select
-              className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+              className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={sortDirection}
               onChange={(event) => {
                 setPage(0);
@@ -77,13 +78,13 @@ export function ProductsPage() {
             </select>
           </label>
           <Link
-            className="inline-flex h-10 items-center justify-center rounded-md bg-ink px-4 text-sm font-medium text-white hover:bg-slate-800"
+            className="inline-flex h-11 items-center justify-center rounded-2xl border border-sky-900/90 bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] px-4 text-sm font-semibold text-white shadow-lg hover:-translate-y-0.5"
             to="/products/new"
           >
             상품 생성
           </Link>
           <Link
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-ink hover:bg-slate-50"
+            className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:bg-slate-50"
             to="/products/approved"
           >
             승인 완료 상품 보기
@@ -91,14 +92,14 @@ export function ProductsPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 shadow-sm">
+      <section className="table-shell">
         {products.length > 0 ? (
           <>
             <div className="grid gap-5 p-6 md:grid-cols-2 xl:grid-cols-4">
               {productCards.map((product) => (
                 <article
                   key={product.id}
-                  className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
                 >
                   <Link to={`/products/${product.id}`}>
                     <div className="aspect-[4/3] overflow-hidden bg-slate-100">
@@ -124,20 +125,20 @@ export function ProductsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                         to={`/products/${product.id}`}
                       >
                         상세
                       </Link>
                       <Link
-                        className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                         to={`/product-options?categoryId=${product.categoryId}`}
                       >
                         옵션 관리
                       </Link>
                       {canReviewApprovals && product.status === 'PENDING' ? (
                         <Link
-                          className="inline-flex h-9 items-center justify-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-700"
+                          className="inline-flex h-9 items-center justify-center rounded-xl border border-sky-900/90 bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] px-3 text-sm font-semibold text-white shadow-lg hover:-translate-y-0.5"
                           to={`/approval-requests/${product.id}`}
                         >
                           승인 검토

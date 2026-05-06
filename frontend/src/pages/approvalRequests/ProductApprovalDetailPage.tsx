@@ -51,12 +51,13 @@ export function ProductApprovalDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">승인 요청 상품 상세</h2>
-          <p className="mt-1 text-sm text-slate-600">승인 대기 중인 상품 정보를 읽기 전용으로 확인합니다.</p>
+          <p className="section-kicker">Review Detail</p>
+          <h2 className="page-title">승인 요청 상품 상세</h2>
+          <p className="page-description">승인 대기 중인 상품 정보를 읽기 전용으로 확인합니다.</p>
         </div>
-        <Link className="text-sm font-medium text-slate-900 underline" to="/approval-requests">
+        <Link className="ghost-link" to="/approval-requests">
           승인 요청 관리로 돌아가기
         </Link>
       </section>
@@ -65,7 +66,7 @@ export function ProductApprovalDetailPage() {
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
         <div className="space-y-5">
-          <div className="rounded-lg border border-border bg-white p-5 shadow-sm">
+          <div className="surface-card-muted p-5">
             <h3 className="text-base font-semibold text-ink">상품 기본 정보</h3>
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div className="rounded-lg border border-border bg-slate-50 p-4">
@@ -97,7 +98,7 @@ export function ProductApprovalDetailPage() {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-white p-5 shadow-sm">
+          <div className="surface-card-muted p-5">
             <h3 className="text-base font-semibold text-ink">상품 이미지</h3>
             {imageItems.length === 0 ? (
               <div className="mt-4 rounded-lg border border-dashed border-border px-4 py-8 text-center text-sm text-slate-500">
@@ -133,7 +134,7 @@ export function ProductApprovalDetailPage() {
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-white p-5 shadow-sm">
+        <div className="surface-card-muted p-5">
           <h3 className="text-base font-semibold text-ink">기본 정보</h3>
           <div className="mt-4 space-y-3 text-sm text-slate-600">
             <p>상품 번호: {product ? shortId(product.id) : '-'}</p>
@@ -143,12 +144,12 @@ export function ProductApprovalDetailPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-        <div className="border-b border-border px-5 py-4">
+      <section className="table-shell">
+        <div className="border-b border-slate-200/70 px-5 py-4">
           <h3 className="text-base font-semibold text-ink">변경 이력</h3>
         </div>
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <table className="table-base min-w-[760px]">
+          <thead>
             <tr>
               <th className="px-4 py-3">이력 번호</th>
               <th className="px-4 py-3">변경 내용</th>
@@ -157,7 +158,7 @@ export function ProductApprovalDetailPage() {
               <th className="px-4 py-3">일시</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody>
             {(historiesQuery.data ?? []).map((history) => (
               <tr key={history.id}>
                 <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(history.id)}</td>

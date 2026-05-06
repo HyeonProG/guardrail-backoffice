@@ -88,19 +88,19 @@ export function Header({ groups, onLogout }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-5 py-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-white/60 bg-white/70 backdrop-blur-2xl">
+      <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-6 px-5 py-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-8">
           <Link
-            className="group inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-md"
+            className="group inline-flex items-center gap-3 rounded-[28px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96)_0%,rgba(241,245,249,0.94)_100%)] px-4 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)]"
             to="/dashboard"
           >
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white transition duration-300 group-hover:rotate-6">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#0f172a_0%,#1d4ed8_100%)] text-sm font-semibold text-white shadow-lg transition duration-300 group-hover:-rotate-3">
               G
             </span>
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-none text-slate-950">{env.appName}</p>
-              <p className="mt-1 text-xs text-slate-500">Backoffice Control Center</p>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">Backoffice Control Center</p>
             </div>
           </Link>
 
@@ -110,8 +110,8 @@ export function Header({ groups, onLogout }: HeaderProps) {
                 <button
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition duration-200 ${
                     openGroup === group.label
-                      ? 'bg-slate-950 text-white'
-                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950'
+                      ? 'bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] text-white shadow-lg'
+                      : 'text-slate-700 hover:bg-white hover:text-slate-950 hover:shadow-sm'
                   }`}
                   onClick={() => setOpenGroup((current) => (current === group.label ? null : group.label))}
                   type="button"
@@ -124,7 +124,7 @@ export function Header({ groups, onLogout }: HeaderProps) {
                   </span>
                 </button>
                 <div
-                  className={`absolute left-0 top-full mt-3 w-80 rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-2xl shadow-slate-900/10 transition duration-300 ${
+                  className={`absolute left-0 top-full mt-3 w-80 rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_100%)] p-3 shadow-2xl shadow-slate-900/10 transition duration-300 ${
                     openGroup === group.label
                       ? 'pointer-events-auto translate-y-0 opacity-100'
                       : 'pointer-events-none translate-y-2 opacity-0'
@@ -134,10 +134,10 @@ export function Header({ groups, onLogout }: HeaderProps) {
                     {group.items.map((item) => (
                       <Link
                         key={item.path}
-                        className={`block rounded-2xl px-4 py-3 transition duration-200 ${
+                        className={`block rounded-[20px] px-4 py-3 transition duration-200 ${
                           isPathActive(item.path)
-                            ? 'bg-slate-950 text-white'
-                            : 'bg-white text-slate-700 hover:bg-slate-100 hover:text-slate-950'
+                            ? 'bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] text-white shadow-lg'
+                            : 'bg-white/80 text-slate-700 hover:bg-slate-100 hover:text-slate-950'
                         }`}
                         to={item.path}
                       >
@@ -161,11 +161,11 @@ export function Header({ groups, onLogout }: HeaderProps) {
         <div className="flex items-center gap-3">
           <div className="relative hidden md:block" ref={profileRef}>
             <button
-              className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-2 text-left shadow-sm transition duration-200 hover:border-slate-300 hover:shadow-md"
+              className="inline-flex items-center gap-3 rounded-[28px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(241,245,249,0.94)_100%)] px-4 py-2 text-left shadow-[0_16px_40px_rgba(15,23,42,0.08)] transition duration-200 hover:border-slate-300 hover:shadow-[0_20px_48px_rgba(15,23,42,0.12)]"
               onClick={() => setProfileOpen((current) => !current)}
               type="button"
             >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-semibold text-white">
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,#020617_0%,#0f172a_100%)] text-sm font-semibold text-white">
                 {(userQuery.data?.name ?? 'U').slice(0, 1)}
               </span>
               <span className="min-w-0">
@@ -177,7 +177,7 @@ export function Header({ groups, onLogout }: HeaderProps) {
             </button>
 
             <div
-              className={`absolute right-0 top-full mt-3 w-72 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl shadow-slate-900/10 transition duration-300 ${
+              className={`absolute right-0 top-full mt-3 w-72 rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.96)_100%)] p-4 shadow-2xl shadow-slate-900/10 transition duration-300 ${
                 profileOpen ? 'pointer-events-auto translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0'
               }`}
             >
@@ -196,7 +196,7 @@ export function Header({ groups, onLogout }: HeaderProps) {
               </div>
             </div>
           </div>
-          <Button type="button" variant="secondary" onClick={onLogout}>
+          <Button type="button" variant="secondary" className="bg-white/85" onClick={onLogout}>
             로그아웃
           </Button>
         </div>
@@ -209,8 +209,8 @@ export function Header({ groups, onLogout }: HeaderProps) {
               key={item.path}
               className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition ${
                 isPathActive(item.path)
-                  ? 'bg-slate-950 text-white'
-                  : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:text-slate-950'
+                  ? 'bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] text-white shadow-md'
+                  : 'bg-white/90 text-slate-600 ring-1 ring-slate-200 hover:text-slate-950'
               }`}
               to={item.path}
             >

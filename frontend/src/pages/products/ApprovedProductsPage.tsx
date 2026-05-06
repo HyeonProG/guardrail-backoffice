@@ -45,16 +45,17 @@ export function ApprovedProductsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">승인 완료 상품</h2>
-          <p className="mt-1 text-sm text-slate-500">승인이 완료된 상품을 카드형 목록으로 확인합니다.</p>
+          <p className="section-kicker">Approved Catalog</p>
+          <h2 className="page-title">승인 완료 상품</h2>
+          <p className="page-description">승인이 완료된 상품을 카드형 목록으로 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-700">
             정렬
             <select
-              className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+              className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={sortDirection}
               onChange={(event) => {
                 setPage(0);
@@ -66,7 +67,7 @@ export function ApprovedProductsPage() {
             </select>
           </label>
           <Link
-            className="inline-flex h-10 items-center justify-center rounded-md border border-border px-4 text-sm font-medium text-ink hover:bg-slate-50"
+            className="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-700 shadow-sm hover:-translate-y-0.5 hover:bg-slate-50"
             to="/products"
           >
             승인 전 상품 관리
@@ -74,14 +75,14 @@ export function ApprovedProductsPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 shadow-sm">
+      <section className="table-shell">
         {products.length > 0 ? (
           <>
             <div className="grid gap-5 p-6 md:grid-cols-2 xl:grid-cols-4">
               {productCards.map((product) => (
                 <article
                   key={product.id}
-                  className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  className="overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
                 >
                   <Link to={`/products/${product.id}`}>
                     <div className="aspect-[4/3] overflow-hidden bg-slate-100">
@@ -107,7 +108,7 @@ export function ApprovedProductsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Link
-                        className="inline-flex h-9 items-center justify-center rounded-md border border-border px-3 text-sm font-medium text-ink hover:bg-slate-50"
+                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
                         to={`/products/${product.id}`}
                       >
                         상세

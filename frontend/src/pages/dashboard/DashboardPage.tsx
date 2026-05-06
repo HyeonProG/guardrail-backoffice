@@ -121,7 +121,7 @@ export function DashboardPage() {
             {stats.map((stat, index) => (
               <article
                 key={stat.label}
-                className="animate-fade-up rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur-md"
+                className="animate-fade-up rounded-[28px] border border-white/15 bg-white/10 p-5 shadow-[0_16px_40px_rgba(15,23,42,0.16)] backdrop-blur-md"
                 style={{ animationDelay: `${index * 80}ms` }}
               >
                 <div className={`inline-flex rounded-full bg-gradient-to-r ${stat.accent} px-3 py-1 text-xs font-semibold`}>
@@ -139,7 +139,7 @@ export function DashboardPage() {
         {quickLinks.map((item, index) => (
           <Link
             key={item.label}
-            className="animate-fade-up rounded-[24px] border border-slate-200/80 bg-white/90 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+            className="animate-fade-up rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.96)_0%,rgba(248,250,252,0.92)_100%)] p-5 shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
             style={{ animationDelay: `${120 + index * 70}ms` }}
             to={item.path}
           >
@@ -151,13 +151,13 @@ export function DashboardPage() {
       </section>
 
       <section className={canReviewApprovals ? 'grid gap-6 xl:grid-cols-[1.3fr_0.7fr]' : 'grid gap-6'}>
-        <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white/90 shadow-sm">
+        <div className="table-shell">
           <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
             <div>
               <h2 className="text-xl font-semibold text-slate-950">상품 목록</h2>
             </div>
             <div className="flex items-center gap-3">
-              <Link className="text-sm font-semibold text-slate-900 underline" to="/products/approved">
+              <Link className="ghost-link" to="/products/approved">
                 전체 상품 보기
               </Link>
             </div>
@@ -168,7 +168,7 @@ export function DashboardPage() {
                 {approvedProductCards.map((product) => (
                   <Link
                     key={product.id}
-                    className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    className="overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
                     to={`/products/${product.id}`}
                   >
                     <div className="aspect-[4/3] overflow-hidden bg-slate-100">
@@ -201,13 +201,13 @@ export function DashboardPage() {
 
         {canReviewApprovals ? (
           <div className="space-y-6">
-            <section className="rounded-[28px] border border-slate-200/80 bg-white/90 p-6 shadow-sm">
+            <section className="surface-card p-6">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-950">승인 요청 현황</h2>
                   <p className="mt-1 text-sm text-slate-500">관리자 검토를 기다리는 상품 요청 건수입니다.</p>
                 </div>
-                <Link className="text-sm font-semibold text-slate-900 underline" to="/approval-requests">
+                <Link className="ghost-link" to="/approval-requests">
                   검토하러 가기
                 </Link>
               </div>

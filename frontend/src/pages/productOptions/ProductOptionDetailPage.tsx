@@ -114,13 +114,14 @@ export function ProductOptionDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">옵션 상세</h2>
-          <p className="mt-1 text-sm text-slate-600">옵션 정보와 연결된 선택 항목 목록을 확인합니다.</p>
+          <p className="section-kicker">Option Detail</p>
+          <h2 className="page-title">옵션 상세</h2>
+          <p className="page-description">옵션 정보와 연결된 선택 항목 목록을 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Link className="text-sm font-medium text-slate-900 underline" to={`/product-options?categoryId=${categoryId}`}>
+          <Link className="ghost-link" to={`/product-options?categoryId=${categoryId}`}>
             옵션 목록으로
           </Link>
           {canManageOptionMaster ? (
@@ -135,7 +136,7 @@ export function ProductOptionDetailPage() {
 
       {option ? (
         <>
-          <section className="rounded-lg border border-border bg-white p-5 shadow-sm">
+          <section className="surface-card-muted p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500">옵션 정보</p>
@@ -154,14 +155,14 @@ export function ProductOptionDetailPage() {
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-            <div className="border-b border-border px-5 py-4">
+          <section className="table-shell">
+            <div className="border-b border-slate-200/70 px-5 py-4">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-base font-semibold text-ink">선택 항목 목록</h3>
                 <label className="text-sm font-medium text-slate-700">
                   정렬
                   <select
-                    className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+                    className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
                     value={sortDirection}
                     onChange={(event) => {
                       setItemPage(0);
@@ -174,8 +175,8 @@ export function ProductOptionDetailPage() {
                 </label>
               </div>
             </div>
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+            <table className="table-base min-w-[760px]">
+              <thead>
                 <tr>
                   <th className="px-4 py-3">ID</th>
                   <th className="px-4 py-3">선택 항목 이름</th>
@@ -184,7 +185,7 @@ export function ProductOptionDetailPage() {
                   <th className="px-4 py-3">액션</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody>
                 {pagedItems.map((item) => (
                   <tr key={item.id}>
                     <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(item.id)}</td>
@@ -193,14 +194,14 @@ export function ProductOptionDetailPage() {
                     <td className="px-4 py-3 text-slate-600">{formatDateTime(item.updatedAt)}</td>
                     <td className="space-x-2 px-4 py-3">
                       <Link
-                        className="font-medium text-slate-900 underline"
+                        className="ghost-link"
                         to={`/product-options/${productOptionId}/items/${item.id}?categoryId=${categoryId}`}
                       >
                         상세
                       </Link>
                       {canManageOptionMaster ? (
                         <button
-                          className="font-medium text-slate-900 underline"
+                          className="ghost-link"
                           type="button"
                           onClick={() => {
                             setEditingItem(item);

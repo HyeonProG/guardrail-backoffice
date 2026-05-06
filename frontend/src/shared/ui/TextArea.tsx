@@ -15,14 +15,14 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(function 
 
   return (
     <label className="block" htmlFor={inputId}>
-      <span className={hideLabel ? 'sr-only' : 'mb-1.5 block text-sm font-medium text-slate-700'}>{label}</span>
+      <span className={hideLabel ? 'sr-only' : 'mb-2 block text-sm font-semibold tracking-[0.01em] text-slate-700'}>{label}</span>
       <textarea
         ref={ref}
         id={inputId}
-        className={`min-h-28 w-full rounded-md border border-border bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-slate-500 focus:ring-2 focus:ring-slate-200 ${className}`}
+        className={`min-h-32 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100 ${className}`}
         {...props}
       />
-      {error ? <span className="mt-1.5 block text-xs font-medium text-red-600">{error}</span> : null}
+      {error ? <span className="mt-2 block text-xs font-semibold text-red-600">{error}</span> : null}
     </label>
   );
 });

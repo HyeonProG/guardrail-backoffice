@@ -109,15 +109,16 @@ export function ProductOptionsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">상품 옵션 관리</h2>
+          <p className="section-kicker">Option Matrix</p>
+          <h2 className="page-title">상품 옵션 관리</h2>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-700">
             정렬
             <select
-              className="ml-2 h-10 rounded-md border border-border bg-white px-3 text-sm"
+              className="ml-2 h-11 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={sortDirection}
               onChange={(event) => {
                 setPage(0);
@@ -131,7 +132,7 @@ export function ProductOptionsPage() {
           <label className="text-sm font-medium text-slate-700">
             대상 카테고리
             <select
-              className="ml-2 h-10 min-w-64 rounded-md border border-border bg-white px-3 text-sm"
+              className="ml-2 h-11 min-w-64 rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
               value={categoryId}
               onChange={(event) => {
                 const nextCategoryId = event.target.value;
@@ -156,19 +157,19 @@ export function ProductOptionsPage() {
       </section>
 
       {selectedCategory ? (
-        <div className="rounded-lg border border-border bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
+        <div className="surface-section text-sm text-slate-600">
           선택 카테고리: <span className="font-medium text-slate-900">{selectedCategory.name}</span>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-border bg-white px-5 py-10 text-center text-sm text-slate-500 shadow-sm">
+        <div className="surface-section border-dashed text-center text-sm text-slate-500">
           카테고리를 먼저 선택하면 해당 카테고리에 사용할 옵션을 관리할 수 있습니다.
         </div>
       )}
 
       {categoryId ? (
-        <section className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-          <table className="w-full min-w-[780px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <section className="table-shell">
+          <table className="table-base min-w-[780px]">
+            <thead>
               <tr>
                 <th className="px-4 py-3">ID</th>
                 <th className="px-4 py-3">옵션명</th>
@@ -177,7 +178,7 @@ export function ProductOptionsPage() {
                 <th className="px-4 py-3">액션</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {pagedOptions.map((option) => (
                 <tr key={option.id}>
                   <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(option.id)}</td>
@@ -186,13 +187,13 @@ export function ProductOptionsPage() {
                   <td className="px-4 py-3 text-slate-600">{formatDateTime(option.updatedAt)}</td>
                   <td className="space-x-2 px-4 py-3">
                     <Link
-                      className="font-medium text-slate-900 underline"
+                      className="ghost-link"
                       to={`/product-options/${option.id}?categoryId=${categoryId}`}
                     >
                       상세
                     </Link>
                     {canManageOptionMaster ? (
-                      <button className="font-medium text-slate-900 underline" type="button" onClick={() => startEdit(option)}>
+                      <button className="ghost-link" type="button" onClick={() => startEdit(option)}>
                         수정
                       </button>
                     ) : null}

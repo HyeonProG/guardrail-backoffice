@@ -100,15 +100,18 @@ export function ApprovalRequestsPage() {
 
   return (
     <div className="space-y-6">
-      <section>
-        <h2 className="text-xl font-semibold text-ink">승인 요청 관리</h2>
-        <p className="mt-1 text-sm text-slate-600">직원이 등록한 상품을 검토하고 승인 또는 반려합니다.</p>
+      <section className="page-header">
+        <div>
+          <p className="section-kicker">Review Queue</p>
+          <h2 className="page-title">승인 요청 관리</h2>
+          <p className="page-description">직원이 등록한 상품을 검토하고 승인 또는 반려합니다.</p>
+        </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[1fr_420px]">
-        <div className="overflow-hidden rounded-lg border border-border bg-white shadow-sm">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <div className="table-shell">
+          <table className="table-base min-w-[760px]">
+            <thead>
               <tr>
                 <th className="px-4 py-3">이미지</th>
                 <th className="px-4 py-3">상품 번호</th>
@@ -118,7 +121,7 @@ export function ApprovalRequestsPage() {
                 <th className="px-4 py-3">액션</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody>
               {products.map((product) => (
                 <tr key={product.id}>
                   <td className="px-4 py-3">
@@ -170,7 +173,7 @@ export function ApprovalRequestsPage() {
         </div>
 
         <div className="space-y-5">
-          <div className="rounded-lg border border-border bg-white p-5 shadow-sm">
+          <div className="surface-card-muted p-5">
             <h3 className="text-base font-semibold text-ink">선택 상품 검토</h3>
             {selectedProduct ? (
               <div className="mt-4 space-y-4">

@@ -28,13 +28,14 @@ export function ProductOptionItemDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">선택 항목 상세</h2>
-          <p className="mt-1 text-sm text-slate-600">선택 항목 정보를 읽기 전용으로 확인합니다.</p>
+          <p className="section-kicker">Option Item</p>
+          <h2 className="page-title">선택 항목 상세</h2>
+          <p className="page-description">선택 항목 정보를 읽기 전용으로 확인합니다.</p>
         </div>
         <Link
-          className="text-sm font-medium text-slate-900 underline"
+          className="ghost-link"
           to={`/product-options/${productOptionId}?categoryId=${categoryId}`}
         >
           옵션 상세로 돌아가기
@@ -44,7 +45,7 @@ export function ProductOptionItemDetailPage() {
       <ErrorMessage error={optionQuery.error} />
 
       {item ? (
-        <section className="rounded-lg border border-border bg-white p-6 shadow-sm">
+        <section className="surface-card p-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-border bg-slate-50 p-4">
               <p className="text-xs font-medium text-slate-500">옵션 이름</p>
@@ -72,7 +73,7 @@ export function ProductOptionItemDetailPage() {
         </section>
       ) : (
         !optionQuery.isLoading && (
-          <div className="rounded-lg border border-border bg-white px-5 py-8 text-sm text-slate-600 shadow-sm">
+          <div className="surface-card px-5 py-8 text-sm text-slate-600">
             조회된 선택 항목이 없습니다.
           </div>
         )

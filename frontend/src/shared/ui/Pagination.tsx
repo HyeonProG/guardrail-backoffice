@@ -34,7 +34,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
   const pages = buildPageNumbers(currentPage, totalPages);
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2 rounded-[22px] border border-slate-200/70 bg-white/80 px-3 py-3 shadow-sm">
       <Button
         type="button"
         variant="secondary"
@@ -53,7 +53,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
             <Button
               type="button"
               variant={page === currentPage ? 'primary' : 'secondary'}
-              className="min-w-10 px-3"
+              className="min-w-11 px-3"
               onClick={() => onPageChange(page)}
             >
               {page + 1}

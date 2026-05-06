@@ -297,21 +297,22 @@ export function ProductCreatePage() {
   return (
     <div className="space-y-6">
       <section className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
+        <div className="page-header">
           <div>
-            <h2 className="text-xl font-semibold text-ink">상품 생성</h2>
-            <p className="mt-1 text-sm text-slate-600">카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.</p>
+            <p className="section-kicker">New Product</p>
+            <h2 className="page-title">상품 생성</h2>
+            <p className="page-description">카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.</p>
           </div>
-          <Link className="text-sm font-medium text-slate-900 underline" to="/products">
+          <Link className="ghost-link" to="/products">
             상품 목록으로
           </Link>
         </div>
-        <div className="rounded-lg border border-border bg-white/80 px-4 py-3 text-sm text-slate-600 shadow-sm">
+        <div className="surface-section text-sm text-slate-600">
           상품명과 카테고리를 입력하고 필요하면 이미지를 먼저 추가하세요. 설명은 직접 작성하거나 입력한 내용을 바탕으로 AI 문구를 바로 반영할 수 있습니다.
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <form
           className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]"
           onSubmit={form.handleSubmit(() => submitProductMutation.mutate())}

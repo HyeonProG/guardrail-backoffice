@@ -78,12 +78,13 @@ export function MyAccountPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[28px] border border-slate-200/80 bg-white/90 p-8 shadow-sm">
-        <h1 className="text-2xl font-semibold text-slate-950">내 정보</h1>
+      <section className="surface-card p-8">
+        <p className="section-kicker">Profile Center</p>
+        <h1 className="mt-3 text-2xl font-semibold text-slate-950">내 정보</h1>
         <p className="mt-2 text-sm text-slate-600">로그인한 사용자 기본 정보를 확인하고 수정합니다.</p>
 
         {isTemporaryPassword ? (
-          <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <div className="mt-5 rounded-[22px] border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fff7d6_100%)] px-4 py-3 text-sm font-medium text-amber-900 shadow-sm">
             현재 임시 비밀번호를 사용 중입니다. 아래에서 비밀번호를 변경해 주세요.
           </div>
         ) : null}
@@ -106,7 +107,7 @@ export function MyAccountPage() {
               <ErrorMessage error={userQuery.error ?? updateMutation.error} />
             </form>
 
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+            <div className="surface-section">
               <h2 className="text-base font-semibold text-slate-950">비밀번호 변경</h2>
               <p className="mt-2 text-sm text-slate-600">현재 비밀번호를 확인한 뒤 새 비밀번호로 변경합니다.</p>
               <div className="mt-5">
@@ -122,7 +123,7 @@ export function MyAccountPage() {
             </div>
           </div>
 
-          <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+          <aside className="surface-section">
             <h2 className="text-base font-semibold text-slate-950">현재 로그인 정보</h2>
             <dl className="mt-4 space-y-3 text-sm text-slate-600">
               <div>
@@ -159,7 +160,7 @@ export function MyAccountPage() {
           className="space-y-5"
           onSubmit={passwordForm.handleSubmit((values) => passwordChangeMutation.mutate(values))}
         >
-          <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="grid gap-4 rounded-[22px] border border-slate-200 bg-slate-50/80 p-5">
             <TextField
               label="현재 비밀번호"
               type="password"
@@ -211,7 +212,7 @@ export function MyAccountPage() {
         onClose={() => setProfileConfirmOpen(false)}
       >
         <div className="space-y-5">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-5">
             <dl className="space-y-4 text-sm text-slate-600">
               <div>
                 <dt className="font-medium text-slate-500">이메일</dt>

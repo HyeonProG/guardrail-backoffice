@@ -103,25 +103,25 @@ export function ProductDetailPage() {
 
   return (
     <div className="space-y-6">
-      <section className="flex items-center justify-between gap-3">
+      <section className="page-header">
         <div>
-          <h2 className="text-xl font-semibold text-ink">상품 상세</h2>
-          <p className="mt-1 text-sm text-slate-600">상품 정보와 이미지, 선택 항목, 변경 이력을 한 화면에서 확인합니다.</p>
+          <p className="section-kicker">Product Detail</p>
+          <h2 className="page-title">상품 상세</h2>
+          <p className="page-description">상품 정보와 이미지, 선택 항목, 변경 이력을 한 화면에서 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           {canManageDangerousActions || canStaffEditPendingProduct ? (
-            <Link className="text-sm font-medium text-slate-900 underline" to={`/products/${productId}/edit`}>
+            <Link className="ghost-link" to={`/products/${productId}/edit`}>
               상품 수정
             </Link>
           ) : null}
-          <Link className="text-sm font-medium text-slate-900 underline" to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}>
+          <Link className="ghost-link" to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}>
             상품 옵션 관리
           </Link>
           {canDeleteProduct ? (
             <Button
               type="button"
-              variant="secondary"
-              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              variant="danger"
               disabled={deleteMutation.isPending}
               onClick={() => setDeleteConfirmOpen(true)}
             >
@@ -135,7 +135,7 @@ export function ProductDetailPage() {
 
       {productQuery.data ? (
         <section className={canShowActionPanel ? 'grid gap-5 xl:grid-cols-[1.1fr_0.9fr]' : 'grid gap-5'}>
-          <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
+          <div className="table-shell">
             <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Product Overview</p>
@@ -208,21 +208,21 @@ export function ProductDetailPage() {
 
               <div className="space-y-4">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">카테고리</p>
                     <p className="mt-2 text-base font-semibold text-slate-950">{currentCategoryName}</p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">상품 번호</p>
                     <p className="mt-2 font-mono text-sm text-slate-700">{shortId(productQuery.data.id)}</p>
                   </div>
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                     <p className="text-xs font-medium uppercase tracking-wide text-slate-500">수정일</p>
                     <p className="mt-2 text-base font-semibold text-slate-950">{formatDateTime(productQuery.data.updatedAt)}</p>
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-base font-semibold text-slate-950">선택 항목</h3>
                     <span className="text-xs font-medium text-slate-400">{productQuery.data.selectedOptions.length}개</span>
@@ -245,7 +245,7 @@ export function ProductDetailPage() {
                   )}
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
+                <div className="rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-sm">
                   <h3 className="text-base font-semibold text-slate-950">상품 설명</h3>
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">
                     {productQuery.data.description?.trim() || '등록된 설명이 없습니다.'}
@@ -259,26 +259,26 @@ export function ProductDetailPage() {
             <div className="space-y-5">
               {canManageDangerousActions ? (
                 <>
-                  <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                  <div className="surface-card p-6">
                     <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명을 변경할 수 있습니다.
                     </p>
                     <div className="mt-4">
                       <Link
-                        className="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-700"
+                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-sky-900/90 bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] px-4 text-sm font-semibold text-white shadow-lg hover:-translate-y-0.5"
                         to={`/products/${productId}/edit`}
                       >
                         수정 페이지로 이동
                       </Link>
                     </div>
                   </div>
-                  <div className="rounded-[28px] border border-slate-200/80 bg-white p-6 shadow-sm">
+                  <div className="surface-card p-6">
                     <h3 className="text-base font-semibold text-ink">상태 변경</h3>
                     <div className="mt-4 space-y-3">
                       <p className="text-sm text-slate-600">현재 상태: {getProductStatusLabel(productQuery.data.status)}</p>
                       <select
-                        className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
+                        className="h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm shadow-sm"
                         value={nextStatus}
                         onChange={(event) => setNextStatus(event.target.value as ProductStatus)}
                       >
@@ -303,12 +303,12 @@ export function ProductDetailPage() {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-sm">
+      <section className="table-shell">
         <div className="border-b border-slate-200/70 px-6 py-5">
           <h3 className="text-base font-semibold text-ink">변경 이력</h3>
         </div>
-        <table className="w-full min-w-[760px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+        <table className="table-base min-w-[760px]">
+          <thead>
             <tr>
               <th className="px-4 py-3">이력 번호</th>
               <th className="px-4 py-3">변경 내용</th>
@@ -317,7 +317,7 @@ export function ProductDetailPage() {
               <th className="px-4 py-3">일시</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody>
             {(historiesQuery.data ?? []).map((history) => (
               <tr key={history.id}>
                 <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(history.id)}</td>
@@ -338,7 +338,7 @@ export function ProductDetailPage() {
         onClose={() => setDeleteConfirmOpen(false)}
       >
         <div className="space-y-4">
-          <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm leading-6 text-red-700">
+          <div className="rounded-[20px] border border-red-100 bg-[linear-gradient(180deg,#fef2f2_0%,#fff7f7_100%)] p-4 text-sm leading-6 text-red-700 shadow-sm">
             삭제 가능 상태인 상품만 제거할 수 있습니다. 실행 후에는 복구할 수 없습니다.
           </div>
           <ErrorMessage error={deleteMutation.error} />
@@ -346,12 +346,7 @@ export function ProductDetailPage() {
             <Button type="button" variant="secondary" onClick={() => setDeleteConfirmOpen(false)}>
               취소
             </Button>
-            <Button
-              type="button"
-              className="bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300"
-              disabled={deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate()}
-            >
+            <Button type="button" variant="danger" disabled={deleteMutation.isPending} onClick={() => deleteMutation.mutate()}>
               삭제하기
             </Button>
           </div>

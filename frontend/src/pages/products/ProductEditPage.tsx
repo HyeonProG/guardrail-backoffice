@@ -284,14 +284,15 @@ export function ProductEditPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
+        <div className="page-header">
           <div>
-            <h2 className="text-xl font-semibold text-ink">상품 수정</h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="section-kicker">Edit Product</p>
+            <h2 className="page-title">상품 수정</h2>
+            <p className="page-description">
               상품 기본 정보와 선택 항목, 이미지, 설명을 수정할 수 있습니다. 설명은 직접 작성하거나 AI 문구를 바로 반영할 수 있습니다.
             </p>
           </div>
-          <Link className="text-sm font-medium text-slate-900 underline" to={`/products/${productId}`}>
+          <Link className="ghost-link" to={`/products/${productId}`}>
             상품 상세로 돌아가기
           </Link>
         </div>
@@ -299,7 +300,7 @@ export function ProductEditPage() {
 
       <ErrorMessage error={productQuery.error ?? categoriesQuery.error ?? optionPreviewQuery.error ?? attachmentsQuery.error} />
 
-      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+      <section className="surface-card p-6">
         <form
           className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"
           onSubmit={form.handleSubmit(async () => {

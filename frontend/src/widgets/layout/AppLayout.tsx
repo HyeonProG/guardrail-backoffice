@@ -36,7 +36,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(148,163,184,0.12),_transparent_40%),linear-gradient(180deg,#f8fafc_0%,#eef2f7_100%)] text-ink">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(251,191,36,0.14),_transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef4f8_100%)] text-ink">
       <Modal
         open={temporaryPasswordModalOpen}
         title="임시 비밀번호 변경 필요"
@@ -58,7 +58,7 @@ export function AppLayout() {
         </div>
       </Modal>
       <Header groups={navigationGroups} onLogout={handleLogout} />
-      <main className="mx-auto max-w-[1440px] px-5 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1480px] px-5 py-10 sm:px-6 lg:px-8">
         <div className="animate-fade-up">
           <Outlet />
         </div>
