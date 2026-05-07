@@ -58,7 +58,7 @@ export async function updateProduct(productId: string, request: ProductPayload) 
 }
 
 export async function generateProductDescription(productId: string, request: ProductDescriptionGeneratePayload) {
-  const response = await apiClient.patch(`/api/v1/products/${productId}/description/generate`, request);
+  const response = await apiClient.post(`/api/v1/products/${productId}/description/generate`, request);
   return unwrapResult<Product>(response);
 }
 

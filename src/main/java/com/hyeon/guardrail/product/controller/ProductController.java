@@ -79,7 +79,7 @@ public class ProductController {
 
   /** 상품 설명 AI 생성 */
   @Operation(summary = "상품 설명 AI 생성", description = "상품 정보를 기반으로 AI 설명을 생성해 현재 상품 설명에 반영합니다.")
-  @PatchMapping("/{productId}/description/generate")
+  @PostMapping("/{productId}/description/generate")
   public BaseResponseEntity<ProductResponse> generateProductDescription(
       @PathVariable UUID productId, @Valid @RequestBody ProductDescriptionGenerateRequest request) {
     return BaseResponseEntity.success(

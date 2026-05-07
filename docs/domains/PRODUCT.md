@@ -29,6 +29,19 @@
 - 처리 사유
 - 생성일시, 수정일시
 
+### ProductSelectedOption
+상품 생성 시 선택된 옵션값 스냅샷을 관리한다.
+
+관리 대상:
+- 선택 스냅샷 UUID PK
+- 상품 ID
+- 옵션 ID
+- 옵션명
+- 옵션 항목 ID
+- 옵션 항목명
+- 정렬 순서
+- 생성일시, 수정일시
+
 ## 3. Enum
 ### ProductStatus
 상품 상태를 정의한다.
@@ -58,7 +71,7 @@
 | `id` | UUID PK |
 | `categoryId` | 카테고리 UUID |
 | `name` | 상품명 |
-| `description` | 상품 등록 폼의 현재 상세 설명 값 |
+| `description` | 상품 등록 폼의 상세 설명 값 |
 | `status` | 상품 상태 |
 | `createdAt` | 생성일시, `SoftDeleteEntity` 상속 |
 | `updatedAt` | 수정일시, `SoftDeleteEntity` 상속 |
@@ -75,25 +88,43 @@
 | `createdAt` | 생성일시, `BaseEntity` 상속 |
 | `updatedAt` | 수정일시, `BaseEntity` 상속 |
 
+### ProductSelectedOption
+| 필드 | 설명 |
+|------|------|
+| `id` | UUID PK |
+| `productId` | 상품 UUID |
+| `productOptionId` | 옵션 UUID |
+| `productOptionName` | 옵션명 스냅샷 |
+| `productOptionItemId` | 옵션 항목 UUID |
+| `productOptionItemName` | 옵션 항목명 스냅샷 |
+| `sortOrder` | 표시 순서 |
+| `createdAt` | 생성일시, `BaseEntity` 상속 |
+| `updatedAt` | 수정일시, `BaseEntity` 상속 |
+
 ## 5. 설계 규칙
 - 모든 엔티티의 PK는 UUID를 사용한다.
 - `Product`는 `SoftDeleteEntity`를 상속한다.
 - `ProductHistory`는 `BaseEntity`를 상속한다.
-- 상품 삭제는 hard delete로 처리한다.
+- `Product`는 공통 조회/상속 규칙 일관성을 위해 `deleted` 필드를 가지지만, 삭제 유스케이스는 soft delete가 아니라 hard delete로 처리한다.
 - 카테고리는 객체 연관관계로 참조하지 않고 `categoryId` 값으로만 저장한다.
 - 처리자 사용자는 객체 연관관계로 참조하지 않고 `actorId` 값으로만 저장한다.
-- 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 선택하고, 현재 범위에서는 상품 생성 직후 이미지 메타데이터를 함께 등록한다.
+- 상품 이미지는 `FileAttachment` 도메인에서 운영자가 직접 선택하고, 상품 생성 직후 이미지 메타데이터를 함께 등록한다.
 - 상품 옵션은 선택한 카테고리에 연결된 `ProductOption` 마스터 데이터에서 선택한다.
-- 현재 범위에서는 선택된 옵션값을 상품 생성 request로 받아 `ProductSelectedOption` 스냅샷으로 영속 저장한다.
+- 선택된 옵션값은 상품 생성 request로 받아 `ProductSelectedOption` 스냅샷으로 영속 저장한다.
+- `ProductSelectedOption`은 옵션/옵션 항목의 이름을 스냅샷으로 저장해, 기준 정보명이 바뀌어도 기존 상품 표시값을 유지한다.
 - 상세 설명은 직원이 직접 입력할 수도 있고, 상품 API에서 AI 문구를 즉시 생성해 현재 설명 필드에 반영할 수도 있다.
 - AI는 설명 문구를 생성할 뿐이며, 최종 설명 반영 결정은 직원이 한다.
-- 현재 기본 UI에서는 선택 항목을 AI 입력으로 전달하지 않는다.
+- 기본 UI에서는 선택 항목을 AI 입력으로 전달하지 않는다.
 - 상품 승인 전까지는 실제 게시 완료 상태가 아니다.
 - 상품 승인 요청, 승인, 반려, 비활성화 흐름은 `ProductHistory`에 기록한다.
 - 생성, 기본 정보 수정, 상태 변경 request에는 이력 저장을 위한 `actorId`를 포함한다.
-- 현재 단계에서는 `actorId`를 인증 토큰에서 추출하지 않고 request body 값으로 받는다.
+- `actorId`는 인증 토큰에서 추출하지 않고 request body 값으로 받는다.
 - `STAFF`는 상품 등록, 수정, 승인 요청만 수행한다.
 - 카테고리와 상품 옵션 같은 기준 정보 관리는 `ADMIN`, `OPERATOR`만 수행한다.
+- 상품 기본 정보 수정에서 실제 변경이 없으면 `UPDATED` 이력을 남기지 않는다.
+- AI 설명 초안 생성으로 설명이 실제 변경되면 `UPDATED` 이력을 저장하고 `reason`은 `"AI 설명 초안 생성"`으로 기록한다.
+- 승인 완료 상품의 수정과 비활성화는 `ADMIN`, `OPERATOR`만 수행한다.
+- `ProductService`는 유스케이스 오케스트레이션만 담당하고, 상태 전이는 `ProductStatusTransitionService`, 선택 옵션 동기화는 `ProductSelectedOptionService`, 이력 저장은 `ProductHistoryService`로 분리한다.
 
 ## 6. 상태 전이 규칙
 상품 상태는 아래 흐름을 따른다.
@@ -155,10 +186,14 @@ APPROVED -> INACTIVE
   - `sort`
   - `categoryId`
   - `status`
+  - `approvedOnly`
+  - `myOnly`
 - response: `BaseResponseEntity<PageResponse<ProductResponse>>`
 - 규칙:
   - 목록 조회는 `deleted = false` 기준으로만 수행한다.
   - `categoryId`, `status`는 필요 시 필터로 사용한다.
+  - `approvedOnly=true`면 승인 완료 상품만 조회한다.
+  - `myOnly=true`면 현재 로그인한 사용자가 생성한 상품만 조회한다.
 
 ### 상품 상세 조회
 - `GET /api/v1/products/{productId}`
@@ -175,7 +210,7 @@ APPROVED -> INACTIVE
   - `description`은 선택 값이다.
   - `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
   - 상태 변경은 이 API에서 처리하지 않는다.
-  - 수정 시 `UPDATED` 이력을 함께 저장한다.
+  - 실제 변경이 있을 때만 `UPDATED` 이력을 함께 저장한다.
   - 카테고리는 `deleted = false` 상태여야 한다.
 
 ### 상품 승인 요청
@@ -186,6 +221,16 @@ APPROVED -> INACTIVE
   - 직원은 `status = PENDING`으로 요청한다.
   - `DRAFT`, `REJECTED` 상태에서만 승인 요청할 수 있다.
   - `SUBMITTED` 이력을 함께 저장한다.
+
+### 상품 설명 AI 초안 생성
+- `POST /api/v1/products/{productId}/description/generate`
+- request: `ProductDescriptionGenerateRequest`
+- response: `BaseResponseEntity<ProductResponse>`
+- 규칙:
+  - request는 `actorId`, `productName`, `categoryName`, `optionSummary`, `featureKeywords`를 사용한다.
+  - `featureKeywords`는 비어 있을 수 없다.
+  - 기본 프론트 흐름에서는 `optionSummary`를 빈 문자열로 전달할 수 있다.
+  - 생성된 설명이 실제 반영되면 `UPDATED` 이력을 남기고 `reason`은 `"AI 설명 초안 생성"`으로 저장한다.
 
 ### 상품 승인 또는 반려
 - `PATCH /api/v1/products/{productId}/status`
@@ -235,7 +280,10 @@ com.hyeon.guardrail.product
 │   ├── ProductSelectedOptionRepository.java
 │   └── ProductSelectedOptionRepositoryQuery.java
 ├── service
-│   └── ProductService.java
+│   ├── ProductService.java
+│   ├── ProductHistoryService.java
+│   ├── ProductSelectedOptionService.java
+│   └── ProductStatusTransitionService.java
 ├── dto
 │   ├── ProductCreateRequest.java
 │   ├── ProductUpdateRequest.java

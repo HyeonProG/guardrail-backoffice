@@ -10,24 +10,26 @@
 2. `docs/PACKAGE-STRUCTURE.md`
 3. `docs/CODE-CONVENTIONS.md`
 4. `docs/HARNESS-RULES.md`
-5. `docs/API-SPEC.md`
-6. `docs/DOMAIN-MODEL.md`
-7. `docs/AI-INTEGRATION.md`
-8. `docs/domains/*.md`
+5. `docs/HOOKS-RUNBOOK.md`
+6. `docs/API-SPEC.md`
+7. `docs/DOMAIN-MODEL.md`
+8. `docs/AI-INTEGRATION.md`
+9. `docs/domains/*.md`
 
 ## 3. 문서 우선순위
 문서 간 충돌 시 아래 우선순위를 따른다.
 
 1. `AGENT.md`
 2. `docs/HARNESS-RULES.md`
-3. `docs/PACKAGE-STRUCTURE.md`
-4. `docs/CODE-CONVENTIONS.md`
-5. `docs/API-SPEC.md`
-6. `docs/DOMAIN-MODEL.md`
-7. `docs/AI-INTEGRATION.md`
-8. `docs/domains/*.md`
-9. `docs/PROJECT-OVERVIEW.md`
-10. `docs/VERSION-POLICY.md`, `docs/CHANGELOG-CONVENTION.md`, `docs/COMMIT-MESSAGE.md`
+3. `docs/HOOKS-RUNBOOK.md`
+4. `docs/PACKAGE-STRUCTURE.md`
+5. `docs/CODE-CONVENTIONS.md`
+6. `docs/API-SPEC.md`
+7. `docs/DOMAIN-MODEL.md`
+8. `docs/AI-INTEGRATION.md`
+9. `docs/domains/*.md`
+10. `docs/PROJECT-OVERVIEW.md`
+11. `docs/VERSION-POLICY.md`, `docs/CHANGELOG-CONVENTION.md`, `docs/COMMIT-MESSAGE.md`
 
 ## 4. 작업 유형별 참조 문서
 ### 도메인 구현
@@ -44,6 +46,7 @@
 
 ### 하네스 규칙 구현
 - `docs/HARNESS-RULES.md`
+- `docs/HOOKS-RUNBOOK.md`
 - `docs/PACKAGE-STRUCTURE.md`
 - `docs/CODE-CONVENTIONS.md`
 
@@ -65,9 +68,10 @@
 2. 변경 범위 결정
 3. 코드 또는 문서 수정
 4. `CHANGELOG.md` 업데이트
-5. `./scripts/verify.sh all` 실행
-6. 실패 원인 수정
-7. 커밋 가능 여부와 커밋 메시지 제안
+5. `./scripts/install-git-hooks.sh` 기준 훅 구성 확인
+6. `./scripts/verify.sh all` 실행
+7. 실패 원인 수정
+8. 커밋 가능 여부와 커밋 메시지 제안
 
 ## 7. 핵심 금지 사항
 - 문서 기준과 다른 패키지 구조 임의 생성 금지

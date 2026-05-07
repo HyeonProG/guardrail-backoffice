@@ -83,6 +83,9 @@ com.hyeon.guardrail
 제약:
 - 여러 도메인을 조합하는 흐름 제어와 유스케이스 실행은 service 계층에서 수행한다.
 - controller 또는 repository에서 비즈니스 로직을 수행하지 않는다.
+- 도메인 service 패키지는 메인 오케스트레이션 서비스 1개와 보조 정책/이력/동기화 서비스 여러 개로 분리할 수 있다.
+- 오케스트레이션 서비스는 유스케이스 진입점만 담당하고, 상태 전이 규칙이나 이력 저장처럼 분리 가능한 책임은 보조 서비스로 나눈다.
+- 예를 들어 `product` 패키지는 `ProductService`를 진입점으로 두고, `ProductStatusTransitionService`, `ProductSelectedOptionService`, `ProductHistoryService`로 책임을 분리한다.
 
 ### dto
 dto는 계층 간 데이터 전달을 위한 객체를 둔다.
@@ -156,17 +159,19 @@ BaseEntity 기준:
 - 외부 AI 모델 호출, 프롬프트 조합, AI 응답 매핑은 `common.ai`에 둔다.
 - 도메인 서비스는 AI 모델 구현체가 아니라 `common.ai` 인터페이스만 호출한다.
 
-## 7. 현재 도메인 기준 매핑
-현재 정의된 도메인은 아래 패키지에 배치한다.
+## 7. 도메인 기준 매핑
+정의된 도메인은 아래 패키지에 배치한다.
 
 - `Auth`, `UserLoginHistory`, `UserSession`, `UserPasswordHistory` -> `auth`
 - `User` -> `user`
-- `Product`, `ProductHistory` -> `product`
+- `Product`, `ProductHistory`, `ProductSelectedOption` -> `product`
 - `ProductOption`, `ProductOptionItem` -> `productoption`
 - `Category` -> `category`
 - `FileAttachment` -> `file`
 
-인증 및 세션 관련 도메인은 사용자 도메인과 분리하여 인증 경계 기준으로 auth 패키지에 배치한다.
+인증 및 세션 관련 저장 모델은 사용자 도메인과 분리하여 인증 경계 기준으로 auth 패키지에 배치한다.
+다만 비밀번호 변경, 비밀번호 이력 조회처럼 사용자 자기관리 성격이 강한 API는 user 패키지의 controller/service가 auth 저장 모델을 조합해 노출할 수 있다.
+즉 `auth`는 로그인/토큰/세션/로그인 이력 중심이고, `user`는 사용자 본체와 자기관리 유스케이스 중심으로 구분한다.
 
 ## 8. 문서 위치 기준
 도메인별 문서는 `src` 하위가 아니라 `docs` 하위에서 관리한다.

@@ -40,6 +40,7 @@ public class ProductStatusTransitionService {
     }
 
     if (status == ProductStatus.INACTIVE) {
+      currentUserService.requireAdminOrOperator();
       product.inactivate();
       return ProductHistoryType.INACTIVATED;
     }

@@ -29,7 +29,7 @@ MAJOR.MINOR.PATCH
 - 설정 변경
 - 리팩토링
 
-## 4. 현재 운영 방식
+## 4. 운영 방식
 - changelog는 `0.1.0`부터 시작한다.
 - 별도의 release 문서나 날짜는 작성하지 않는다.
 - changelog는 간단하게 유지한다.

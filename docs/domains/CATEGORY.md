@@ -70,12 +70,14 @@
   - `size`
   - `sort`
   - `parentId`
+  - `rootOnly`
   - `status`
 - response: `BaseResponseEntity<PageResponse<CategoryResponse>>`
 - 규칙:
   - 목록 조회는 `deleted = false` 기준으로만 조회한다.
   - `parentId`가 request에 포함되면 해당 부모 기준으로 필터링한다.
-  - `parentId`가 request에 없으면 전체 카테고리 목록을 조회한다.
+  - `rootOnly=true`면 최상위 카테고리만 조회한다.
+  - `parentId`가 request에 없고 `rootOnly=false`면 전체 카테고리 목록을 조회한다.
   - `status`는 `ACTIVE`, `INACTIVE`만 허용한다.
 
 ### 카테고리 상세 조회

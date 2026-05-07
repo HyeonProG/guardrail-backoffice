@@ -2,6 +2,7 @@ package com.hyeon.guardrail.architecture;
 
 import com.hyeon.guardrail.common.domain.BaseEntity;
 import com.hyeon.guardrail.common.domain.SoftDeleteEntity;
+import com.hyeon.guardrail.common.response.BaseResponseEntity;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaConstructor;
 import com.tngtech.archunit.core.domain.JavaField;
@@ -17,6 +18,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -161,14 +163,33 @@ class PackageArchitectureTest {
           .as("auth 도메인 entity는 SoftDeleteEntity를 상속할 수 없다")
           .allowEmptyShould(true);
 
+  // soft delete 대상 도메인 entity는 SoftDeleteEntity를 상속해야 한다.
+  @ArchTest
+  static final ArchRule SOFT_DELETE_TARGET_ENTITY_SHOULD_EXTEND_SOFT_DELETE_ENTITY =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .and()
+          .resideInAnyPackage(
+              "..user.domain..",
+              "..category.domain..",
+              "..file.domain..",
+              "..productoption.domain..")
+          .or()
+          .haveFullyQualifiedName("com.hyeon.guardrail.product.domain.Product")
+          .should()
+          .beAssignableTo(SoftDeleteEntity.class)
+          .as("soft delete 대상 entity는 SoftDeleteEntity를 상속해야 한다")
+          .allowEmptyShould(true);
+
   // controller public 메서드는 BaseResponseEntity만 반환하고 ResponseEntity를 직접 사용하지 않는다.
   @ArchTest
-  static final ArchRule CONTROLLER_SHOULD_NOT_RETURN_RESPONSE_ENTITY =
+  static final ArchRule CONTROLLER_SHOULD_RETURN_BASE_RESPONSE_ENTITY =
       ArchRuleDefinition.classes()
           .that()
           .resideInAPackage("..controller..")
-          .should(notDeclareResponseEntityReturnType())
-          .as("controller public 메서드는 ResponseEntity를 직접 반환할 수 없다")
+          .should(declareOnlyBaseResponseEntityReturnType())
+          .as("controller public 메서드는 BaseResponseEntity만 반환해야 한다")
           .allowEmptyShould(true);
 
   // controller의 기본 경로는 /api/v1 prefix를 사용한다.
@@ -199,6 +220,16 @@ class PackageArchitectureTest {
           .areAnnotatedWith(Entity.class)
           .should(haveAllArgsConstructor())
           .as("entity는 선언 필드 기준 all-args 생성자를 가져야 한다")
+          .allowEmptyShould(true);
+
+  // entity는 상속 포함 기준으로 UUID 타입 id 필드를 가져야 한다.
+  @ArchTest
+  static final ArchRule ENTITY_SHOULD_HAVE_UUID_ID_FIELD =
+      ArchRuleDefinition.classes()
+          .that()
+          .areAnnotatedWith(Entity.class)
+          .should(haveUuidIdField())
+          .as("entity는 UUID 타입 id 필드를 가져야 한다")
           .allowEmptyShould(true);
 
   // entity는 테이블 간 객체 연관관계 매핑을 사용하지 않는다.
@@ -268,6 +299,32 @@ class PackageArchitectureTest {
     };
   }
 
+  private static ArchCondition<JavaClass> declareOnlyBaseResponseEntityReturnType() {
+    return new ArchCondition<>("public 메서드가 BaseResponseEntity만 반환해야 한다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        List<JavaMethod> methods =
+            item.getMethods().stream()
+                .filter(method -> method.getOwner().equals(item))
+                .filter(method -> method.getModifiers().contains(JavaModifier.PUBLIC))
+                .toList();
+
+        boolean valid =
+            methods.stream()
+                .allMatch(
+                    method ->
+                        method.getRawReturnType().isEquivalentTo(BaseResponseEntity.class)
+                            && !method.getRawReturnType().isEquivalentTo(ResponseEntity.class));
+
+        events.add(
+            new SimpleConditionEvent(
+                item,
+                valid,
+                item.getName() + " controller public 메서드는 BaseResponseEntity만 반환해야 한다"));
+      }
+    };
+  }
+
   private static ArchCondition<JavaClass> haveExplicitColumnName() {
     return new ArchCondition<>("선언 필드에 @Column(name = ...)이 있어야 한다") {
       @Override
@@ -311,6 +368,25 @@ class PackageArchitectureTest {
         events.add(
             new SimpleConditionEvent(
                 item, hasAllArgsConstructor, item.getName() + " entity는 all-args 생성자를 가져야 한다"));
+      }
+    };
+  }
+
+  private static ArchCondition<JavaClass> haveUuidIdField() {
+    return new ArchCondition<>("UUID 타입 id 필드를 가져야 한다") {
+      @Override
+      public void check(JavaClass item, ConditionEvents events) {
+        boolean valid =
+            item.getAllFields().stream()
+                .anyMatch(
+                    field ->
+                        field.getName().equals("id")
+                            && field.getRawType().isEquivalentTo(java.util.UUID.class)
+                            && field.isAnnotatedWith(Id.class));
+
+        events.add(
+            new SimpleConditionEvent(
+                item, valid, item.getName() + " entity는 UUID 타입 id 필드를 가져야 한다"));
       }
     };
   }

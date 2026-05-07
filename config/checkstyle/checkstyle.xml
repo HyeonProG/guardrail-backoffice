@@ -6,6 +6,11 @@
     <!-- 파일 인코딩 고정 -->
     <property name="charset" value="UTF-8"/>
 
+    <!-- Javadoc 예외 파일 범위 -->
+    <module name="SuppressionFilter">
+        <property name="file" value="${config_loc}/checkstyle-suppressions.xml"/>
+    </module>
+
     <!-- 한 줄 최대 길이 제한. import/package 문은 예외 처리 -->
     <module name="LineLength">
         <property name="max" value="120"/>
@@ -32,8 +37,22 @@
         <!-- 클래스/인터페이스/enum/record 이름 규칙 -->
         <module name="TypeName"/>
 
+        <!-- 공개 타입 Javadoc 강제 -->
+        <module name="MissingJavadocType">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="CLASS_DEF,INTERFACE_DEF,RECORD_DEF"/>
+        </module>
+
         <!-- 메서드명 camelCase 강제 -->
         <module name="MethodName"/>
+
+        <!-- 공개 메서드 Javadoc 강제 -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="tokens" value="METHOD_DEF"/>
+            <property name="allowMissingPropertyJavadoc" value="true"/>
+            <property name="allowedAnnotations" value="Override,Bean,ExceptionHandler,PostConstruct,PreDestroy"/>
+        </module>
 
         <!-- 파라미터명 camelCase 강제 -->
         <module name="ParameterName"/>

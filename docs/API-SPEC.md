@@ -198,7 +198,211 @@ response result:
 - `REVOKED` 상태 세션은 토큰 재발급을 허용하지 않는다.
 - 로그아웃 API는 세션 식별을 위해 request body의 `sessionId`만 사용한다.
 
-## 7.2 카테고리 API 기준
+### 로그인 이력 저장 API
+```http
+POST /api/v1/auth/login-histories
+```
+
+request body:
+- `userId`
+- `loginType`
+- `loginResult`
+- `ipAddress`
+- `loggedInAt`
+
+response result:
+- `LoginHistoryResponse`
+
+### 사용자 로그인 이력 조회 API
+```http
+GET /api/v1/auth/users/{userId}/login-histories
+```
+
+response result:
+- `LoginHistoryResponse[]`
+
+### 인증 세션 저장 API
+```http
+POST /api/v1/auth/sessions
+```
+
+request body:
+- `userId`
+- `accessTokenId`
+- `refreshTokenHash`
+- `deviceType`
+- `ipAddress`
+- `status`
+- `refreshedAt`
+- `expiredAt`
+
+response result:
+- `SessionResponse`
+
+### 사용자 인증 세션 조회 API
+```http
+GET /api/v1/auth/users/{userId}/sessions
+```
+
+response result:
+- `SessionResponse[]`
+
+### 인증 세션 상태 변경 API
+```http
+PATCH /api/v1/auth/sessions/{sessionId}/status
+```
+
+request body:
+- `status`
+
+response result:
+- `SessionResponse`
+
+## 7.2 사용자 API 기준
+### 사용자 생성 API
+```http
+POST /api/v1/users
+```
+
+request body:
+- `email`
+- `name`
+- `role`
+
+response result:
+- `userId`
+- `email`
+- `name`
+- `role`
+- `temporaryPassword`
+- `temporaryPasswordIssuedAt`
+
+규칙:
+- 관리자가 사용자를 생성한다.
+- 초기 비밀번호는 시스템이 자동 생성한다.
+- 초기 비밀번호 원문은 비밀번호 이력에 저장하지 않고 해시만 저장한다.
+
+### 사용자 단건 조회 API
+```http
+GET /api/v1/users/{userId}
+```
+
+response result:
+- `id`
+- `email`
+- `name`
+- `role`
+- `status`
+- `createdAt`
+- `updatedAt`
+
+### 사용자 목록 조회 API
+```http
+GET /api/v1/users?page=0&size=20&sort=createdAt,desc&status=ACTIVE
+```
+
+query:
+- `page`
+- `size`
+- `sort`
+- `status`
+
+response result:
+- `PageResponse<UserResponse>`
+
+규칙:
+- `status`를 주지 않으면 전체 사용자 목록을 조회한다.
+- 페이지네이션 응답은 `content`, `page`, `size`, `totalElements`, `totalPages`, `first`, `last`를 포함한다.
+
+### 사용자 수정 API
+```http
+PUT /api/v1/users/{userId}
+```
+
+request body:
+- `email`
+- `name`
+- `role`
+
+response result:
+- `UserResponse`
+
+규칙:
+- 사용자 기본 정보 수정과 상태 변경은 별도 유스케이스다.
+- `email`, `name`, `role`만 수정한다.
+
+### 사용자 상태 변경 API
+```http
+PATCH /api/v1/users/{userId}/status
+```
+
+request body:
+- `status`
+
+response result:
+- `UserResponse`
+
+규칙:
+- `ACTIVE`, `INACTIVE` 전이만 허용한다.
+
+### 사용자 삭제 API
+```http
+DELETE /api/v1/users/{userId}
+```
+
+response result:
+- 없음
+
+규칙:
+- 사용자 삭제는 soft delete로 처리한다.
+
+### 사용자 비밀번호 이력 조회 API
+```http
+GET /api/v1/users/{userId}/password-histories
+```
+
+response result:
+- `PasswordHistoryResponse[]`
+
+규칙:
+- 현재 로그인한 사용자 본인만 자신의 비밀번호 이력을 조회할 수 있다.
+- 응답에는 비밀번호 원문이 아니라 이력 메타데이터만 포함한다.
+
+### 사용자 비밀번호 변경 API
+```http
+PATCH /api/v1/users/{userId}/password
+```
+
+request body:
+- `currentPassword`
+- `newPassword`
+
+response result:
+- `userId`
+- `changedAt`
+
+규칙:
+- 현재 로그인한 사용자 본인만 자신의 비밀번호를 변경할 수 있다.
+- 현재 비밀번호 검증이 먼저 통과해야 한다.
+- 변경 성공 시 새 비밀번호 이력을 추가한다.
+
+### 사용자 임시 비밀번호 재발급 API
+```http
+POST /api/v1/users/{userId}/temporary-password
+```
+
+response result:
+- `userId`
+- `email`
+- `temporary`
+- `issuedAt`
+
+규칙:
+- 시스템은 새 임시 비밀번호를 생성하고 비밀번호 이력에 해시로 저장한다.
+- 메일 발송은 실제 외부 발송 또는 로깅 대체 구현으로 처리할 수 있다.
+- 로그에는 임시 비밀번호 원문을 남기지 않는다.
+
+## 7.3 카테고리 API 기준
 ### 카테고리 생성 API
 ```http
 POST /api/v1/categories
@@ -222,7 +426,7 @@ response result:
 
 ### 카테고리 목록 조회 API
 ```http
-GET /api/v1/categories?page=0&size=20&sort=createdAt,desc&parentId={parentId}&status=ACTIVE
+GET /api/v1/categories?page=0&size=20&sort=createdAt,desc&parentId={parentId}&rootOnly=false&status=ACTIVE
 ```
 
 query:
@@ -230,6 +434,7 @@ query:
 - `size`
 - `sort`
 - `parentId`
+- `rootOnly`
 - `status`
 
 response result:
@@ -238,8 +443,20 @@ response result:
 규칙:
 - 목록 조회는 `deleted = false` 기준으로만 수행한다.
 - `parentId`가 query에 포함되면 해당 부모 카테고리 기준으로 목록을 필터링한다.
-- `parentId`가 query에 없으면 전체 카테고리 목록을 조회한다.
+- `rootOnly=true`면 최상위 카테고리만 조회한다.
+- `parentId`가 query에 없고 `rootOnly=false`면 전체 카테고리 목록을 조회한다.
 - `status`는 필요 시 필터로 사용한다.
+
+### 삭제된 카테고리 목록 조회 API
+```http
+GET /api/v1/categories/deleted
+```
+
+response result:
+- `CategoryResponse[]`
+
+규칙:
+- soft delete된 카테고리만 반환한다.
 
 ### 카테고리 상세 조회 API
 ```http
@@ -306,7 +523,7 @@ response result:
 - 하위 카테고리 복구 시 부모 카테고리는 `deleted = false` 상태여야 한다.
 - 복구 후 `status`는 기존 값을 유지한다.
 
-## 7.3 상품 API 기준
+## 7.4 상품 API 기준
 ### 상품 생성 API
 ```http
 POST /api/v1/products
@@ -342,7 +559,7 @@ response result:
 
 ### 상품 목록 조회 API
 ```http
-GET /api/v1/products?page=0&size=20&sort=createdAt,desc&categoryId={categoryId}&status=DRAFT
+GET /api/v1/products?page=0&size=20&sort=createdAt,desc&categoryId={categoryId}&status=DRAFT&approvedOnly=false&myOnly=false
 ```
 
 query:
@@ -351,6 +568,8 @@ query:
 - `sort`
 - `categoryId`
 - `status`
+- `approvedOnly`
+- `myOnly`
 
 response result:
 - `PageResponse<ProductResponse>`
@@ -358,6 +577,8 @@ response result:
 규칙:
 - 목록 조회는 `deleted = false` 기준으로만 수행한다.
 - `categoryId`, `status`는 필요 시 필터로 사용한다.
+- `approvedOnly=true`면 승인 완료 상품만 조회한다.
+- `myOnly=true`면 현재 사용자 본인 상품만 조회한다.
 
 ### 상품 상세 조회 API
 ```http
@@ -389,7 +610,7 @@ response result:
 - 기본 정보 수정은 `categoryId`, `name`, `description`만 처리한다.
 - `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
 - 상태 변경은 별도 API에서 처리한다.
-- 수정 시 `UPDATED` 이력을 저장한다.
+- 실제 변경이 있을 때만 `UPDATED` 이력을 저장한다.
 - 카테고리는 `deleted = false` 상태여야 한다.
 
 ### 상품 상태 변경 API
@@ -451,7 +672,7 @@ response result:
 ## 7.4 상품 설명 AI 생성 API 기준
 ### 상품 설명 AI 생성 API
 ```http
-PATCH /api/v1/products/{productId}/description/generate
+POST /api/v1/products/{productId}/description/generate
 ```
 
 request body:
@@ -467,7 +688,7 @@ response result:
 규칙:
 - 상품 설명은 직접 입력하거나 AI 초안 생성으로 즉시 현재 `description` 필드에 반영할 수 있다.
 - AI는 상품명, 카테고리명, 특징 키워드를 입력으로 사용한다.
-- 현재 구현과 기본 UI 기준에서는 옵션값은 AI 요청 입력으로 사용하지 않는다.
+- `optionSummary` 필드는 존재하지만 현재 기본 UI 기준에서는 빈 문자열로 전달될 수 있다.
 - 이미지 데이터는 설명 생성 request에 포함하지 않는다.
 - 별도 설명 초안 테이블은 사용하지 않는다.
 
@@ -607,6 +828,84 @@ response result:
 ### 옵션값 삭제 API
 ```http
 DELETE /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOptionItemId}
+```
+
+response result:
+- `null`
+
+## 7.5 파일 첨부 API 기준
+### 파일 첨부 생성 API
+```http
+POST /api/v1/file-attachments
+```
+
+request body:
+- `targetType`
+- `targetId`
+- `fileName`
+- `originalFileName`
+- `filePath`
+- `fileSize`
+- `contentType`
+- `sortOrder`
+
+response result:
+- `FileAttachmentResponse`
+
+### 파일 업로드 API
+```http
+POST /api/v1/file-attachments/upload
+```
+
+form-data:
+- `targetType`
+- `targetId`
+- `sortOrder`
+- `file`
+
+response result:
+- `FileAttachmentResponse`
+
+규칙:
+- 업로드와 메타데이터 생성을 함께 처리한다.
+- 실제 파일 저장은 `FileStorageService` 구현체가 담당한다.
+- 현재 운영 구현은 S3다.
+
+### 파일 첨부 단건 조회 API
+```http
+GET /api/v1/file-attachments/{fileAttachmentId}
+```
+
+response result:
+- `FileAttachmentResponse`
+
+### 대상별 파일 목록 조회 API
+```http
+GET /api/v1/file-attachments?targetType=PRODUCT&targetId={targetId}
+```
+
+response result:
+- `FileAttachmentResponse[]`
+
+### 파일 첨부 수정 API
+```http
+PUT /api/v1/file-attachments/{fileAttachmentId}
+```
+
+request body:
+- `fileName`
+- `originalFileName`
+- `filePath`
+- `fileSize`
+- `contentType`
+- `sortOrder`
+
+response result:
+- `FileAttachmentResponse`
+
+### 파일 첨부 삭제 API
+```http
+DELETE /api/v1/file-attachments/{fileAttachmentId}
 ```
 
 response result:

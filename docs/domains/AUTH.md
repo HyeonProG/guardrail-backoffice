@@ -1,9 +1,10 @@
 # Auth 도메인
 
 ## 1. 책임
-`Auth`는 인증 흐름과 인증 이력을 관리한다.
+`Auth`는 인증 흐름과 인증 저장 모델을 관리한다.
 
-로그인, 로그아웃, 토큰 재발급, 세션 관리, 로그인 이력, 비밀번호 이력을 담당한다.
+로그인, 로그아웃, 토큰 재발급, 세션 관리, 로그인 이력, 비밀번호 이력 저장을 담당한다.
+비밀번호 변경과 비밀번호 이력 조회 API는 사용자 자기관리 유스케이스로 `User` 도메인에서 노출한다.
 
 ## 2. 주요 엔티티
 ### UserLoginHistory
@@ -124,7 +125,7 @@
 - 자동 생성된 초기 비밀번호 전달 정책은 인증 흐름에서 관리한다.
 - 자동 생성된 초기 비밀번호는 해시 저장 전에만 평문으로 존재할 수 있다.
 - 초기 비밀번호는 생성 직후 1회 전달용 정보로만 사용하고 저장하지 않는다.
-- 현재 단계에서는 사용자 생성 응답 또는 별도 초기 전달용 응답으로만 초기 비밀번호를 노출할 수 있다.
+- 사용자 생성 응답 또는 별도 초기 전달용 응답으로만 초기 비밀번호를 노출할 수 있다.
 - 초기 임시 비밀번호의 만료 기간은 생성 시점부터 7일이다.
 - 초기 임시 비밀번호 이력은 `expiredAt`을 반드시 저장한다.
 - 초기 임시 비밀번호가 만료되면 재로그인에 사용할 수 없고, 재발급 시 새로운 비밀번호 이력을 추가한다.
@@ -149,7 +150,7 @@
 - 비밀번호 이력은 최근 비밀번호 재사용 방지와 임시 비밀번호 만료 추적을 위해 사용한다.
 - 사용자는 `내 정보` 화면에서 현재 비밀번호를 검증한 뒤 자신의 비밀번호를 변경할 수 있다.
 - 비밀번호 변경 성공 시 새 비밀번호 이력을 추가하고 `temporary=false`, `expiredAt=null`로 저장한다.
-- 현재 로그인한 사용자 본인만 자신의 비밀번호를 변경할 수 있다.
+- 로그인한 사용자 본인만 자신의 비밀번호를 변경할 수 있다.
 - 로그아웃 시 세션은 삭제하지 않고 상태를 `REVOKED`로 변경한다.
 - 로그인 이력은 삭제보다 보존 정책으로 관리한다.
 - 세션과 비밀번호 이력은 삭제보다 상태와 만료 정책으로 관리한다.
@@ -182,7 +183,7 @@
 4. 로그아웃 후 해당 세션으로는 재발급을 허용하지 않는다.
 
 ### 6.4 비밀번호 변경
-1. 현재 로그인 사용자가 자신의 계정에 대해서만 변경 요청을 보낼 수 있다.
+1. 로그인 사용자가 자신의 계정에 대해서만 변경 요청을 보낼 수 있다.
 2. 최근 유효 비밀번호 이력과 `currentPassword`를 검증한다.
 3. 새 비밀번호는 현재 비밀번호와 달라야 한다.
 4. 변경 성공 시 새로운 비밀번호 이력을 추가한다.
@@ -207,14 +208,25 @@ com.hyeon.guardrail.auth
 │   ├── UserPasswordHistoryRepository.java
 │   └── AuthRepositoryQuery.java
 ├── service
-│   └── AuthService.java
+│   ├── AuthService.java
+│   └── JwtService.java
 ├── dto
 │   ├── LoginRequest.java
 │   ├── LoginResponse.java
-│   ├── ChangePasswordRequest.java
-│   ├── ChangePasswordResponse.java
 │   ├── TokenRefreshRequest.java
 │   └── TokenRefreshResponse.java
 └── controller
     └── AuthController.java
 ```
+
+## 8. AuthController 책임
+`AuthController`는 아래 인증/세션/로그인 이력 관련 API만 담당한다.
+
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/token/refresh`
+- `POST /api/v1/auth/logout`
+- `POST /api/v1/auth/login-histories`
+- `GET /api/v1/auth/users/{userId}/login-histories`
+- `POST /api/v1/auth/sessions`
+- `GET /api/v1/auth/users/{userId}/sessions`
+- `PATCH /api/v1/auth/sessions/{sessionId}/status`

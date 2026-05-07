@@ -3,11 +3,11 @@
 ## 1. 책임
 `User`는 시스템 사용자의 기본 정보를 관리한다.
 
-인증 흐름은 `Auth` 도메인에서 담당하며, `User` 도메인은 사용자 자체의 식별 정보, 역할, 사용 여부를 관리한다.
+인증 흐름은 `Auth` 도메인에서 담당하며, `User` 도메인은 사용자 자체의 식별 정보, 역할, 사용 여부와 사용자 자기관리 유스케이스를 관리한다.
 
 백오피스에서는 관리자가 사용자를 생성하며, 초기 비밀번호는 시스템이 자동 생성한다.
 생성된 아이디와 초기 비밀번호 전달 정책은 인증 흐름과 함께 `Auth` 도메인에서 담당한다.
-현재 단계의 사용자 생성 완료 조건은 사용자 저장, 초기 비밀번호 생성, 초기 비밀번호 해시 저장, 초기 전달용 정보 반환까지 포함한다.
+사용자 생성 완료 조건은 사용자 저장, 초기 비밀번호 생성, 초기 비밀번호 해시 저장, 초기 전달용 정보 반환까지 포함한다.
 
 ## 2. 주요 엔티티
 ### User
@@ -65,6 +65,8 @@
 - 자동 생성된 초기 비밀번호는 평문 저장하지 않고 `Auth` 도메인의 비밀번호 이력에 해시로 저장한다.
 - 자동 생성된 초기 비밀번호는 생성 직후 1회 전달 가능한 정보로만 사용한다.
 - 사용자 생성 응답 또는 후속 인증 전달 흐름에는 초기 전달용 정보가 포함되어야 한다.
+- 사용자의 비밀번호 변경과 비밀번호 이력 조회는 `User` 도메인의 API로 노출할 수 있다.
+- `User` 도메인은 auth 저장 모델을 직접 소유하지 않더라도 사용자 자기관리 유스케이스를 위해 `Auth` 저장 모델을 조회/조합할 수 있다.
 - 사용자 기본 정보의 범용 전체 수정은 entity가 아니라 service에서 처리한다.
 - 사용자 기본 정보 수정과 사용자 상태 변경은 서로 다른 유스케이스로 분리한다.
 - `email`, `name`, `role` 수정은 기본 정보 수정 API에서 처리한다.
@@ -92,7 +94,24 @@ com.hyeon.guardrail.user
 │   ├── UserCreateRequest.java
 │   ├── UserUpdateRequest.java
 │   ├── UserStatusUpdateRequest.java
+│   ├── ChangePasswordRequest.java
+│   ├── ChangePasswordResponse.java
+│   ├── PasswordHistoryResponse.java
+│   ├── UserTemporaryPasswordIssueResponse.java
 │   └── UserResponse.java
 └── controller
     └── UserController.java
 ```
+
+## 7. UserController 책임
+`UserController`는 아래 사용자 및 자기관리 API를 담당한다.
+
+- `POST /api/v1/users`
+- `GET /api/v1/users/{userId}`
+- `GET /api/v1/users/{userId}/password-histories`
+- `PATCH /api/v1/users/{userId}/password`
+- `GET /api/v1/users`
+- `PUT /api/v1/users/{userId}`
+- `PATCH /api/v1/users/{userId}/status`
+- `DELETE /api/v1/users/{userId}`
+- `POST /api/v1/users/{userId}/temporary-password`

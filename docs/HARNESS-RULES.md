@@ -8,11 +8,11 @@
 ## 2. 하네스 적용 원칙
 - 하네스는 개발 편의를 위한 권고가 아니라, 위반 시 차단 가능한 규칙을 목표로 한다.
 - 문서로 먼저 기준을 정의한 뒤 자동 검증으로 연결한다.
-- 구조, 네이밍, 의존 방향, API 규칙, 코드 스타일을 점진적으로 검증한다.
+- 구조, 네이밍, 의존 방향, API 규칙, 코드 스타일을 자동 검증한다.
 - 사람 리뷰 전에 기계적으로 걸러낼 수 있는 규칙부터 우선 적용한다.
 
 ## 3. 검증 대상
-현재 프로젝트에서 하네스로 검증할 주요 대상은 아래와 같다.
+하네스로 검증할 주요 대상은 아래와 같다.
 
 - 패키지 구조
 - 클래스 네이밍
@@ -71,7 +71,7 @@
 - 비밀번호와 토큰은 평문으로 저장하지 않는다.
 - Auth 도메인 엔티티는 soft delete 대신 상태/만료 정책을 우선한다.
 
-## 5. 자동 검증 도구 후보
+## 5. 자동 검증 도구
 ### 도구별 책임 분리
 | 도구 | 역할 | 검증 대상 |
 |------|------|-----------|
@@ -95,15 +95,18 @@
 
 ### Checkstyle
 - 네이밍, import, 스타일 규칙 검증
-- Javadoc 작성 여부 검증
+- controller, service, config, common 진입점의 Javadoc 작성 여부 검증
 - `@Data` 사용 금지 같은 기본 제한 규칙 검증
 
 ### ArchUnit
 - 패키지 구조 및 계층 의존 규칙 검증
 - controller -> service -> repository 방향 검증
-- entity 직접 노출 금지 같은 구조 규칙 검증
+- controller의 repository/domain 직접 접근 차단과 entity 직접 노출 금지 같은 구조 규칙 검증
+- UUID `id` 필드와 soft delete 대상 상속 규칙 검증
 - JPA 연관관계 금지 규칙 검증
 - `~Repository`, `~RepositoryQuery`, `Request`, `Response` 네이밍 검증
+- 현재 규칙은 메서드 호출/필드 접근 기준의 직접 의존 차단에 초점을 둔다.
+- controller가 domain enum을 요청 파라미터나 쿼리 파라미터 타입으로 사용하는 형태는 현재 허용한다.
 
 ### JUnit
 - 상태 전이, 도메인 규칙, 비즈니스 검증 테스트
@@ -114,66 +117,39 @@
 - Auth 상태/만료 규칙 검증
 
 ### Git Hooks
-- commit 전 포맷/정적 검증 차단
-- push 전 테스트 및 규칙 검증 차단
+- `.githooks/commit-msg`에서 커밋 메시지 형식 검증
+- `.githooks/pre-commit`에서 `./scripts/verify.sh static` 실행
+- `.githooks/pre-push`에서 `./scripts/verify.sh all` 실행
+- 실제 설치는 `./scripts/install-git-hooks.sh`와 `git config core.hooksPath .githooks` 기준으로 수행
 
 ### CI
 - 훅과 동일한 규칙을 서버에서 다시 검증
 - 로컬 우회 시에도 최종 차단
 
-## 6. 현재 자동화 상태
-현재 자동화가 적용된 규칙은 아래와 같다.
-
-### 자동화 완료
+## 6. 자동화 규칙
 - Spotless 기반 포맷 검증
 - Checkstyle 기반 스타일 검증
+- Checkstyle 기반 공개 진입점 Javadoc 검증
 - `@Data` 사용 금지 검증
 - ArchUnit 기반 패키지 구조 검증
 - ArchUnit 기반 계층 의존 방향 검증
 - ArchUnit 기반 클래스 네이밍 검증
 - ArchUnit 기반 엔티티 상속 규칙 검증
+- ArchUnit 기반 soft delete 대상 엔티티 상속 검증
 - ArchUnit 기반 DTO `record` 사용 금지 검증
-- ArchUnit 기반 controller `ResponseEntity` 반환 금지 검증
+- ArchUnit 기반 controller `BaseResponseEntity` 반환 강제 검증
 - ArchUnit 기반 entity `@Column(name = "...")` 명시 검증
 - ArchUnit 기반 entity 정적 `create` 메서드 금지 검증
 - ArchUnit 기반 entity `@AllArgsConstructor` 검증
-- Git Hook 기반 commit 메시지 형식 검증
-- Git Hook 기반 pre-commit, pre-push 검증 실행
+- ArchUnit 기반 entity UUID `id` 필드 검증
+- ArchUnit 기반 API 경로 `/api/v1` prefix 검증
+- ArchUnit 기반 JPA 연관관계 금지 검증
+- `.githooks` 기반 commit 메시지 형식 검증
+- `.githooks` 기반 pre-commit, pre-push 검증 실행
+- GitHub Actions 기반 `./scripts/verify.sh all` CI 검증
+- JUnit 기반 상품 상태 전이 규칙 검증
 
-### 문서 기준은 존재하지만 자동화가 남아 있는 항목
-- API 경로 `/api/v1` prefix 검증
-- JPA 연관관계 금지 규칙 검증
-- PK 필드명과 UUID 타입 직접 검증
-- soft delete 적용 대상 검증
-- 로그 민감 정보 출력 금지 검증
-- 도메인 상태 전이 규칙 검증
-
-## 7. 점진 적용 순서
-### 1단계
-- Spotless
-- Checkstyle
-- 기본 테스트 실행
-
-### 2단계
-- ArchUnit 패키지 구조 규칙
-- Repository/Controller/DTO 네이밍 검증
-
-### 3단계
-- API 응답 형식 테스트
-- soft delete 및 공통 엔티티 규칙 테스트
-- 민감 정보 로그 검증 보강
-
-## 8. 우선 구현할 규칙
-초기에는 아래 규칙부터 자동화한다.
-
-1. controller가 repository를 직접 호출하지 못하게 한다.
-2. entity를 controller 응답으로 직접 반환하지 못하게 한다.
-3. Querydsl 조회 클래스는 `~RepositoryQuery` 네이밍만 허용한다.
-4. API 경로는 `/api/v1` prefix만 허용한다.
-5. DTO는 `Request`, `Response` 네이밍만 허용한다.
-6. `@Data` 사용을 금지한다.
-
-## 9. 수동 확인 규칙
+## 7. 수동 확인 규칙
 아래 내용은 자동화 전까지 수동 리뷰로 확인한다.
 
 - 도메인 경계 변경
@@ -181,13 +157,14 @@
 - 파일 정책 변경
 - Auth 저장 정책 변경
 - 문서와 코드 기준 불일치 여부
-- 수동으로 허용한 예외 규칙은 문서에 기록하고, 추후 자동화 대상으로 편입한다.
+- 수동으로 허용한 예외 규칙은 문서에 기록한다.
 
-## 10. 문서 연계
+## 8. 문서 연계
 하네스 규칙은 아래 문서를 기준으로 삼는다.
 
 - `docs/PACKAGE-STRUCTURE.md`
 - `docs/API-SPEC.md`
 - `docs/CODE-CONVENTIONS.md`
 - `docs/DOMAIN-MODEL.md`
+- `docs/HOOKS-RUNBOOK.md`
 - `docs/domains/*.md`

@@ -15,10 +15,12 @@ public abstract class SoftDeleteEntity extends BaseEntity {
   @Column(nullable = false)
   private boolean deleted = false;
 
+  /** soft delete 상태로 전환 */
   public void delete() {
     this.deleted = true;
   }
 
+  /** soft delete 상태 해제 */
   public void restore() {
     this.deleted = false;
   }

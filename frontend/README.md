@@ -31,7 +31,7 @@ VITE_APP_NAME=Guardrail Backoffice
 ## 구현된 화면
 
 - `/login`: `/api/v1/auth/login` 기반 로그인
-- `/dashboard`: 승인 완료 상품과 승인 요청 현황을 보여주는 메인 대시보드
+- `/dashboard`: 승인 완료 상품, 승인 요청 현황, 최근 등록 상품 미리보기를 보여주는 메인 대시보드
 - `/categories`: 카테고리 목록, 생성, 수정, 상태 변경, 삭제, 복구
 - `/product-options`: 카테고리별 옵션과 선택 항목 관리
 - `/products`: 승인 전 단계 상품 목록

@@ -159,8 +159,9 @@
 - DTO와 공통 응답 구조에는 `record`를 사용하지 않는다.
 
 ## 12. 주석 작성 기준
-- 모든 클래스에는 한 줄 Javadoc을 작성한다.
+- controller, service, config, common 진입점의 public 클래스/인터페이스/record에는 한 줄 Javadoc을 작성한다.
 - public 메서드 중 외부 계약, 설정 진입점, 공통 응답/예외 유틸에는 한 줄 Javadoc을 작성한다.
+- DTO, domain, repository, support, test는 Javadoc 강제 범위에서 제외한다.
 - 단순 getter, 생성자에는 Javadoc을 작성하지 않는다.
 - 메서드 Javadoc은 복잡한 정책, 상태 전이, 보안 판단, 외부 공개 API에만 작성한다.
 - Javadoc은 역할과 의도를 간단한 명사형으로 작성한다.
