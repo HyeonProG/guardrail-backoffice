@@ -3,10 +3,14 @@ package com.hyeon.guardrail.user.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.hyeon.guardrail.auth.domain.UserPasswordHistory;
+import com.hyeon.guardrail.auth.repository.AuthRepositoryQuery;
+import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.service.AuthService;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.mail.MailSender;
@@ -14,17 +18,21 @@ import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserRole;
 import com.hyeon.guardrail.user.domain.UserStatus;
+import com.hyeon.guardrail.user.dto.ChangePasswordRequest;
+import com.hyeon.guardrail.user.dto.ChangePasswordResponse;
 import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserStatusUpdateRequest;
 import com.hyeon.guardrail.user.repository.UserRepository;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /** 사용자 서비스 단위 테스트 */
@@ -33,7 +41,10 @@ class UserServiceTest {
 
   @Mock private UserRepository userRepository;
   @Mock private UserRepositoryQuery userRepositoryQuery;
+  @Mock private AuthRepositoryQuery authRepositoryQuery;
+  @Mock private UserPasswordHistoryRepository passwordHistoryRepository;
   @Mock private AuthService authService;
+  @Mock private PasswordEncoder passwordEncoder;
   @Mock private MailSender mailSender;
   @Mock private CurrentUserService currentUserService;
 
@@ -90,5 +101,32 @@ class UserServiceTest {
 
     assertThat(response.getStatus()).isEqualTo(UserStatus.INACTIVE);
     assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
+  }
+
+  /** 현재 비밀번호가 일치하면 새 비밀번호 이력을 저장한다 */
+  @Test
+  void changePasswordStoresNewNonTemporaryPasswordHistory() {
+    UUID userId = UUID.randomUUID();
+    UserPasswordHistory latestPasswordHistory =
+        new UserPasswordHistory(
+            userId, "encoded-current-password", true, LocalDateTime.now().plusDays(1));
+    ChangePasswordRequest request = new ChangePasswordRequest("current-password", "new-password");
+
+    when(authRepositoryQuery.findLatestValidPasswordHistory(eq(userId), any(LocalDateTime.class)))
+        .thenReturn(java.util.Optional.of(latestPasswordHistory));
+    when(passwordEncoder.matches(
+            request.getCurrentPassword(), latestPasswordHistory.getPasswordHash()))
+        .thenReturn(true);
+    when(passwordEncoder.matches(request.getNewPassword(), latestPasswordHistory.getPasswordHash()))
+        .thenReturn(false);
+    when(passwordEncoder.encode(request.getNewPassword())).thenReturn("encoded-new-password");
+    when(passwordHistoryRepository.save(any(UserPasswordHistory.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
+    ChangePasswordResponse response = userService.changePassword(userId, request);
+
+    verify(currentUserService).validateActor(userId);
+    assertThat(response.isTemporary()).isFalse();
+    assertThat(response.getUserId()).isEqualTo(userId);
   }
 }

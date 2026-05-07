@@ -6,14 +6,11 @@ import com.hyeon.guardrail.auth.domain.SessionStatus;
 import com.hyeon.guardrail.auth.domain.UserLoginHistory;
 import com.hyeon.guardrail.auth.domain.UserPasswordHistory;
 import com.hyeon.guardrail.auth.domain.UserSession;
-import com.hyeon.guardrail.auth.dto.ChangePasswordRequest;
-import com.hyeon.guardrail.auth.dto.ChangePasswordResponse;
 import com.hyeon.guardrail.auth.dto.LoginHistoryCreateRequest;
 import com.hyeon.guardrail.auth.dto.LoginHistoryResponse;
 import com.hyeon.guardrail.auth.dto.LoginRequest;
 import com.hyeon.guardrail.auth.dto.LoginResponse;
 import com.hyeon.guardrail.auth.dto.LogoutResponse;
-import com.hyeon.guardrail.auth.dto.PasswordHistoryResponse;
 import com.hyeon.guardrail.auth.dto.SessionCreateRequest;
 import com.hyeon.guardrail.auth.dto.SessionResponse;
 import com.hyeon.guardrail.auth.dto.TokenIssueResponse;
@@ -25,7 +22,6 @@ import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserSessionRepository;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
-import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserStatus;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
@@ -60,7 +56,6 @@ public class AuthService {
   private final UserRepositoryQuery userRepositoryQuery;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
-  private final CurrentUserService currentUserService;
 
   /** 사용자 초기 비밀번호 해시 저장 */
   @Transactional
@@ -184,45 +179,6 @@ public class AuthService {
     session.revoke();
 
     return new LogoutResponse(session.getId(), session.getStatus());
-  }
-
-  /** 사용자 비밀번호 이력 목록 조회 */
-  @Transactional(readOnly = true)
-  public List<PasswordHistoryResponse> getPasswordHistories(UUID userId) {
-    return authRepositoryQuery.findPasswordHistoriesByUserId(userId).stream()
-        .map(PasswordHistoryResponse::from)
-        .toList();
-  }
-
-  /** 현재 로그인 사용자의 비밀번호를 변경한다. */
-  @Transactional
-  public ChangePasswordResponse changePassword(UUID userId, ChangePasswordRequest request) {
-    currentUserService.validateActor(userId);
-
-    UserPasswordHistory latestPasswordHistory =
-        authRepositoryQuery
-            .findLatestValidPasswordHistory(userId, LocalDateTime.now())
-            .orElseThrow(
-                () -> new BaseException(BaseResponseStatus.NOT_FOUND, "현재 비밀번호 정보를 찾을 수 없습니다."));
-
-    if (!passwordEncoder.matches(
-        request.getCurrentPassword(), latestPasswordHistory.getPasswordHash())) {
-      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "현재 비밀번호가 일치하지 않습니다.");
-    }
-
-    if (passwordEncoder.matches(
-        request.getNewPassword(), latestPasswordHistory.getPasswordHash())) {
-      throw new BaseException(BaseResponseStatus.CONFLICT, "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
-    }
-
-    UserPasswordHistory changedPasswordHistory =
-        new UserPasswordHistory(
-            userId, passwordEncoder.encode(request.getNewPassword()), false, null);
-
-    UserPasswordHistory savedPasswordHistory =
-        passwordHistoryRepository.save(changedPasswordHistory);
-    return new ChangePasswordResponse(
-        savedPasswordHistory.getUserId(), false, savedPasswordHistory.getCreatedAt());
   }
 
   /** 로그인 이력 저장 */

@@ -3,6 +3,9 @@ package com.hyeon.guardrail.user.controller;
 import com.hyeon.guardrail.common.response.BaseResponseEntity;
 import com.hyeon.guardrail.common.response.PageResponse;
 import com.hyeon.guardrail.user.domain.UserStatus;
+import com.hyeon.guardrail.user.dto.ChangePasswordRequest;
+import com.hyeon.guardrail.user.dto.ChangePasswordResponse;
+import com.hyeon.guardrail.user.dto.PasswordHistoryResponse;
 import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserResponse;
@@ -14,6 +17,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +57,23 @@ public class UserController {
   @GetMapping("/{userId}")
   public BaseResponseEntity<UserResponse> getUser(@PathVariable UUID userId) {
     return BaseResponseEntity.success(userService.getUser(userId));
+  }
+
+  /** 사용자 비밀번호 이력 조회 */
+  @Operation(summary = "비밀번호 이력 조회", description = "사용자의 비밀번호 이력 목록을 조회합니다.")
+  @GetMapping("/{userId}/password-histories")
+  public BaseResponseEntity<List<PasswordHistoryResponse>> getPasswordHistories(
+      @PathVariable UUID userId) {
+    return BaseResponseEntity.success(userService.getPasswordHistories(userId));
+  }
+
+  /** 사용자 비밀번호 변경 */
+  @Operation(summary = "비밀번호 변경", description = "현재 로그인한 사용자의 비밀번호를 변경합니다.")
+  @PatchMapping("/{userId}/password")
+  public BaseResponseEntity<ChangePasswordResponse> changePassword(
+      @PathVariable UUID userId, @Valid @RequestBody ChangePasswordRequest request) {
+    return BaseResponseEntity.success(
+        userService.changePassword(userId, request), "비밀번호가 변경되었습니다.");
   }
 
   /** 사용자 목록 조회 */

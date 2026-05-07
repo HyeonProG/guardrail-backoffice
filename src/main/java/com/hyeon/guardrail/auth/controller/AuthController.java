@@ -1,14 +1,11 @@
 package com.hyeon.guardrail.auth.controller;
 
-import com.hyeon.guardrail.auth.dto.ChangePasswordRequest;
-import com.hyeon.guardrail.auth.dto.ChangePasswordResponse;
 import com.hyeon.guardrail.auth.dto.LoginHistoryCreateRequest;
 import com.hyeon.guardrail.auth.dto.LoginHistoryResponse;
 import com.hyeon.guardrail.auth.dto.LoginRequest;
 import com.hyeon.guardrail.auth.dto.LoginResponse;
 import com.hyeon.guardrail.auth.dto.LogoutRequest;
 import com.hyeon.guardrail.auth.dto.LogoutResponse;
-import com.hyeon.guardrail.auth.dto.PasswordHistoryResponse;
 import com.hyeon.guardrail.auth.dto.SessionCreateRequest;
 import com.hyeon.guardrail.auth.dto.SessionResponse;
 import com.hyeon.guardrail.auth.dto.SessionStatusUpdateRequest;
@@ -63,24 +60,6 @@ public class AuthController {
   @PostMapping("/logout")
   public BaseResponseEntity<LogoutResponse> logout(@Valid @RequestBody LogoutRequest request) {
     return BaseResponseEntity.success(authService.logout(request.getSessionId()), "로그아웃되었습니다.");
-  }
-
-  /** 사용자 비밀번호 이력 조회 */
-  @Operation(summary = "비밀번호 이력 조회", description = "사용자의 비밀번호 이력 목록을 조회합니다.")
-  @SecurityRequirement(name = "bearerAuth")
-  @GetMapping("/users/{userId}/password-histories")
-  public BaseResponseEntity<List<PasswordHistoryResponse>> getPasswordHistories(
-      @PathVariable UUID userId) {
-    return BaseResponseEntity.success(authService.getPasswordHistories(userId));
-  }
-
-  /** 사용자 비밀번호 변경 */
-  @Operation(summary = "비밀번호 변경", description = "현재 로그인한 사용자의 비밀번호를 변경합니다.")
-  @PatchMapping("/users/{userId}/password")
-  public BaseResponseEntity<ChangePasswordResponse> changePassword(
-      @PathVariable UUID userId, @Valid @RequestBody ChangePasswordRequest request) {
-    return BaseResponseEntity.success(
-        authService.changePassword(userId, request), "비밀번호가 변경되었습니다.");
   }
 
   /** 로그인 이력 저장 */

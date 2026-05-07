@@ -1,4 +1,4 @@
-package com.hyeon.guardrail.auth.dto;
+package com.hyeon.guardrail.user.dto;
 
 import com.hyeon.guardrail.auth.domain.UserPasswordHistory;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,10 +7,10 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/** 비밀번호 이력 응답 */
+/** 사용자 비밀번호 이력 응답 */
 @Getter
 @AllArgsConstructor
-@Schema(description = "비밀번호 이력 응답")
+@Schema(description = "사용자 비밀번호 이력 응답")
 public class PasswordHistoryResponse {
 
   @Schema(description = "비밀번호 이력 ID")

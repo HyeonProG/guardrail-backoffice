@@ -1,5 +1,8 @@
 package com.hyeon.guardrail.user.service;
 
+import com.hyeon.guardrail.auth.domain.UserPasswordHistory;
+import com.hyeon.guardrail.auth.repository.AuthRepositoryQuery;
+import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.service.AuthService;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.mail.MailSender;
@@ -8,6 +11,9 @@ import com.hyeon.guardrail.common.response.PageResponse;
 import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserStatus;
+import com.hyeon.guardrail.user.dto.ChangePasswordRequest;
+import com.hyeon.guardrail.user.dto.ChangePasswordResponse;
+import com.hyeon.guardrail.user.dto.PasswordHistoryResponse;
 import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserResponse;
@@ -18,9 +24,11 @@ import com.hyeon.guardrail.user.repository.UserRepository;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +43,10 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final UserRepositoryQuery userRepositoryQuery;
+  private final AuthRepositoryQuery authRepositoryQuery;
+  private final UserPasswordHistoryRepository passwordHistoryRepository;
   private final AuthService authService;
+  private final PasswordEncoder passwordEncoder;
   private final MailSender mailSender;
   private final CurrentUserService currentUserService;
   private final SecureRandom secureRandom = new SecureRandom();
@@ -69,6 +80,46 @@ public class UserService {
   @Transactional(readOnly = true)
   public UserResponse getUser(UUID userId) {
     return UserResponse.from(findActiveUser(userId));
+  }
+
+  /** 사용자 비밀번호 이력 목록 조회 */
+  @Transactional(readOnly = true)
+  public List<PasswordHistoryResponse> getPasswordHistories(UUID userId) {
+    currentUserService.validateActor(userId);
+    return authRepositoryQuery.findPasswordHistoriesByUserId(userId).stream()
+        .map(PasswordHistoryResponse::from)
+        .toList();
+  }
+
+  /** 현재 로그인 사용자의 비밀번호를 변경한다. */
+  @Transactional
+  public ChangePasswordResponse changePassword(UUID userId, ChangePasswordRequest request) {
+    currentUserService.validateActor(userId);
+
+    UserPasswordHistory latestPasswordHistory =
+        authRepositoryQuery
+            .findLatestValidPasswordHistory(userId, LocalDateTime.now())
+            .orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND, "현재 비밀번호 정보를 찾을 수 없습니다."));
+
+    if (!passwordEncoder.matches(
+        request.getCurrentPassword(), latestPasswordHistory.getPasswordHash())) {
+      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "현재 비밀번호가 일치하지 않습니다.");
+    }
+
+    if (passwordEncoder.matches(
+        request.getNewPassword(), latestPasswordHistory.getPasswordHash())) {
+      throw new BaseException(BaseResponseStatus.CONFLICT, "새 비밀번호는 현재 비밀번호와 달라야 합니다.");
+    }
+
+    UserPasswordHistory changedPasswordHistory =
+        new UserPasswordHistory(
+            userId, passwordEncoder.encode(request.getNewPassword()), false, null);
+
+    UserPasswordHistory savedPasswordHistory =
+        passwordHistoryRepository.save(changedPasswordHistory);
+    return new ChangePasswordResponse(
+        savedPasswordHistory.getUserId(), false, savedPasswordHistory.getCreatedAt());
   }
 
   /** 사용자 목록 조회 */

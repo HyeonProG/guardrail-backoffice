@@ -33,6 +33,7 @@ export function ProductDetailPage() {
   const [reason, setReason] = useState('');
   const [imageIndex, setImageIndex] = useState(0);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [statusConfirmOpen, setStatusConfirmOpen] = useState(false);
 
   const productQuery = useQuery({
     queryKey: ['products', productId],
@@ -302,7 +303,11 @@ export function ProductDetailPage() {
                       </select>
                       <TextField label="사유" value={reason} onChange={(event) => setReason(event.target.value)} />
                       <ErrorMessage error={statusMutation.error} />
-                      <Button type="button" disabled={statusMutation.isPending} onClick={() => statusMutation.mutate()}>
+                      <Button
+                        type="button"
+                        disabled={statusMutation.isPending}
+                        onClick={() => setStatusConfirmOpen(true)}
+                      >
                         상태 변경
                       </Button>
                     </div>
@@ -342,6 +347,48 @@ export function ProductDetailPage() {
           </tbody>
         </table>
       </section>
+
+      <Modal
+        open={statusConfirmOpen}
+        title="상태 변경 확인"
+        onClose={() => setStatusConfirmOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="rounded-[20px] border border-slate-200 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] p-4 shadow-sm">
+            <dl className="space-y-3 text-sm text-slate-700">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="font-medium text-slate-500">현재 상태</dt>
+                <dd className="font-semibold text-slate-950">{getProductStatusLabel(productQuery.data?.status ?? 'DRAFT')}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="font-medium text-slate-500">변경 상태</dt>
+                <dd className="font-semibold text-slate-950">{getProductStatusLabel(nextStatus)}</dd>
+              </div>
+              <div className="flex items-start justify-between gap-4">
+                <dt className="pt-0.5 font-medium text-slate-500">사유</dt>
+                <dd className="max-w-[70%] text-right text-slate-700">{reason.trim() || '-'}</dd>
+              </div>
+            </dl>
+          </div>
+          <ErrorMessage error={statusMutation.error} />
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setStatusConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button
+              type="button"
+              disabled={statusMutation.isPending}
+              onClick={() =>
+                statusMutation.mutate(undefined, {
+                  onSuccess: () => setStatusConfirmOpen(false)
+                })
+              }
+            >
+              상태 변경하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         open={deleteConfirmOpen}

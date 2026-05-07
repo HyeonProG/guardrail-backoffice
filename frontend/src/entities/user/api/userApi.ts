@@ -26,7 +26,7 @@ export async function updateUser(
 }
 
 export async function getPasswordHistories(userId: string, config?: ApiRequestConfig) {
-  const response = await apiClient.get(`/api/v1/auth/users/${userId}/password-histories`, config);
+  const response = await apiClient.get(`/api/v1/users/${userId}/password-histories`, config);
   return unwrapResult<PasswordHistory[]>(response);
 }
 
@@ -37,6 +37,6 @@ export async function changePassword(
     newPassword: string;
   }
 ) {
-  const response = await apiClient.patch(`/api/v1/auth/users/${userId}/password`, request);
+  const response = await apiClient.patch(`/api/v1/users/${userId}/password`, request);
   return unwrapResult<ChangePasswordResponse>(response);
 }

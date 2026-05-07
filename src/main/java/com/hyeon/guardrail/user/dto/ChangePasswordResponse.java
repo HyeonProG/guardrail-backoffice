@@ -1,4 +1,4 @@
-package com.hyeon.guardrail.auth.dto;
+package com.hyeon.guardrail.user.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -6,10 +6,10 @@ import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-/** 비밀번호 변경 응답 */
+/** 사용자 비밀번호 변경 응답 */
 @Getter
 @AllArgsConstructor
-@Schema(description = "비밀번호 변경 응답")
+@Schema(description = "사용자 비밀번호 변경 응답")
 public class ChangePasswordResponse {
 
   @Schema(description = "사용자 ID")
@@ -18,6 +18,6 @@ public class ChangePasswordResponse {
   @Schema(description = "임시 비밀번호 여부", example = "false")
   private boolean temporary;
 
-  @Schema(description = "변경 일시", example = "2026-04-30T10:30:00")
+  @Schema(description = "변경 시각", example = "2026-04-28T10:30:00")
   private LocalDateTime changedAt;
 }

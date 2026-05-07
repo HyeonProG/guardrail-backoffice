@@ -1,32 +1,85 @@
+import { Suspense, lazy, type ComponentType, type ReactNode } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { LoginPage } from '@/pages/login/LoginPage';
-import { DashboardPage } from '@/pages/dashboard/DashboardPage';
-import { CategoriesPage } from '@/pages/categories/CategoriesPage';
-import { ApprovalRequestsPage } from '@/pages/approvalRequests/ApprovalRequestsPage';
-import { ProductApprovalDetailPage } from '@/pages/approvalRequests/ProductApprovalDetailPage';
-import { ProductCreatePage } from '@/pages/products/ProductCreatePage';
-import { ProductDetailPage } from '@/pages/products/ProductDetailPage';
-import { ProductEditPage } from '@/pages/products/ProductEditPage';
-import { ApprovedProductsPage } from '@/pages/products/ApprovedProductsPage';
-import { ProductsPage } from '@/pages/products/ProductsPage';
-import { ProductOptionDetailPage } from '@/pages/productOptions/ProductOptionDetailPage';
-import { ProductOptionItemDetailPage } from '@/pages/productOptions/ProductOptionItemDetailPage';
-import { ProductOptionsPage } from '@/pages/productOptions/ProductOptionsPage';
-import { MyAccountPage } from '@/pages/myAccount/MyAccountPage';
-import { UsersPage } from '@/pages/users/UsersPage';
-import { NotFoundPage } from '@/pages/errors/NotFoundPage';
-import { UnauthorizedPage } from '@/pages/errors/UnauthorizedPage';
 import { AppLayout } from '@/widgets/layout/AppLayout';
 import { ProtectedRoute } from '@/app/routes/ProtectedRoute';
+
+function lazyPage<T extends Record<string, unknown>, K extends keyof T & string>(
+  loader: () => Promise<T>,
+  exportName: K
+) {
+  return lazy(async () => {
+    const module = await loader();
+    return { default: module[exportName] as ComponentType };
+  });
+}
+
+const LoginPage = lazyPage(() => import('@/pages/login/LoginPage'), 'LoginPage');
+const DashboardPage = lazyPage(() => import('@/pages/dashboard/DashboardPage'), 'DashboardPage');
+const CategoriesPage = lazyPage(() => import('@/pages/categories/CategoriesPage'), 'CategoriesPage');
+const ApprovalRequestsPage = lazyPage(
+  () => import('@/pages/approvalRequests/ApprovalRequestsPage'),
+  'ApprovalRequestsPage'
+);
+const ProductApprovalDetailPage = lazyPage(
+  () => import('@/pages/approvalRequests/ProductApprovalDetailPage'),
+  'ProductApprovalDetailPage'
+);
+const ProductCreatePage = lazyPage(
+  () => import('@/pages/products/ProductCreatePage'),
+  'ProductCreatePage'
+);
+const ProductDetailPage = lazyPage(
+  () => import('@/pages/products/ProductDetailPage'),
+  'ProductDetailPage'
+);
+const ProductEditPage = lazyPage(() => import('@/pages/products/ProductEditPage'), 'ProductEditPage');
+const ApprovedProductsPage = lazyPage(
+  () => import('@/pages/products/ApprovedProductsPage'),
+  'ApprovedProductsPage'
+);
+const ProductsPage = lazyPage(() => import('@/pages/products/ProductsPage'), 'ProductsPage');
+const ProductOptionDetailPage = lazyPage(
+  () => import('@/pages/productOptions/ProductOptionDetailPage'),
+  'ProductOptionDetailPage'
+);
+const ProductOptionItemDetailPage = lazyPage(
+  () => import('@/pages/productOptions/ProductOptionItemDetailPage'),
+  'ProductOptionItemDetailPage'
+);
+const ProductOptionsPage = lazyPage(
+  () => import('@/pages/productOptions/ProductOptionsPage'),
+  'ProductOptionsPage'
+);
+const MyAccountPage = lazyPage(() => import('@/pages/myAccount/MyAccountPage'), 'MyAccountPage');
+const UsersPage = lazyPage(() => import('@/pages/users/UsersPage'), 'UsersPage');
+const NotFoundPage = lazyPage(() => import('@/pages/errors/NotFoundPage'), 'NotFoundPage');
+const UnauthorizedPage = lazyPage(
+  () => import('@/pages/errors/UnauthorizedPage'),
+  'UnauthorizedPage'
+);
+
+function withSuspense(element: ReactNode) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[40vh] items-center justify-center text-sm font-medium text-slate-500">
+          화면을 불러오는 중입니다.
+        </div>
+      }
+    >
+      {element}
+    </Suspense>
+  );
+}
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />
+    element: withSuspense(<LoginPage />)
   },
   {
     path: '/unauthorized',
-    element: <UnauthorizedPage />
+    element: withSuspense(<UnauthorizedPage />)
   },
   {
     path: '/',
@@ -42,25 +95,25 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <DashboardPage />
+        element: withSuspense(<DashboardPage />)
       },
       {
         path: 'products',
-        element: <ProductsPage />
+        element: withSuspense(<ProductsPage />)
       },
       {
         path: 'products/approved',
-        element: <ApprovedProductsPage />
+        element: withSuspense(<ApprovedProductsPage />)
       },
       {
         path: 'products/new',
-        element: <ProductCreatePage />
+        element: withSuspense(<ProductCreatePage />)
       },
       {
         path: 'approval-requests',
         element: (
           <ProtectedRoute allowedRoles={['ADMIN', 'OPERATOR']}>
-            <ApprovalRequestsPage />
+            {withSuspense(<ApprovalRequestsPage />)}
           </ProtectedRoute>
         )
       },
@@ -68,54 +121,54 @@ export const router = createBrowserRouter([
         path: 'approval-requests/:productId',
         element: (
           <ProtectedRoute allowedRoles={['ADMIN', 'OPERATOR']}>
-            <ProductApprovalDetailPage />
+            {withSuspense(<ProductApprovalDetailPage />)}
           </ProtectedRoute>
         )
       },
       {
         path: 'products/:productId',
-        element: <ProductDetailPage />
+        element: withSuspense(<ProductDetailPage />)
       },
       {
         path: 'products/:productId/edit',
-        element: <ProductEditPage />
+        element: withSuspense(<ProductEditPage />)
       },
       {
         path: 'product-options',
-        element: <ProductOptionsPage />
+        element: withSuspense(<ProductOptionsPage />)
       },
       {
         path: 'product-options/:productOptionId',
-        element: <ProductOptionDetailPage />
+        element: withSuspense(<ProductOptionDetailPage />)
       },
       {
         path: 'product-options/:productOptionId/items/:productOptionItemId',
-        element: <ProductOptionItemDetailPage />
+        element: withSuspense(<ProductOptionItemDetailPage />)
       },
       {
         path: 'categories',
-        element: <CategoriesPage />
+        element: withSuspense(<CategoriesPage />)
       },
       {
         path: 'my-account',
-        element: <MyAccountPage />
+        element: withSuspense(<MyAccountPage />)
       },
       {
         path: 'users',
         element: (
           <ProtectedRoute allowedRoles={['ADMIN', 'OPERATOR']}>
-            <UsersPage />
+            {withSuspense(<UsersPage />)}
           </ProtectedRoute>
         )
       },
       {
         path: '*',
-        element: <NotFoundPage />
+        element: withSuspense(<NotFoundPage />)
       }
     ]
   },
   {
     path: '*',
-    element: <NotFoundPage />
+    element: withSuspense(<NotFoundPage />)
   }
 ]);
