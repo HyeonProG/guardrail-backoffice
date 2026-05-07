@@ -34,10 +34,10 @@ export function ProductOptionItemDetailPage() {
           <h2 className="page-title">선택 항목 상세</h2>
         </div>
         <Link
-          className="ghost-link"
-          to={`/product-options/${productOptionId}?categoryId=${categoryId}`}
+          className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+          to={`/product-options?categoryId=${categoryId}`}
         >
-          옵션 상세로 돌아가기
+          옵션 목록으로
         </Link>
       </section>
 

@@ -309,7 +309,7 @@ export function CategoriesPage() {
                         </Button>
                         <Button
                           type="button"
-                          variant="ghost"
+                          variant="danger"
                           onClick={() =>
                             setConfirmState({
                               title: '카테고리 삭제 확인',

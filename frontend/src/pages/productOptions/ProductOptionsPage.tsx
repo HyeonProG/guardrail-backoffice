@@ -185,18 +185,20 @@ export function ProductOptionsPage() {
                   <td className="px-4 py-3 font-medium text-ink">{option.name}</td>
                   {currentRole !== 'STAFF' ? <td className="px-4 py-3">{option.status}</td> : null}
                   <td className="px-4 py-3 text-slate-600">{formatDateTime(option.updatedAt)}</td>
-                  <td className="space-x-2 px-4 py-3">
-                    <Link
-                      className="ghost-link"
-                      to={`/product-options/${option.id}?categoryId=${categoryId}`}
-                    >
-                      상세
-                    </Link>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+                        to={`/product-options/${option.id}?categoryId=${categoryId}`}
+                      >
+                        상세
+                      </Link>
                     {canManageOptionMaster ? (
-                      <button className="ghost-link" type="button" onClick={() => startEdit(option)}>
+                      <Button type="button" variant="secondary" onClick={() => startEdit(option)}>
                         수정
-                      </button>
+                      </Button>
                     ) : null}
+                    </div>
                   </td>
                 </tr>
               ))}
