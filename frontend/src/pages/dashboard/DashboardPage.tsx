@@ -16,7 +16,7 @@ export function DashboardPage() {
 
   const approvedProductsQuery = useQuery({
     queryKey: ['dashboard', 'approved-products'],
-    queryFn: () => getProducts({ status: 'APPROVED', page: 0, size: 8, sort: 'updatedAt,desc' })
+    queryFn: () => getProducts({ status: 'APPROVED', page: 0, size: 4, sort: 'updatedAt,desc' })
   });
   const pendingProductsQuery = useQuery({
     queryKey: ['dashboard', 'pending-products'],
@@ -114,6 +114,51 @@ export function DashboardPage() {
                 </Link>
               ) : null}
             </div>
+            <div className="mt-10">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">최근 등록 상품</h2>
+                <Link
+                  className="text-sm font-medium text-slate-300 transition hover:text-white"
+                  to="/products/approved"
+                >
+                  전체 보기
+                </Link>
+              </div>
+              {approvedProducts.length > 0 ? (
+                <div className="mt-4 grid grid-cols-2 gap-3 xl:grid-cols-4 xl:max-w-[760px]">
+                  {approvedProductCards.map((product) => (
+                    <Link
+                      key={product.id}
+                      className="overflow-hidden rounded-[22px] border border-white/15 bg-white/10 shadow-[0_16px_40px_rgba(15,23,42,0.16)] transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-white/12"
+                      to={`/products/${product.id}`}
+                    >
+                      <div className="aspect-[4/5] overflow-hidden bg-slate-800/60">
+                        {product.representativeImageUrl ? (
+                          <img
+                            alt={product.name}
+                            className="h-full w-full object-cover transition duration-300 hover:scale-[1.03]"
+                            src={product.representativeImageUrl}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-sm font-medium text-slate-400">
+                            이미지 없음
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <h3 className="line-clamp-2 text-sm font-semibold text-white">{product.name}</h3>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                !approvedProductsQuery.isLoading && (
+                  <div className="mt-4 rounded-[24px] border border-dashed border-white/20 bg-white/5 px-5 py-8 text-sm text-slate-300">
+                    승인 완료된 상품이 아직 없습니다.
+                  </div>
+                )
+              )}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
@@ -147,56 +192,6 @@ export function DashboardPage() {
             <p className="mt-2 text-sm leading-6 text-slate-600">{item.description}</p>
           </Link>
         ))}
-      </section>
-
-      <section className="grid gap-6">
-        <div className="table-shell">
-          <div className="flex items-center justify-between border-b border-slate-200/70 px-6 py-5">
-            <div>
-              <h2 className="text-xl font-semibold text-slate-950">상품 목록</h2>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link className="ghost-link" to="/products/approved">
-                전체 상품 보기
-              </Link>
-            </div>
-          </div>
-          {approvedProducts.length > 0 ? (
-            <>
-              <div className="grid gap-5 p-6 md:grid-cols-2 xl:grid-cols-4">
-                {approvedProductCards.map((product) => (
-                  <Link
-                    key={product.id}
-                    className="overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
-                    to={`/products/${product.id}`}
-                  >
-                    <div className="aspect-[4/3] overflow-hidden bg-slate-100">
-                      {product.representativeImageUrl ? (
-                        <img
-                          alt={product.name}
-                          className="h-full w-full object-cover transition duration-300 hover:scale-[1.03]"
-                          src={product.representativeImageUrl}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm font-medium text-slate-400">
-                          이미지 없음
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-3 p-4">
-                      <h3 className="line-clamp-2 text-lg font-semibold text-slate-950">{product.name}</h3>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-            </>
-          ) : null}
-
-          {!approvedProductsQuery.isLoading && approvedProducts.length === 0 ? (
-            <div className="px-6 py-12 text-sm text-slate-500">승인 완료된 상품이 아직 없습니다.</div>
-          ) : null}
-        </div>
       </section>
 
       <ErrorMessage error={approvedProductsQuery.error ?? pendingProductsQuery.error ?? categoriesQuery.error} />
