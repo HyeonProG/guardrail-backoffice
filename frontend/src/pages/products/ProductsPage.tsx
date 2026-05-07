@@ -22,7 +22,7 @@ export function ProductsPage() {
     queryFn: () =>
       getProducts({
         page,
-        size: 10,
+        size: 8,
         sort: `updatedAt,${sortDirection}`,
         approvedOnly: false,
         myOnly: true

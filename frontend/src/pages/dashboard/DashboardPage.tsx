@@ -16,11 +16,11 @@ export function DashboardPage() {
 
   const approvedProductsQuery = useQuery({
     queryKey: ['dashboard', 'approved-products'],
-    queryFn: () => getProducts({ status: 'APPROVED', page: 0, size: 4, sort: 'updatedAt,desc' })
+    queryFn: () => getProducts({ status: 'APPROVED', page: 0, size: 8, sort: 'updatedAt,desc' })
   });
   const pendingProductsQuery = useQuery({
     queryKey: ['dashboard', 'pending-products'],
-    queryFn: () => getProducts({ status: 'PENDING', size: 20, sort: 'updatedAt,desc' }),
+    queryFn: () => getProducts({ status: 'PENDING', page: 0, size: 10, sort: 'updatedAt,desc' }),
     enabled: canReviewApprovals
   });
   const categoriesQuery = useQuery({
@@ -30,6 +30,8 @@ export function DashboardPage() {
 
   const approvedProducts = approvedProductsQuery.data?.content ?? [];
   const pendingProducts = pendingProductsQuery.data?.content ?? [];
+  const approvedProductCount = approvedProductsQuery.data?.totalElements ?? 0;
+  const pendingProductCount = pendingProductsQuery.data?.totalElements ?? 0;
   const categories = categoriesQuery.data?.content ?? [];
   const approvedProductImageQueries = useQueries({
     queries: approvedProducts.map((product) => ({
@@ -78,13 +80,13 @@ export function DashboardPage() {
 
   const stats = useMemo(
     () => [
-      { label: '승인 완료 상품', value: approvedProducts.length, accent: 'from-emerald-500 to-teal-500', badge: '상품' },
+      { label: '승인 완료 상품', value: approvedProductCount, accent: 'from-emerald-500 to-teal-500', badge: '상품' },
       ...(canReviewApprovals
-        ? [{ label: '승인 요청 건수', value: pendingProducts.length, accent: 'from-amber-500 to-orange-500', badge: '요청' }]
+        ? [{ label: '승인 요청 건수', value: pendingProductCount, accent: 'from-amber-500 to-orange-500', badge: '요청' }]
         : []),
       { label: '등록 카테고리', value: categories.length, accent: 'from-sky-500 to-indigo-500', badge: '기준 정보' }
     ],
-    [approvedProducts.length, canReviewApprovals, pendingProducts.length, categories.length]
+    [approvedProductCount, canReviewApprovals, pendingProductCount, categories.length]
   );
 
   return (

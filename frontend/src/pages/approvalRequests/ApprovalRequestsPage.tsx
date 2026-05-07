@@ -15,7 +15,7 @@ export function ApprovalRequestsPage() {
 
   const pendingProductsQuery = useQuery({
     queryKey: ['products', 'approval-requests', page],
-    queryFn: () => getProducts({ status: 'PENDING', page, size: 10 })
+    queryFn: () => getProducts({ status: 'PENDING', page, size: 8 })
   });
 
   const products = pendingProductsQuery.data?.content ?? [];
