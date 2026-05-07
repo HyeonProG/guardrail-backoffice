@@ -71,7 +71,6 @@ export function UsersPage() {
         <div>
           <p className="section-kicker">Identity Control</p>
           <h1 className="page-title">사용자 관리</h1>
-          <p className="page-description">관리자와 운영자는 사용자 계정을 생성하고 상태를 관리할 수 있습니다.</p>
         </div>
       </section>
 

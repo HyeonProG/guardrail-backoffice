@@ -38,7 +38,6 @@ export function ApprovalRequestsPage() {
         <div>
           <p className="section-kicker">Review Queue</p>
           <h2 className="page-title">승인 요청 관리</h2>
-          <p className="page-description">직원이 등록한 상품을 검토하고 승인 또는 반려합니다.</p>
         </div>
       </section>
 

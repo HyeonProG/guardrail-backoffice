@@ -118,7 +118,6 @@ export function ProductOptionDetailPage() {
         <div>
           <p className="section-kicker">Option Detail</p>
           <h2 className="page-title">옵션 상세</h2>
-          <p className="page-description">옵션 정보와 연결된 선택 항목 목록을 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link className="ghost-link" to={`/product-options?categoryId=${categoryId}`}>

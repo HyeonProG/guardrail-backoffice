@@ -198,9 +198,6 @@ export function CategoriesPage() {
               </div>
             ))}
           </div>
-          <p className="mt-2 text-sm text-slate-600">
-            {currentParent ? `${currentParent.name} 하위 카테고리 목록입니다.` : '최상위 카테고리 목록입니다.'}
-          </p>
         </div>
         <div className="flex items-center gap-3">
           {currentRole !== 'STAFF' ? (

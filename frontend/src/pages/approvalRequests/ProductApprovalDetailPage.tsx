@@ -10,6 +10,7 @@ import { getProductHistoryTypeLabel, getProductStatusLabel } from '@/shared/lib/
 import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
+import { Modal } from '@/shared/ui/Modal';
 import { TextField } from '@/shared/ui/TextField';
 
 /** 승인 요청 상품 상세 페이지 */
@@ -19,6 +20,9 @@ export function ProductApprovalDetailPage() {
   const queryClient = useQueryClient();
   const [previewIndex, setPreviewIndex] = useState(0);
   const [rejectReason, setRejectReason] = useState('');
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
+  const [rejectConfirmOpen, setRejectConfirmOpen] = useState(false);
+  const [completedAction, setCompletedAction] = useState<'APPROVED' | 'REJECTED' | null>(null);
   const productQuery = useQuery({
     queryKey: ['products', productId],
     queryFn: () => getProduct(productId),
@@ -69,7 +73,8 @@ export function ProductApprovalDetailPage() {
       }),
     onSuccess: async () => {
       await refresh();
-      navigate('/approval-requests', { replace: true });
+      setApproveConfirmOpen(false);
+      setCompletedAction('APPROVED');
     }
   });
 
@@ -82,7 +87,8 @@ export function ProductApprovalDetailPage() {
       }),
     onSuccess: async () => {
       await refresh();
-      navigate('/approval-requests', { replace: true });
+      setRejectConfirmOpen(false);
+      setCompletedAction('REJECTED');
     }
   });
 
@@ -92,7 +98,6 @@ export function ProductApprovalDetailPage() {
         <div>
           <p className="section-kicker">Review Detail</p>
           <h2 className="page-title">승인 요청 상품 상세</h2>
-          <p className="page-description">승인 대기 상품의 상세 정보와 변경 이력을 확인하고 여기서 바로 승인 또는 반려합니다.</p>
         </div>
         <Link
           className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
@@ -186,14 +191,15 @@ export function ProductApprovalDetailPage() {
 
           <div className="surface-card p-5">
             <h3 className="text-base font-semibold text-ink">승인 처리</h3>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              상품 내용을 검토한 뒤 여기서 바로 승인하거나 반려할 수 있습니다.
-            </p>
             <div className="mt-4 space-y-3">
               <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm text-slate-700">
                 현재 상태: <span className="font-semibold text-slate-950">{product ? getProductStatusLabel(product.status) : '-'}</span>
               </div>
-              <Button type="button" disabled={approveMutation.isPending || rejectMutation.isPending} onClick={() => approveMutation.mutate()}>
+              <Button
+                type="button"
+                disabled={approveMutation.isPending || rejectMutation.isPending}
+                onClick={() => setApproveConfirmOpen(true)}
+              >
                 승인
               </Button>
               <TextField
@@ -206,7 +212,7 @@ export function ProductApprovalDetailPage() {
                 type="button"
                 variant="secondary"
                 disabled={approveMutation.isPending || rejectMutation.isPending || !rejectReason.trim()}
-                onClick={() => rejectMutation.mutate()}
+                onClick={() => setRejectConfirmOpen(true)}
               >
                 반려
               </Button>
@@ -243,6 +249,83 @@ export function ProductApprovalDetailPage() {
           </tbody>
         </table>
       </section>
+
+      <Modal
+        open={approveConfirmOpen}
+        title="상품 승인 확인"
+        description="이 상품을 승인하시겠습니까? 승인 후에는 승인 완료 상품 목록에 반영됩니다."
+        onClose={() => setApproveConfirmOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm leading-6 text-slate-700">
+            승인 대상: <span className="font-semibold text-slate-950">{product?.name ?? '-'}</span>
+          </div>
+          <ErrorMessage error={approveMutation.error} />
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setApproveConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button type="button" disabled={approveMutation.isPending} onClick={() => approveMutation.mutate()}>
+              승인하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={rejectConfirmOpen}
+        title="상품 반려 확인"
+        description="이 상품을 반려하시겠습니까? 반려 사유가 상품 이력에 기록됩니다."
+        onClose={() => setRejectConfirmOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-red-100 bg-[linear-gradient(180deg,#fef2f2_0%,#fff7f7_100%)] p-4 text-sm leading-6 text-red-700">
+            반려 대상: <span className="font-semibold text-red-800">{product?.name ?? '-'}</span>
+            <br />
+            사유: <span className="font-semibold">{rejectReason.trim() || '-'}</span>
+          </div>
+          <ErrorMessage error={rejectMutation.error} />
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setRejectConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button type="button" variant="danger" disabled={rejectMutation.isPending} onClick={() => rejectMutation.mutate()}>
+              반려하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={completedAction !== null}
+        title={completedAction === 'APPROVED' ? '상품 승인 완료' : '상품 반려 완료'}
+        description={
+          completedAction === 'APPROVED'
+            ? '승인 처리가 완료되었습니다. 승인 요청 관리 목록으로 돌아갑니다.'
+            : '반려 처리가 완료되었습니다. 승인 요청 관리 목록으로 돌아갑니다.'
+        }
+        onClose={() => {
+          setCompletedAction(null);
+          navigate('/approval-requests', { replace: true });
+        }}
+      >
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm leading-6 text-slate-700">
+            처리 상품: <span className="font-semibold text-slate-950">{product?.name ?? '-'}</span>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              onClick={() => {
+                setCompletedAction(null);
+                navigate('/approval-requests', { replace: true });
+              }}
+            >
+              목록으로 돌아가기
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

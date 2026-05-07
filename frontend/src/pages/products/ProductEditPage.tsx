@@ -10,7 +10,7 @@ import {
   getFileAttachments,
   uploadFileAttachment
 } from '@/entities/file/api/fileAttachmentApi';
-import { generateProductDescription, getProduct, updateProduct } from '@/entities/product/api/productApi';
+import { generateProductDescription, getProduct, updateProduct, updateProductStatus } from '@/entities/product/api/productApi';
 import type { Product } from '@/entities/product/model/types';
 import { getProductOptions } from '@/entities/productOption/api/productOptionApi';
 import type { UserRole } from '@/entities/user/model/types';
@@ -46,6 +46,8 @@ export function ProductEditPage() {
   const [previewIndex, setPreviewIndex] = useState(0);
   const [updateConfirmOpen, setUpdateConfirmOpen] = useState(false);
   const [updateCompleteOpen, setUpdateCompleteOpen] = useState(false);
+  const [resubmitConfirmOpen, setResubmitConfirmOpen] = useState(false);
+  const [resubmitCompleteOpen, setResubmitCompleteOpen] = useState(false);
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: { categoryId: '', name: '', description: '', selectedOptionItemIds: [] }
@@ -227,6 +229,27 @@ export function ProductEditPage() {
       await queryClient.invalidateQueries({ queryKey: ['file-attachments', 'PRODUCT', productId] });
     }
   });
+  const resubmitMutation = useMutation({
+    mutationFn: async () => {
+      const valid = await form.trigger();
+      if (!valid) {
+        throw new Error('상품 기본 정보를 먼저 확인해 주세요.');
+      }
+
+      const updatedProduct = await updateMutation.mutateAsync(form.getValues());
+      return updateProductStatus(updatedProduct.id, {
+        status: 'PENDING',
+        actorId: requireActorId()
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['products', productId] });
+      await queryClient.invalidateQueries({ queryKey: ['products', productId, 'histories'] });
+      setResubmitConfirmOpen(false);
+      setResubmitCompleteOpen(true);
+    }
+  });
 
   async function registerPendingImages(targetProductId: string) {
     if (pendingImages.length === 0) {
@@ -272,6 +295,7 @@ export function ProductEditPage() {
     (currentRole === 'STAFF' &&
       productQuery.data != null &&
       ['DRAFT', 'PENDING', 'REJECTED'].includes(productQuery.data.status));
+  const isRejectedProduct = productQuery.data?.status === 'REJECTED';
 
   if (!canEditRole) {
     return <Navigate to={`/products/${productId}`} replace />;
@@ -288,9 +312,6 @@ export function ProductEditPage() {
           <div>
             <p className="section-kicker">Edit Product</p>
             <h2 className="page-title">상품 수정</h2>
-            <p className="page-description">
-              상품 기본 정보와 선택 항목, 이미지, 설명을 수정할 수 있습니다. 설명은 직접 작성하거나 AI 문구를 바로 반영할 수 있습니다.
-            </p>
           </div>
           <Link
             className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
@@ -573,13 +594,26 @@ export function ProductEditPage() {
               error={
                 updateMutation.error ??
                 generateDescriptionMutation.error ??
-                deleteAttachmentMutation.error
+                deleteAttachmentMutation.error ??
+                resubmitMutation.error
               }
             />
             {attachmentNotice ? <p className="text-xs font-medium text-slate-600">{attachmentNotice}</p> : null}
-            <Button className="w-full" disabled={updateMutation.isPending} type="submit">
-              변경 저장
-            </Button>
+            {!isRejectedProduct ? (
+              <Button className="w-full" disabled={updateMutation.isPending} type="submit">
+                변경 저장
+              </Button>
+            ) : null}
+            {isRejectedProduct ? (
+              <Button
+                className="w-full"
+                disabled={updateMutation.isPending || resubmitMutation.isPending}
+                type="button"
+                onClick={() => setResubmitConfirmOpen(true)}
+              >
+                재심사 요청
+              </Button>
+            ) : null}
             <p className="text-xs leading-6 text-slate-500">
               저장 시 현재 폼 내용과 선택 항목, 이미지 변경 내용이 함께 반영됩니다.
             </p>
@@ -736,6 +770,66 @@ export function ProductEditPage() {
               onClick={() => {
                 setUpdateCompleteOpen(false);
                 navigate(0);
+              }}
+            >
+              확인
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={resubmitConfirmOpen}
+        title="재심사 요청 확인"
+        description="현재 수정 내용을 저장하고 이 상품을 다시 승인 대기 상태로 올리시겠습니까?"
+        onClose={() => setResubmitConfirmOpen(false)}
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            <p>
+              상품명: <span className="font-medium text-slate-900">{form.getValues('name') || '-'}</span>
+            </p>
+            <p className="mt-2">
+              카테고리: <span className="font-medium text-slate-900">{selectedCategory?.name ?? '-'}</span>
+            </p>
+            <p className="mt-2">
+              이미지: <span className="font-medium text-slate-900">{uploadedAttachments.length + pendingImages.length}건</span>
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="secondary" onClick={() => setResubmitConfirmOpen(false)}>
+              취소
+            </Button>
+            <Button
+              type="button"
+              disabled={resubmitMutation.isPending}
+              onClick={() => void resubmitMutation.mutateAsync()}
+            >
+              요청하기
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        open={resubmitCompleteOpen}
+        title="재심사 요청 완료"
+        description="상품이 다시 승인 대기 상태로 변경되었습니다."
+        onClose={() => {
+          setResubmitCompleteOpen(false);
+          navigate(`/products/${productId}`, { replace: true });
+        }}
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">
+            수정된 내용이 저장되었고, 승인 요청 관리 목록에서 다시 검토할 수 있습니다.
+          </div>
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              onClick={() => {
+                setResubmitCompleteOpen(false);
+                navigate(`/products/${productId}`, { replace: true });
               }}
             >
               확인

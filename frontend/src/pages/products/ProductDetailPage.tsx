@@ -75,7 +75,6 @@ export function ProductDetailPage() {
     mutationFn: () => deleteProduct(productId),
     onSuccess: () => navigate('/products', { replace: true })
   });
-
   const categories = categoriesQuery.data?.content ?? [];
   const attachments = useMemo(
     () => [...(attachmentsQuery.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder),
@@ -107,7 +106,6 @@ export function ProductDetailPage() {
         <div>
           <p className="section-kicker">Product Detail</p>
           <h2 className="page-title">상품 상세</h2>
-          <p className="page-description">상품 정보와 이미지, 선택 항목, 변경 이력을 한 화면에서 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link
@@ -121,15 +119,17 @@ export function ProductDetailPage() {
               className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
               to={`/products/${productId}/edit`}
             >
-              상품 수정
+              {productQuery.data?.status === 'REJECTED' ? '재심사 요청' : '상품 수정'}
             </Link>
           ) : null}
-          <Link
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
-            to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}
-          >
-            상품 옵션 관리
-          </Link>
+          {canManageDangerousActions ? (
+            <Link
+              className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
+              to={`/product-options?categoryId=${productQuery.data?.categoryId ?? ''}`}
+            >
+              상품 옵션 관리
+            </Link>
+          ) : null}
           {canDeleteProduct ? (
             <Button
               type="button"
@@ -364,6 +364,7 @@ export function ProductDetailPage() {
           </div>
         </div>
       </Modal>
+
     </div>
   );
 }

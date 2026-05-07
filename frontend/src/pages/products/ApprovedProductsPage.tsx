@@ -49,7 +49,6 @@ export function ApprovedProductsPage() {
         <div>
           <p className="section-kicker">Approved Catalog</p>
           <h2 className="page-title">승인 완료 상품</h2>
-          <p className="page-description">승인이 완료된 상품을 카드형 목록으로 확인합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-700">

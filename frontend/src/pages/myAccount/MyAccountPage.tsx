@@ -81,7 +81,6 @@ export function MyAccountPage() {
       <section className="surface-card p-8">
         <p className="section-kicker">Profile Center</p>
         <h1 className="mt-3 text-2xl font-semibold text-slate-950">내 정보</h1>
-        <p className="mt-2 text-sm text-slate-600">로그인한 사용자 기본 정보를 확인하고 수정합니다.</p>
 
         {isTemporaryPassword ? (
           <div className="mt-5 rounded-[22px] border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fff7d6_100%)] px-4 py-3 text-sm font-medium text-amber-900 shadow-sm">

@@ -32,7 +32,6 @@ export function ProductOptionItemDetailPage() {
         <div>
           <p className="section-kicker">Option Item</p>
           <h2 className="page-title">선택 항목 상세</h2>
-          <p className="page-description">선택 항목 정보를 읽기 전용으로 확인합니다.</p>
         </div>
         <Link
           className="ghost-link"

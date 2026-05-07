@@ -7,8 +7,8 @@ import { getProducts } from '@/entities/product/api/productApi';
 import { authStorage } from '@/features/auth/model/authStorage';
 import type { UserRole } from '@/entities/user/model/types';
 import { resolveFileUrl } from '@/shared/lib/fileUrl';
+import { getProductStatusLabel } from '@/shared/lib/productText';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
-import { Button } from '@/shared/ui/Button';
 import { Pagination } from '@/shared/ui/Pagination';
 
 export function ProductsPage() {
@@ -60,7 +60,6 @@ export function ProductsPage() {
         <div>
           <p className="section-kicker">Product Queue</p>
           <h2 className="page-title">상품 관리</h2>
-          <p className="page-description">등록 중이거나 승인 대기 중인 상품을 확인하고 관리합니다.</p>
         </div>
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-700">
@@ -117,11 +116,36 @@ export function ProductsPage() {
                     </div>
                   </Link>
                   <div className="space-y-4 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                          {product.categoryName || '카테고리 없음'}
+                        </p>
+                        <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-slate-950">{product.name}</h3>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                          product.status === 'REJECTED'
+                            ? 'border border-red-200 bg-red-50 text-red-700'
+                            : product.status === 'PENDING'
+                              ? 'border border-amber-200 bg-amber-50 text-amber-700'
+                              : product.status === 'APPROVED'
+                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border border-slate-200 bg-slate-50 text-slate-600'
+                        }`}
+                      >
+                        {getProductStatusLabel(product.status)}
+                      </span>
+                    </div>
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                        {product.categoryName || '카테고리 없음'}
+                        상품 상태
                       </p>
-                      <h3 className="mt-2 line-clamp-2 text-lg font-semibold text-slate-950">{product.name}</h3>
+                      <p className="mt-2 text-sm font-medium text-slate-600">
+                        {product.status === 'REJECTED'
+                          ? '반려된 상품입니다. 내용을 수정한 뒤 다시 재심사를 요청할 수 있습니다.'
+                          : getProductStatusLabel(product.status)}
+                      </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <Link
@@ -130,12 +154,14 @@ export function ProductsPage() {
                       >
                         상세
                       </Link>
-                      <Link
-                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-                        to={`/product-options?categoryId=${product.categoryId}`}
-                      >
-                        옵션 관리
-                      </Link>
+                      {canReviewApprovals ? (
+                        <Link
+                          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                          to={`/product-options?categoryId=${product.categoryId}`}
+                        >
+                          옵션 관리
+                        </Link>
+                      ) : null}
                       {canReviewApprovals && product.status === 'PENDING' ? (
                         <Link
                           className="inline-flex h-9 items-center justify-center rounded-xl border border-sky-900/90 bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] px-3 text-sm font-semibold text-white shadow-lg hover:-translate-y-0.5"

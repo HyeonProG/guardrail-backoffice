@@ -315,7 +315,6 @@ export function ProductCreatePage() {
           <div>
             <p className="section-kicker">New Product</p>
             <h2 className="page-title">상품 생성</h2>
-            <p className="page-description">카테고리와 선택 항목을 고르고 이미지를 등록한 뒤, 설명을 작성해 승인 요청까지 진행합니다.</p>
           </div>
           <Link
             className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-md"
@@ -323,9 +322,6 @@ export function ProductCreatePage() {
           >
             상품 목록으로
           </Link>
-        </div>
-        <div className="surface-section text-sm text-slate-600">
-          상품명과 카테고리를 입력하고 필요하면 이미지를 먼저 추가하세요. 설명은 직접 작성하거나 입력한 내용을 바탕으로 AI 문구를 바로 반영할 수 있습니다.
         </div>
       </section>
 
@@ -648,9 +644,6 @@ export function ProductCreatePage() {
             >
               승인 요청
             </Button>
-            <p className="text-xs leading-6 text-slate-500">
-              승인 요청 시 현재 입력한 내용을 저장한 뒤 승인 대기 상태로 전환합니다.
-            </p>
           </div>
         </form>
       </section>
