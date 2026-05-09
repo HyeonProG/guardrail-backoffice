@@ -52,7 +52,11 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
                     .requestMatchers(
-                        "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**", "/health")
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/api-docs/**",
+                        "/health",
+                        "/api/v1/health")
                     .permitAll()
                     .requestMatchers("/uploads/**")
                     .permitAll()

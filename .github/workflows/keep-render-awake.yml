@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Ping Render health check
         run: |
-          curl -fsS --max-time 10 https://guardrail-backoffice.onrender.com/health > /dev/null
+          curl -fsS --max-time 10 https://guardrail-backoffice.onrender.com/api/v1/health > /dev/null
