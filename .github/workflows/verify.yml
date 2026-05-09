@@ -16,6 +16,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Restore application.yml from example
+        run: cp src/main/resources/application-example.yml src/main/resources/application.yml
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
