@@ -69,8 +69,10 @@
 - `User` 도메인은 auth 저장 모델을 직접 소유하지 않더라도 사용자 자기관리 유스케이스를 위해 `Auth` 저장 모델을 조회/조합할 수 있다.
 - 사용자 기본 정보의 범용 전체 수정은 entity가 아니라 service에서 처리한다.
 - 사용자 기본 정보 수정과 사용자 상태 변경은 서로 다른 유스케이스로 분리한다.
-- `email`, `name`, `role` 수정은 기본 정보 수정 API에서 처리한다.
-- `email`, `name`, `role` 수정은 `ADMIN`, `OPERATOR` 권한만 허용한다.
+- 사용자 기본 정보 수정 API는 현재 로그인 사용자 본인만 요청할 수 있다.
+- 사용자 기본 정보 수정 API는 `email`, `name`만 변경한다.
+- 사용자 기본 정보 수정 API는 `role`, `status`를 변경하지 않는다.
+- 사용자 기본 정보 수정 API에서 `email`은 다른 사용자와 중복될 수 없다.
 - `status` 변경은 별도 상태 변경 API에서만 처리한다.
 - 사용자 상태 변경 API는 `ACTIVE`, `INACTIVE` 전이만 허용한다.
 - entity에는 `activate`, `inactivate`, `delete`, `restore` 같은 최소 상태 변경 메서드만 둔다.

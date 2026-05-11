@@ -105,9 +105,9 @@ class UserServiceTest {
     assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
   }
 
-  /** 사용자 기본 정보 수정은 관리자 또는 운영자 권한을 요구한다 */
+  /** 사용자 기본 정보 수정은 본인 검증 후 이메일과 이름만 변경한다 */
   @Test
-  void updateUserRequiresAdminOrOperator() {
+  void updateUserValidatesActorAndUpdatesEmailAndNameOnly() {
     UUID userId = UUID.randomUUID();
     User user = new User("staff@example.com", "홍길동", UserRole.STAFF, UserStatus.ACTIVE);
     ReflectionTestUtils.setField(user, "id", userId);
@@ -120,10 +120,10 @@ class UserServiceTest {
 
     var response = userService.updateUser(userId, request);
 
-    verify(currentUserService).requireAdminOrOperator();
+    verify(currentUserService).validateActor(userId);
     assertThat(response.getEmail()).isEqualTo("operator@example.com");
     assertThat(response.getName()).isEqualTo("운영자");
-    assertThat(response.getRole()).isEqualTo(UserRole.OPERATOR);
+    assertThat(response.getRole()).isEqualTo(UserRole.STAFF);
   }
 
   /** 현재 비밀번호가 일치하면 새 비밀번호 이력을 저장한다 */

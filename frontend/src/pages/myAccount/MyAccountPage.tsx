@@ -59,9 +59,12 @@ export function MyAccountPage() {
     mutationFn: (values: MyAccountFormValues) =>
       updateUser(userId, {
         email: values.email,
-          name: values.name,
-          role: (userQuery.data?.role ?? (authStorage.getRole() as UserRole) ?? 'STAFF') as UserRole
-        })
+        name: values.name,
+        role: (userQuery.data?.role ?? (authStorage.getRole() as UserRole) ?? 'STAFF') as UserRole
+      }),
+    onSuccess: () => {
+      window.location.reload();
+    }
   });
   const passwordChangeMutation = useMutation({
     mutationFn: (values: PasswordChangeFormValues) =>
@@ -96,7 +99,11 @@ export function MyAccountPage() {
                 setProfileConfirmOpen(true);
               })}
             >
-              <TextField label="이메일" error={form.formState.errors.email?.message} {...form.register('email')} />
+              <TextField
+                label="이메일"
+                error={form.formState.errors.email?.message}
+                {...form.register('email')}
+              />
               <TextField label="이름" error={form.formState.errors.name?.message} {...form.register('name')} />
               <div className="flex flex-wrap gap-3 pt-2">
                 <Button disabled={updateMutation.isPending || userQuery.isLoading} type="submit">
@@ -207,19 +214,18 @@ export function MyAccountPage() {
       <Modal
         open={profileConfirmOpen}
         title="내 정보 수정 확인"
-        description="입력한 이메일과 이름으로 내 정보를 수정합니다."
         onClose={() => setProfileConfirmOpen(false)}
       >
         <div className="space-y-5">
           <div className="rounded-[22px] border border-slate-200 bg-slate-50/80 p-5">
             <dl className="space-y-4 text-sm text-slate-600">
               <div>
-                <dt className="font-medium text-slate-500">이메일</dt>
-                <dd className="mt-1 text-base font-medium text-slate-900">{form.getValues('email')}</dd>
-              </div>
-              <div>
                 <dt className="font-medium text-slate-500">이름</dt>
                 <dd className="mt-1 text-base font-medium text-slate-900">{form.getValues('name')}</dd>
+              </div>
+              <div>
+                <dt className="font-medium text-slate-500">이메일</dt>
+                <dd className="mt-1 text-base font-medium text-slate-900">{form.getValues('email')}</dd>
               </div>
             </dl>
           </div>

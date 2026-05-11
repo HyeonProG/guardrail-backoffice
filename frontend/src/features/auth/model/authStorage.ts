@@ -8,6 +8,12 @@ const ROLE_KEY = 'guardrail.backoffice.role';
 const TEMPORARY_PASSWORD_KEY = 'guardrail.backoffice.temporaryPassword';
 const TEMP_PASSWORD_PROMPT_DISMISSED_KEY = 'guardrail.backoffice.temporaryPasswordPromptDismissed';
 
+type TokenValues = {
+  accessToken: string;
+  refreshToken: string;
+  sessionId: string;
+};
+
 export const authStorage = {
   getAccessToken() {
     return window.localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -41,6 +47,11 @@ export const authStorage = {
     window.localStorage.setItem(ROLE_KEY, session.role);
     window.localStorage.setItem(TEMPORARY_PASSWORD_KEY, String(session.temporaryPassword));
     window.sessionStorage.removeItem(TEMP_PASSWORD_PROMPT_DISMISSED_KEY);
+  },
+  updateTokens(tokens: TokenValues) {
+    window.localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
+    window.localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken);
+    window.localStorage.setItem(SESSION_ID_KEY, tokens.sessionId);
   },
   clear() {
     window.localStorage.removeItem(ACCESS_TOKEN_KEY);
