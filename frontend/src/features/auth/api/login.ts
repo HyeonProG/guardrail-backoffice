@@ -13,7 +13,7 @@ export async function login(request: LoginRequest) {
   return unwrapResult<Session>(response);
 }
 
-export async function logout(sessionId: string) {
-  const response = await apiClient.post('/api/v1/auth/logout', { sessionId });
+export async function logout(sessionId: string, refreshToken: string) {
+  const response = await apiClient.post('/api/v1/auth/logout', { sessionId, refreshToken });
   return unwrapResult<{ sessionId: string; status: string }>(response);
 }

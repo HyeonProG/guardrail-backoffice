@@ -174,8 +174,20 @@ public class AuthService {
 
   /** 로그아웃 */
   @Transactional
-  public LogoutResponse logout(UUID sessionId) {
+  public LogoutResponse logout(UUID sessionId, String refreshToken) {
+    Claims claims = parseRefreshClaims(refreshToken);
+    UUID tokenSessionId = UUID.fromString(claims.get(SESSION_ID_CLAIM, String.class));
+
+    if (!sessionId.equals(tokenSessionId)) {
+      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
+    }
+
     UserSession session = findSession(sessionId);
+
+    if (!matchesRefreshToken(refreshToken, session.getRefreshTokenHash())) {
+      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
+    }
+
     session.revoke();
 
     return new LogoutResponse(session.getId(), session.getStatus());

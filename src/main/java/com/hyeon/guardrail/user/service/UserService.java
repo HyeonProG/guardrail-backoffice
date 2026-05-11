@@ -132,6 +132,8 @@ public class UserService {
   /** 사용자 기본 정보 수정 */
   @Transactional
   public UserResponse updateUser(UUID userId, UserUpdateRequest request) {
+    currentUserService.requireAdminOrOperator();
+
     if (userRepository.existsByEmailAndDeletedFalseAndIdNot(request.getEmail(), userId)) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
     }

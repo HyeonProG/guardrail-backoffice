@@ -23,9 +23,11 @@ import com.hyeon.guardrail.user.dto.ChangePasswordResponse;
 import com.hyeon.guardrail.user.dto.UserCreateRequest;
 import com.hyeon.guardrail.user.dto.UserCreateResponse;
 import com.hyeon.guardrail.user.dto.UserStatusUpdateRequest;
+import com.hyeon.guardrail.user.dto.UserUpdateRequest;
 import com.hyeon.guardrail.user.repository.UserRepository;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,7 +95,7 @@ class UserServiceTest {
     UUID userId = UUID.randomUUID();
     User user = new User("staff@example.com", "홍길동", UserRole.STAFF, UserStatus.ACTIVE);
     ReflectionTestUtils.setField(user, "id", userId);
-    when(userRepositoryQuery.findById(userId)).thenReturn(java.util.Optional.of(user));
+    when(userRepositoryQuery.findById(userId)).thenReturn(Optional.of(user));
 
     UserStatusUpdateRequest request = new UserStatusUpdateRequest(UserStatus.INACTIVE);
 
@@ -101,6 +103,27 @@ class UserServiceTest {
 
     assertThat(response.getStatus()).isEqualTo(UserStatus.INACTIVE);
     assertThat(user.getStatus()).isEqualTo(UserStatus.INACTIVE);
+  }
+
+  /** 사용자 기본 정보 수정은 관리자 또는 운영자 권한을 요구한다 */
+  @Test
+  void updateUserRequiresAdminOrOperator() {
+    UUID userId = UUID.randomUUID();
+    User user = new User("staff@example.com", "홍길동", UserRole.STAFF, UserStatus.ACTIVE);
+    ReflectionTestUtils.setField(user, "id", userId);
+    UserUpdateRequest request =
+        new UserUpdateRequest("operator@example.com", "운영자", UserRole.OPERATOR);
+
+    when(userRepository.existsByEmailAndDeletedFalseAndIdNot(request.getEmail(), userId))
+        .thenReturn(false);
+    when(userRepositoryQuery.findById(userId)).thenReturn(Optional.of(user));
+
+    var response = userService.updateUser(userId, request);
+
+    verify(currentUserService).requireAdminOrOperator();
+    assertThat(response.getEmail()).isEqualTo("operator@example.com");
+    assertThat(response.getName()).isEqualTo("운영자");
+    assertThat(response.getRole()).isEqualTo(UserRole.OPERATOR);
   }
 
   /** 현재 비밀번호가 일치하면 새 비밀번호 이력을 저장한다 */
@@ -113,7 +136,7 @@ class UserServiceTest {
     ChangePasswordRequest request = new ChangePasswordRequest("current-password", "new-password");
 
     when(authRepositoryQuery.findLatestValidPasswordHistory(eq(userId), any(LocalDateTime.class)))
-        .thenReturn(java.util.Optional.of(latestPasswordHistory));
+        .thenReturn(Optional.of(latestPasswordHistory));
     when(passwordEncoder.matches(
             request.getCurrentPassword(), latestPasswordHistory.getPasswordHash()))
         .thenReturn(true);

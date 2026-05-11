@@ -131,6 +131,8 @@ Authorization: Bearer {accessToken}
 - refresh token은 토큰 재발급 API의 request body로 전달한다.
 - 만료된 access token은 `401 Unauthorized`로 응답한다.
 - 권한이 부족한 사용자는 `403 Forbidden`으로 응답한다.
+- access token 검증 시 토큰의 `sessionId`, `accessTokenId`를 서버의 `ACTIVE` 세션 정보와 대조한다.
+- 로그아웃되거나 만료된 세션의 access token은 토큰 만료 전이라도 `401 Unauthorized`로 응답한다.
 
 ## 7.1 인증 API 기준
 ### 로그인 API
@@ -188,6 +190,7 @@ POST /api/v1/auth/logout
 
 request:
 - request body의 `sessionId`
+- request body의 `refreshToken`
 
 response result:
 - `sessionId`
@@ -196,7 +199,9 @@ response result:
 규칙:
 - 로그아웃 시 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
 - `REVOKED` 상태 세션은 토큰 재발급을 허용하지 않는다.
-- 로그아웃 API는 세션 식별을 위해 request body의 `sessionId`만 사용한다.
+- 로그아웃 API는 request body의 `sessionId`와 `refreshToken`을 함께 사용한다.
+- refresh token의 `sessionId` claim은 request body의 `sessionId`와 일치해야 한다.
+- 입력한 refresh token과 저장된 검증용 해시 값의 검증이 통과해야 한다.
 
 ### 로그인 이력 저장 API
 ```http
@@ -330,6 +335,7 @@ response result:
 규칙:
 - 사용자 기본 정보 수정과 상태 변경은 별도 유스케이스다.
 - `email`, `name`, `role`만 수정한다.
+- 사용자 기본 정보 수정은 `ADMIN`, `OPERATOR` 권한만 허용한다.
 
 ### 사용자 상태 변경 API
 ```http

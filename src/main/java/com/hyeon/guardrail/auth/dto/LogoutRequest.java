@@ -1,6 +1,7 @@
 package com.hyeon.guardrail.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -19,4 +20,8 @@ public class LogoutRequest {
   @NotNull
   @Schema(description = "세션 ID")
   private UUID sessionId;
+
+  @NotBlank
+  @Schema(description = "리프레시 토큰")
+  private String refreshToken;
 }

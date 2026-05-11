@@ -59,7 +59,8 @@ public class AuthController {
   @Operation(summary = "로그아웃", description = "세션을 종료하고 로그아웃 처리합니다.")
   @PostMapping("/logout")
   public BaseResponseEntity<LogoutResponse> logout(@Valid @RequestBody LogoutRequest request) {
-    return BaseResponseEntity.success(authService.logout(request.getSessionId()), "로그아웃되었습니다.");
+    return BaseResponseEntity.success(
+        authService.logout(request.getSessionId(), request.getRefreshToken()), "로그아웃되었습니다.");
   }
 
   /** 로그인 이력 저장 */

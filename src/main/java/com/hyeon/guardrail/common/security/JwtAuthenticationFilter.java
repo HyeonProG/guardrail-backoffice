@@ -1,5 +1,8 @@
 package com.hyeon.guardrail.common.security;
 
+import com.hyeon.guardrail.auth.domain.SessionStatus;
+import com.hyeon.guardrail.auth.domain.UserSession;
+import com.hyeon.guardrail.auth.repository.AuthRepositoryQuery;
 import com.hyeon.guardrail.auth.service.JwtService;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
@@ -11,6 +14,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
+  private final AuthRepositoryQuery authRepositoryQuery;
 
   /** 공개 엔드포인트를 제외한 요청의 Bearer JWT를 검증한다. */
   @Override
@@ -46,6 +51,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       Claims claims = jwtService.parseAccessToken(token);
       UUID userId = UUID.fromString(String.valueOf(claims.get("userId")));
       UserRole role = UserRole.valueOf(String.valueOf(claims.get("role")));
+      UUID sessionId = UUID.fromString(String.valueOf(claims.get("sessionId")));
+      String accessTokenId = String.valueOf(claims.get("accessTokenId"));
+
+      validateSession(userId, sessionId, accessTokenId);
+
       AuthenticatedUser authenticatedUser = new AuthenticatedUser(userId, role);
 
       UsernamePasswordAuthenticationToken authentication =
@@ -57,6 +67,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "유효하지 않은 인증 토큰입니다.");
     } finally {
       SecurityContextHolder.clearContext();
+    }
+  }
+
+  private void validateSession(UUID userId, UUID sessionId, String accessTokenId) {
+    UserSession session =
+        authRepositoryQuery
+            .findSessionById(sessionId)
+            .orElseThrow(() -> new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다."));
+
+    if (!session.getUserId().equals(userId)
+        || session.getStatus() != SessionStatus.ACTIVE
+        || !session.getAccessTokenId().equals(accessTokenId)
+        || !session.getExpiredAt().isAfter(LocalDateTime.now())) {
+      throw new BaseException(BaseResponseStatus.UNAUTHORIZED, "인증에 실패했습니다.");
     }
   }
 

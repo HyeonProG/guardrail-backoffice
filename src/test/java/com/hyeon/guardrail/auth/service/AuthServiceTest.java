@@ -202,6 +202,7 @@ class AuthServiceTest {
   void logoutRevokesSession() {
     UUID userId = UUID.randomUUID();
     UUID sessionId = UUID.randomUUID();
+    Claims claims = mock(Claims.class);
     UserSession session =
         new UserSession(
             userId,
@@ -213,12 +214,31 @@ class AuthServiceTest {
             LocalDateTime.now(),
             LocalDateTime.now().plusDays(1));
     ReflectionTestUtils.setField(session, "id", sessionId);
-    when(authRepositoryQuery.findSessionById(sessionId)).thenReturn(Optional.of(session));
 
-    LogoutResponse response = authService.logout(sessionId);
+    when(claims.get("sessionId", String.class)).thenReturn(sessionId.toString());
+    when(jwtService.parseRefreshToken("plain-refresh-token")).thenReturn(claims);
+    when(authRepositoryQuery.findSessionById(sessionId)).thenReturn(Optional.of(session));
+    when(passwordEncoder.matches("plain-refresh-token", session.getRefreshTokenHash()))
+        .thenReturn(true);
+
+    LogoutResponse response = authService.logout(sessionId, "plain-refresh-token");
 
     assertThat(response.getSessionId()).isEqualTo(sessionId);
     assertThat(response.getStatus()).isEqualTo(SessionStatus.REVOKED);
     assertThat(session.getStatus()).isEqualTo(SessionStatus.REVOKED);
+  }
+
+  /** 로그아웃 요청 세션과 리프레시 토큰 세션이 다르면 거부 */
+  @Test
+  void logoutRejectsDifferentRefreshTokenSession() {
+    UUID sessionId = UUID.randomUUID();
+    Claims claims = mock(Claims.class);
+
+    when(claims.get("sessionId", String.class)).thenReturn(UUID.randomUUID().toString());
+    when(jwtService.parseRefreshToken("plain-refresh-token")).thenReturn(claims);
+
+    assertThatThrownBy(() -> authService.logout(sessionId, "plain-refresh-token"))
+        .isInstanceOf(BaseException.class);
+    verify(authRepositoryQuery, never()).findSessionById(sessionId);
   }
 }

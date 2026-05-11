@@ -19,9 +19,10 @@ export function AppLayout() {
 
   const handleLogout = async () => {
     const sessionId = authStorage.getSessionId();
-    if (sessionId) {
+    const refreshToken = authStorage.getRefreshToken();
+    if (sessionId && refreshToken) {
       try {
-        await logout(sessionId);
+        await logout(sessionId, refreshToken);
       } catch {
         // 로컬 세션 정리는 실패 여부와 무관하게 진행한다.
       }

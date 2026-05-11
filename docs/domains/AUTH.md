@@ -138,11 +138,15 @@
 - access token에는 `userId`, `role`, `sessionId`, `accessTokenId`를 포함한다.
 - refresh token에는 `userId`, `sessionId`를 포함한다.
 - 로그인 성공 시 `UserSession`을 `ACTIVE` 상태로 생성하고 refresh token은 검증 가능한 해시 값으로 저장한다.
+- access token 검증 시 토큰의 `userId`, `sessionId`, `accessTokenId`가 서버의 `ACTIVE` 세션 정보와 일치해야 한다.
+- access token 검증 시 세션 만료 시간이 지나면 인증 실패로 처리한다.
 - 토큰 재발급 요청은 `sessionId`, `refreshToken`을 사용한다.
 - 토큰 재발급 성공 시 새로운 access token, refresh token, `accessTokenExpiredAt`, `refreshTokenExpiredAt`, `sessionId`를 응답한다.
 - 토큰 재발급 시 세션 상태가 `ACTIVE`이고 세션 만료 시간이 지나지 않았으며 저장된 refresh token 해시 검증이 통과해야 한다.
 - 토큰 재발급 성공 시 세션의 refresh token hash, refreshedAt, expiredAt을 갱신한다.
-- 로그아웃 요청은 request body의 `sessionId`를 사용한다.
+- 로그아웃 요청은 request body의 `sessionId`, `refreshToken`을 사용한다.
+- 로그아웃 시 refresh token의 `sessionId` claim과 요청 `sessionId`가 일치해야 한다.
+- 로그아웃 시 입력한 refresh token과 저장된 refresh token hash 검증이 통과해야 한다.
 - 로그아웃 성공 응답은 `sessionId`, `status`를 포함한다.
 - 로그아웃 시 대상 세션을 삭제하지 않고 `REVOKED` 상태로 변경한다.
 - 존재하지 않는 이메일 로그인 실패는 로그인 이력을 저장하지 않고 즉시 인증 실패로 종료한다.
@@ -152,6 +156,7 @@
 - 비밀번호 변경 성공 시 새 비밀번호 이력을 추가하고 `temporary=false`, `expiredAt=null`로 저장한다.
 - 로그인한 사용자 본인만 자신의 비밀번호를 변경할 수 있다.
 - 로그아웃 시 세션은 삭제하지 않고 상태를 `REVOKED`로 변경한다.
+- `REVOKED`, `EXPIRED` 세션의 access token은 토큰 자체가 만료되지 않았더라도 인증 실패로 처리한다.
 - 로그인 이력은 삭제보다 보존 정책으로 관리한다.
 - 세션과 비밀번호 이력은 삭제보다 상태와 만료 정책으로 관리한다.
 
@@ -177,10 +182,12 @@
 7. 새 토큰 정보와 세션 식별 정보를 응답한다.
 
 ### 6.3 로그아웃
-1. request body의 `sessionId`로 대상 세션을 식별한다.
-2. 대상 세션을 조회한다.
-3. 세션 상태를 `REVOKED`로 변경한다.
-4. 로그아웃 후 해당 세션으로는 재발급을 허용하지 않는다.
+1. request body의 `sessionId`, `refreshToken`을 받는다.
+2. refresh token을 파싱해 `sessionId` claim과 요청 `sessionId`가 일치하는지 확인한다.
+3. 대상 세션을 조회한다.
+4. 입력한 refresh token과 저장된 refresh token hash를 검증한다.
+5. 세션 상태를 `REVOKED`로 변경한다.
+6. 로그아웃 후 해당 세션으로는 access token 검증과 refresh token 재발급을 허용하지 않는다.
 
 ### 6.4 비밀번호 변경
 1. 로그인 사용자가 자신의 계정에 대해서만 변경 요청을 보낼 수 있다.

@@ -64,7 +64,7 @@ jwt:
 # 프로젝트 전용 커스텀 설정
 app:
   api:
-    version: 1.0.1
+    version: 1.0.2
 
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,https://guardrail-backoffice.vercel.app}
