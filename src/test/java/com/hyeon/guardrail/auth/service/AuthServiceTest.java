@@ -26,6 +26,7 @@ import com.hyeon.guardrail.auth.repository.UserLoginHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserSessionRepository;
 import com.hyeon.guardrail.common.exception.BaseException;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserRole;
 import com.hyeon.guardrail.user.domain.UserStatus;
@@ -54,6 +55,7 @@ class AuthServiceTest {
   @Mock private UserRepositoryQuery userRepositoryQuery;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private JwtService jwtService;
+  @Mock private CurrentUserService currentUserService;
   @InjectMocks private AuthService authService;
 
   /** 초기 비밀번호 저장 시 해시와 만료일을 기록 */

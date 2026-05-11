@@ -24,10 +24,15 @@ public class CurrentUserService {
 
   /** 현재 로그인 사용자가 ADMIN 또는 OPERATOR인지 검증한다. */
   public void requireAdminOrOperator() {
-    UserRole role = getCurrentUserRole();
-    if (role != UserRole.ADMIN && role != UserRole.OPERATOR) {
+    if (!isAdminOrOperator()) {
       throw new BaseException(BaseResponseStatus.FORBIDDEN, "해당 작업은 관리자 또는 운영자만 수행할 수 있습니다.");
     }
+  }
+
+  /** 현재 로그인 사용자가 ADMIN 또는 OPERATOR인지 반환한다. */
+  public boolean isAdminOrOperator() {
+    UserRole role = getCurrentUserRole();
+    return role == UserRole.ADMIN || role == UserRole.OPERATOR;
   }
 
   /** 요청 본문의 actorId가 현재 로그인 사용자와 일치하는지 검증한다. */

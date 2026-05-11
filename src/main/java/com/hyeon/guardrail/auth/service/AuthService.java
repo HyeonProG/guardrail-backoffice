@@ -22,6 +22,7 @@ import com.hyeon.guardrail.auth.repository.UserPasswordHistoryRepository;
 import com.hyeon.guardrail.auth.repository.UserSessionRepository;
 import com.hyeon.guardrail.common.exception.BaseException;
 import com.hyeon.guardrail.common.response.BaseResponseStatus;
+import com.hyeon.guardrail.common.security.CurrentUserService;
 import com.hyeon.guardrail.user.domain.User;
 import com.hyeon.guardrail.user.domain.UserStatus;
 import com.hyeon.guardrail.user.repository.UserRepositoryQuery;
@@ -56,6 +57,7 @@ public class AuthService {
   private final UserRepositoryQuery userRepositoryQuery;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+  private final CurrentUserService currentUserService;
 
   /** 사용자 초기 비밀번호 해시 저장 */
   @Transactional
@@ -196,6 +198,7 @@ public class AuthService {
   /** 로그인 이력 저장 */
   @Transactional
   public LoginHistoryResponse createLoginHistory(LoginHistoryCreateRequest request) {
+    currentUserService.requireAdminOrOperator();
     UserLoginHistory loginHistory =
         new UserLoginHistory(
             request.getUserId(),
@@ -210,6 +213,7 @@ public class AuthService {
   /** 사용자 로그인 이력 목록 조회 */
   @Transactional(readOnly = true)
   public List<LoginHistoryResponse> getLoginHistories(UUID userId) {
+    validateSelfOrAdminOperator(userId);
     return authRepositoryQuery.findLoginHistoriesByUserId(userId).stream()
         .map(LoginHistoryResponse::from)
         .toList();
@@ -218,6 +222,7 @@ public class AuthService {
   /** 인증 세션 저장 */
   @Transactional
   public SessionResponse createSession(SessionCreateRequest request) {
+    currentUserService.requireAdminOrOperator();
     String refreshTokenHash = hashRefreshToken(request.getRefreshToken());
     UserSession session =
         new UserSession(
@@ -236,6 +241,7 @@ public class AuthService {
   /** 사용자 인증 세션 목록 조회 */
   @Transactional(readOnly = true)
   public List<SessionResponse> getSessions(UUID userId) {
+    validateSelfOrAdminOperator(userId);
     return authRepositoryQuery.findSessionsByUserId(userId).stream()
         .map(SessionResponse::from)
         .toList();
@@ -245,6 +251,7 @@ public class AuthService {
   @Transactional
   public SessionResponse updateSessionStatus(UUID sessionId, SessionStatus status) {
     UserSession session = findSession(sessionId);
+    validateSessionStatusChangeAllowed(session, status);
 
     if (status == SessionStatus.ACTIVE) {
       session.activate();
@@ -255,6 +262,25 @@ public class AuthService {
     }
 
     return SessionResponse.from(session);
+  }
+
+  private void validateSelfOrAdminOperator(UUID userId) {
+    if (currentUserService.isAdminOrOperator()) {
+      return;
+    }
+
+    currentUserService.validateActor(userId);
+  }
+
+  private void validateSessionStatusChangeAllowed(UserSession session, SessionStatus status) {
+    if (currentUserService.isAdminOrOperator()) {
+      return;
+    }
+
+    currentUserService.validateActor(session.getUserId());
+    if (status != SessionStatus.REVOKED) {
+      throw new BaseException(BaseResponseStatus.FORBIDDEN, "본인 세션은 해지만 할 수 있습니다.");
+    }
   }
 
   private void saveLoginHistory(
