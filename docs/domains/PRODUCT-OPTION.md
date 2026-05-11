@@ -113,7 +113,7 @@
 - request: `ProductOptionCreateRequest`
 - response: `BaseResponseEntity<ProductOptionResponse>`
 - 규칙:
-  - `name`, `status`, `actorId`를 request body로 받는다.
+  - `name`, `status`를 request body로 받는다.
   - 카테고리는 삭제되지 않은 상태여야 한다.
   - 같은 카테고리 안에서 옵션 그룹명은 미삭제 기준으로 중복될 수 없다.
   - 정렬 순서는 생성 시 자동 부여한다.
@@ -140,7 +140,7 @@
 - request: `ProductOptionUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionResponse>`
 - 규칙:
-  - `name`, `actorId`를 request body로 받는다.
+  - `name`을 request body로 받는다.
   - 상태 변경은 이 API에서 처리하지 않는다.
   - 정렬 순서는 수정 대상이 아니다.
 
@@ -149,7 +149,7 @@
 - request: `ProductOptionStatusUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionResponse>`
 - 규칙:
-  - `status`, `actorId`를 request body로 받는다.
+  - `status`를 request body로 받는다.
   - `ACTIVE`, `INACTIVE`만 허용한다.
 
 ### 옵션 그룹 삭제
@@ -163,7 +163,7 @@
 - request: `ProductOptionItemCreateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `status`, `actorId`를 request body로 받는다.
+  - `name`, `status`를 request body로 받는다.
   - 같은 옵션 그룹 안에서 옵션값명은 중복될 수 없다.
   - 정렬 순서는 생성 시 자동 부여한다.
 
@@ -180,7 +180,7 @@
 - request: `ProductOptionItemUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `name`, `actorId`를 request body로 받는다.
+  - `name`을 request body로 받는다.
   - 상태 변경은 이 API에서 처리하지 않는다.
   - 정렬 순서는 수정 대상이 아니다.
 
@@ -189,7 +189,7 @@
 - request: `ProductOptionItemStatusUpdateRequest`
 - response: `BaseResponseEntity<ProductOptionItemResponse>`
 - 규칙:
-  - `status`, `actorId`를 request body로 받는다.
+  - `status`를 request body로 받는다.
   - `ACTIVE`, `INACTIVE`만 허용한다.
 
 ### 옵션값 삭제

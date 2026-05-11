@@ -112,6 +112,8 @@
 - 상품 옵션은 선택한 카테고리에 연결된 `ProductOption` 마스터 데이터에서 선택한다.
 - 선택된 옵션값은 상품 생성 request로 받아 `ProductSelectedOption` 스냅샷으로 영속 저장한다.
 - `ProductSelectedOption`은 옵션/옵션 항목의 이름을 스냅샷으로 저장해, 기준 정보명이 바뀌어도 기존 상품 표시값을 유지한다.
+- 상품명은 필수이고 최대 100자다.
+- 상품 설명은 선택 값이고 최대 2000자다.
 - 상세 설명은 직원이 직접 입력할 수도 있고, 상품 API에서 AI 문구를 즉시 생성해 현재 설명 필드에 반영할 수도 있다.
 - AI는 설명 문구를 생성할 뿐이며, 최종 설명 반영 결정은 직원이 한다.
 - 기본 UI에서는 선택 항목을 AI 입력으로 전달하지 않는다.
@@ -169,6 +171,8 @@ APPROVED -> INACTIVE
 - 규칙:
   - `categoryId`, `name`, `description`, `actorId`를 request body로 받는다.
   - `description`은 선택 값이다.
+  - `name`은 필수이고 최대 100자다.
+  - `description`은 최대 2000자다.
   - 생성 시 상품 상태는 `DRAFT`로 시작한다.
   - 생성 시 `CREATED` 이력을 함께 저장한다.
   - 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
@@ -208,6 +212,8 @@ APPROVED -> INACTIVE
 - 규칙:
   - `categoryId`, `name`, `description`, `actorId`를 request body로 받는다.
   - `description`은 선택 값이다.
+  - `name`은 필수이고 최대 100자다.
+  - `description`은 최대 2000자다.
   - `selectedOptionItemIds`가 포함되면 선택 항목 스냅샷도 함께 갱신한다.
   - 상태 변경은 이 API에서 처리하지 않는다.
   - 실제 변경이 있을 때만 `UPDATED` 이력을 함께 저장한다.

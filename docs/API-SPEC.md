@@ -327,7 +327,6 @@ PUT /api/v1/users/{userId}
 request body:
 - `email`
 - `name`
-- `role`
 
 response result:
 - `UserResponse`
@@ -558,6 +557,8 @@ response result:
 - `actorId`는 현재 단계에서 request body로 받는다.
 - 카테고리는 `deleted = false`, `status = ACTIVE` 상태여야 한다.
 - 상품명은 등록 화면에서 직접 입력한다.
+- `name`은 필수이고 최대 100자다.
+- `description`은 선택 값이고 최대 2000자다.
 - 카테고리는 사전 생성된 목록에서 선택한다.
 - 옵션은 별도 상품 옵션 관리 메뉴에서 카테고리별로 사전 생성된 값을 화면에서 선택해 사용한다.
 - 선택한 옵션값 ID 목록은 `selectedOptionItemIds`로 request body에 포함한다.
@@ -620,6 +621,8 @@ response result:
 - 상태 변경은 별도 API에서 처리한다.
 - 실제 변경이 있을 때만 `UPDATED` 이력을 저장한다.
 - 카테고리는 `deleted = false` 상태여야 한다.
+- `name`은 필수이고 최대 100자다.
+- `description`은 선택 값이고 최대 2000자다.
 
 ### 상품 상태 변경 API
 ```http
@@ -709,7 +712,6 @@ POST /api/v1/categories/{categoryId}/options
 request body:
 - `name`
 - `status`
-- `actorId`
 
 response result:
 - `ProductOptionResponse`
@@ -753,8 +755,6 @@ PUT /api/v1/categories/{categoryId}/options/{productOptionId}
 
 request body:
 - `name`
-- `sortOrder`
-- `actorId`
 
 response result:
 - `ProductOptionResponse`
@@ -766,7 +766,6 @@ PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/status
 
 request body:
 - `status`
-- `actorId`
 
 response result:
 - `ProductOptionResponse`
@@ -786,9 +785,7 @@ POST /api/v1/categories/{categoryId}/options/{productOptionId}/items
 
 request body:
 - `name`
-- `sortOrder`
 - `status`
-- `actorId`
 
 response result:
 - `ProductOptionItemResponse`
@@ -816,7 +813,6 @@ PUT /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOpti
 
 request body:
 - `name`
-- `actorId`
 
 response result:
 - `ProductOptionItemResponse`
@@ -828,7 +824,6 @@ PATCH /api/v1/categories/{categoryId}/options/{productOptionId}/items/{productOp
 
 request body:
 - `status`
-- `actorId`
 
 response result:
 - `ProductOptionItemResponse`
@@ -860,6 +855,11 @@ request body:
 response result:
 - `FileAttachmentResponse`
 
+규칙:
+- `targetType=PRODUCT`이면 `targetId`는 존재하는 상품 ID여야 한다.
+- 직원은 본인이 생성한 상품의 파일만 생성할 수 있다.
+- 승인 완료 상품의 파일은 관리자 또는 운영자만 생성할 수 있다.
+
 ### 파일 업로드 API
 ```http
 POST /api/v1/file-attachments/upload
@@ -878,6 +878,9 @@ response result:
 - 업로드와 메타데이터 생성을 함께 처리한다.
 - 실제 파일 저장은 `FileStorageService` 구현체가 담당한다.
 - 현재 운영 구현은 S3다.
+- `targetType=PRODUCT`이면 `targetId`는 존재하는 상품 ID여야 한다.
+- 직원은 본인이 생성한 상품의 파일만 업로드할 수 있다.
+- 승인 완료 상품의 파일은 관리자 또는 운영자만 업로드할 수 있다.
 
 ### 파일 첨부 단건 조회 API
 ```http
@@ -911,6 +914,10 @@ request body:
 response result:
 - `FileAttachmentResponse`
 
+규칙:
+- 직원은 본인이 생성한 상품의 파일만 수정할 수 있다.
+- 승인 완료 상품의 파일은 관리자 또는 운영자만 수정할 수 있다.
+
 ### 파일 첨부 삭제 API
 ```http
 DELETE /api/v1/file-attachments/{fileAttachmentId}
@@ -918,6 +925,10 @@ DELETE /api/v1/file-attachments/{fileAttachmentId}
 
 response result:
 - `null`
+
+규칙:
+- 직원은 본인이 생성한 상품의 파일만 삭제할 수 있다.
+- 승인 완료 상품의 파일은 관리자 또는 운영자만 삭제할 수 있다.
 
 ## 8. UUID Path Variable
 리소스 식별자는 UUID를 사용한다.
