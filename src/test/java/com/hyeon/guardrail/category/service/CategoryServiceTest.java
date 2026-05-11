@@ -12,6 +12,7 @@ import com.hyeon.guardrail.category.domain.Category;
 import com.hyeon.guardrail.category.domain.CategoryStatus;
 import com.hyeon.guardrail.category.dto.CategoryCreateRequest;
 import com.hyeon.guardrail.category.dto.CategoryStatusUpdateRequest;
+import com.hyeon.guardrail.category.dto.CategoryUpdateRequest;
 import com.hyeon.guardrail.category.repository.CategoryRepository;
 import com.hyeon.guardrail.category.repository.CategoryRepositoryQuery;
 import com.hyeon.guardrail.common.exception.BaseException;
@@ -83,6 +84,25 @@ class CategoryServiceTest {
     assertThat(response.getStatus()).isEqualTo(CategoryStatus.INACTIVE);
     assertThat(category.getStatus()).isEqualTo(CategoryStatus.INACTIVE);
     assertThat(category.isDeleted()).isFalse();
+  }
+
+  /** 카테고리는 자기 자신이나 하위 카테고리를 부모로 지정할 수 없다. */
+  @Test
+  void updateCategoryRejectsCircularParent() {
+    UUID categoryId = UUID.randomUUID();
+    UUID childId = UUID.randomUUID();
+    Category category = new Category(null, "의류", CategoryStatus.ACTIVE);
+    Category child = new Category(categoryId, "상의", CategoryStatus.ACTIVE);
+    ReflectionTestUtils.setField(category, "id", categoryId);
+    ReflectionTestUtils.setField(child, "id", childId);
+
+    when(categoryRepositoryQuery.findById(childId)).thenReturn(Optional.of(child));
+
+    assertThatThrownBy(
+            () ->
+                categoryService.updateCategory(
+                    categoryId, new CategoryUpdateRequest(childId, "의류")))
+        .isInstanceOf(BaseException.class);
   }
 
   /** 목록 조회는 parentId, status 조건으로 조회 저장소를 호출 */

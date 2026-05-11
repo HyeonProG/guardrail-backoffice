@@ -68,6 +68,7 @@ public class CategoryService {
   public CategoryResponse updateCategory(UUID categoryId, CategoryUpdateRequest request) {
     currentUserService.requireAdminOrOperator();
     validateParentExists(request.getParentId());
+    validateParentNotCircular(categoryId, request.getParentId());
     validateNameNotDuplicated(categoryId, request.getParentId(), request.getName());
 
     Category category = findActiveCategory(categoryId);
@@ -129,6 +130,20 @@ public class CategoryService {
     }
 
     findActiveCategory(parentId);
+  }
+
+  private void validateParentNotCircular(UUID categoryId, UUID parentId) {
+    UUID currentParentId = parentId;
+
+    while (currentParentId != null) {
+      if (categoryId.equals(currentParentId)) {
+        throw new BaseException(
+            BaseResponseStatus.CONFLICT, "자기 자신 또는 하위 카테고리를 상위 카테고리로 지정할 수 없습니다.");
+      }
+
+      Category parent = findActiveCategory(currentParentId);
+      currentParentId = parent.getParentId();
+    }
   }
 
   private void validateNameNotDuplicated(UUID parentId, String name) {
