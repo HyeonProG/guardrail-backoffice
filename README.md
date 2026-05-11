@@ -101,6 +101,43 @@ flowchart LR
 5. 관리자 또는 운영자는 승인 요청 상세에서 승인 또는 반려합니다.
 6. 승인 완료 상품은 상품 목록과 대시보드에 노출됩니다.
 
+```mermaid
+flowchart TD
+    Admin["관리자 / 운영자"]
+    Staff["직원"]
+    MasterData["기준 정보 관리<br/>사용자 / 카테고리 / 상품 옵션"]
+    Draft["상품 초안 생성<br/>DRAFT"]
+    ProductInput["상품 정보 입력<br/>카테고리 / 이미지 / 선택 옵션 / 설명"]
+    AiDraft["AI 설명 초안 생성<br/>선택 기능"]
+    StaffReview["직원 검토<br/>설명 직접 확인"]
+    RequestReview["승인 요청<br/>PENDING"]
+    ReviewDetail["승인 요청 상세 검토"]
+    Approve{"승인 여부"}
+    Approved["승인 완료<br/>APPROVED"]
+    Rejected["반려<br/>REJECTED"]
+    Resubmit["수정 후 재심사 요청"]
+    Dashboard["상품 목록 / 대시보드 노출"]
+    Inactive["운영 중지<br/>INACTIVE"]
+
+    Admin --> MasterData
+    MasterData --> Draft
+    Staff --> Draft
+    Draft --> ProductInput
+    ProductInput --> AiDraft
+    AiDraft --> StaffReview
+    ProductInput --> StaffReview
+    StaffReview --> RequestReview
+    RequestReview --> ReviewDetail
+    Admin --> ReviewDetail
+    ReviewDetail --> Approve
+    Approve -->|"승인"| Approved
+    Approve -->|"반려"| Rejected
+    Rejected --> Resubmit
+    Resubmit --> ProductInput
+    Approved --> Dashboard
+    Approved --> Inactive
+```
+
 ## 서비스 아키텍처
 
 ```mermaid
