@@ -117,7 +117,11 @@ public class BackOfficeCoreFlowIntegrationTest {
     assertThat(childCategory.getParentId()).isEqualTo(rootCategory.getId());
     assertThat(childCategory.getStatus()).isEqualTo(CategoryStatus.ACTIVE);
 
-    UUID fileTargetId = UUID.randomUUID();
+    var product =
+        productService.createProduct(
+            new ProductCreateRequest(
+                childCategory.getId(), "가드레일 티셔츠", "판매 페이지 상품 설명", admin.getUserId()));
+    UUID fileTargetId = product.getId();
     var representativeFile =
         fileAttachmentService.createFileAttachment(
             new FileAttachmentCreateRequest(
@@ -150,11 +154,6 @@ public class BackOfficeCoreFlowIntegrationTest {
                         "image/jpeg",
                         1)))
         .isInstanceOf(BaseException.class);
-
-    var product =
-        productService.createProduct(
-            new ProductCreateRequest(
-                childCategory.getId(), "가드레일 티셔츠", "판매 페이지 상품 설명", admin.getUserId()));
 
     assertThat(product.getCategoryId()).isEqualTo(childCategory.getId());
     assertThat(product.getStatus()).isEqualTo(ProductStatus.DRAFT);

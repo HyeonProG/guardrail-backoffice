@@ -2,8 +2,6 @@ package com.hyeon.guardrail.productoption.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +18,4 @@ public class ProductOptionUpdateRequest {
   @NotBlank
   @Schema(description = "옵션명", example = "색상")
   private String name;
-
-  @NotNull
-  @Schema(description = "처리자 사용자 ID")
-  private UUID actorId;
 }

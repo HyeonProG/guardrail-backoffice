@@ -172,7 +172,6 @@ public class ProductService {
   /** 상품 처리 이력 목록 조회 */
   @Transactional(readOnly = true)
   public List<ProductHistoryResponse> getProductHistories(UUID productId) {
-    validateProductOwnerForStaff(productId);
     findProduct(productId);
     return productHistoryService.getProductHistories(productId);
   }

@@ -5,13 +5,11 @@ import { unwrapResult } from '@/shared/api/unwrap';
 export type ProductOptionPayload = {
   name: string;
   status: ProductOptionStatus;
-  actorId: string;
 };
 
 export type ProductOptionItemPayload = {
   name: string;
   status: ProductOptionStatus;
-  actorId: string;
 };
 
 export async function getProductOptions(categoryId: string, status?: ProductOptionStatus | '') {
@@ -43,7 +41,7 @@ export async function updateProductOption(
 export async function updateProductOptionStatus(
   categoryId: string,
   productOptionId: string,
-  request: { status: ProductOptionStatus; actorId: string }
+  request: { status: ProductOptionStatus }
 ) {
   const response = await apiClient.patch(
     `/api/v1/categories/${categoryId}/options/${productOptionId}/status`,
@@ -86,7 +84,7 @@ export async function updateProductOptionItemStatus(
   categoryId: string,
   productOptionId: string,
   productOptionItemId: string,
-  request: { status: ProductOptionStatus; actorId: string }
+  request: { status: ProductOptionStatus }
 ) {
   const response = await apiClient.patch(
     `/api/v1/categories/${categoryId}/options/${productOptionId}/items/${productOptionItemId}/status`,

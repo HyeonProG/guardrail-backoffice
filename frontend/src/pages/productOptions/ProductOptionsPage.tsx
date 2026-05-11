@@ -10,7 +10,6 @@ import type { UserRole } from '@/entities/user/model/types';
 import { authStorage } from '@/features/auth/model/authStorage';
 import { productOptionSchema, type ProductOptionFormValues } from '@/pages/productOptions/productOptionSchema';
 import { formatDateTime, shortId } from '@/shared/lib/format';
-import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
@@ -78,7 +77,7 @@ export function ProductOptionsPage() {
 
   const createMutation = useMutation({
     mutationFn: (values: ProductOptionFormValues) =>
-      createProductOption(categoryId, { ...values, status: 'ACTIVE', actorId: requireActorId() }),
+      createProductOption(categoryId, { ...values, status: 'ACTIVE' }),
     onSuccess: () => {
       setCreateModalOpen(false);
       createForm.reset({ name: '' });
@@ -91,7 +90,7 @@ export function ProductOptionsPage() {
       if (!editingOption) {
         throw new Error('수정 대상 옵션이 없습니다.');
       }
-      return updateProductOption(categoryId, editingOption.id, { ...values, actorId: requireActorId() });
+      return updateProductOption(categoryId, editingOption.id, values);
     },
     onSuccess: () => {
       setEditModalOpen(false);

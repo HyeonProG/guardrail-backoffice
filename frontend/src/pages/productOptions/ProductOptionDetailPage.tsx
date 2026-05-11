@@ -14,7 +14,6 @@ import type { UserRole } from '@/entities/user/model/types';
 import { authStorage } from '@/features/auth/model/authStorage';
 import { productOptionItemSchema, productOptionSchema, type ProductOptionFormValues, type ProductOptionItemFormValues } from '@/pages/productOptions/productOptionSchema';
 import { formatDateTime, shortId } from '@/shared/lib/format';
-import { requireActorId } from '@/shared/lib/session';
 import { Button } from '@/shared/ui/Button';
 import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
@@ -80,7 +79,7 @@ export function ProductOptionDetailPage() {
 
   const updateOptionMutation = useMutation({
     mutationFn: (values: ProductOptionFormValues) =>
-      updateProductOption(categoryId, productOptionId, { ...values, actorId: requireActorId() }),
+      updateProductOption(categoryId, productOptionId, values),
     onSuccess: () => {
       setEditModalOpen(false);
       refresh();
@@ -88,7 +87,7 @@ export function ProductOptionDetailPage() {
   });
   const createItemMutation = useMutation({
     mutationFn: (values: ProductOptionItemFormValues) =>
-      createProductOptionItem(categoryId, productOptionId, { ...values, status: 'ACTIVE', actorId: requireActorId() }),
+      createProductOptionItem(categoryId, productOptionId, { ...values, status: 'ACTIVE' }),
     onSuccess: () => {
       setCreateItemModalOpen(false);
       createItemForm.reset({ name: '' });
@@ -100,10 +99,7 @@ export function ProductOptionDetailPage() {
       if (!editingItem) {
         throw new Error('수정할 선택 항목을 찾을 수 없습니다.');
       }
-      return updateProductOptionItem(categoryId, productOptionId, editingItem.id, {
-        ...values,
-        actorId: requireActorId()
-      });
+      return updateProductOptionItem(categoryId, productOptionId, editingItem.id, values);
     },
     onSuccess: () => {
       setEditItemModalOpen(false);

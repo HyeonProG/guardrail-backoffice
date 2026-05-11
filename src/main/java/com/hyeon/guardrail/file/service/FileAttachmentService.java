@@ -12,6 +12,11 @@ import com.hyeon.guardrail.file.dto.FileAttachmentUpdateRequest;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepositoryQuery;
 import com.hyeon.guardrail.file.support.StoredFileResult;
+import com.hyeon.guardrail.product.domain.Product;
+import com.hyeon.guardrail.product.domain.ProductStatus;
+import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
+import com.hyeon.guardrail.product.service.ProductHistoryService;
+import com.hyeon.guardrail.user.domain.UserRole;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +36,8 @@ public class FileAttachmentService {
   private final FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
   private final CurrentUserService currentUserService;
   private final FileStorageService fileStorageService;
+  private final ProductRepositoryQuery productRepositoryQuery;
+  private final ProductHistoryService productHistoryService;
 
   @Value("${app.upload.max-file-size-mb}")
   private long maxFileSizeMb;
@@ -46,6 +53,7 @@ public class FileAttachmentService {
   public FileAttachmentResponse createFileAttachment(FileAttachmentCreateRequest request) {
     validateFileMetadata(request.getFileSize(), request.getContentType());
     validateStoragePath(request.getFilePath());
+    validateTargetManageable(request.getTargetType(), request.getTargetId());
     validateSortOrderNotDuplicated(
         request.getTargetType(), request.getTargetId(), request.getSortOrder());
 
@@ -73,6 +81,7 @@ public class FileAttachmentService {
     }
 
     validateFileMetadata(file.getSize(), file.getContentType());
+    validateTargetManageable(targetType, targetId);
     validateSortOrderNotDuplicated(targetType, targetId, sortOrder);
     StoredFileResult storedFile = fileStorageService.upload(targetType, targetId, file);
     String originalFileName =
@@ -112,6 +121,7 @@ public class FileAttachmentService {
   public FileAttachmentResponse updateFileAttachment(
       UUID fileAttachmentId, FileAttachmentUpdateRequest request) {
     FileAttachment fileAttachment = findFileAttachment(fileAttachmentId);
+    validateTargetManageable(fileAttachment.getTargetType(), fileAttachment.getTargetId());
     validateFileMetadata(request.getFileSize(), request.getContentType());
     validateStoragePath(request.getFilePath());
     validateSortOrderNotDuplicated(
@@ -134,8 +144,8 @@ public class FileAttachmentService {
   /** 파일 첨부 삭제 */
   @Transactional
   public void deleteFileAttachment(UUID fileAttachmentId) {
-    currentUserService.requireAdminOrOperator();
     FileAttachment fileAttachment = findFileAttachment(fileAttachmentId);
+    validateTargetManageable(fileAttachment.getTargetType(), fileAttachment.getTargetId());
     fileAttachment.delete();
   }
 
@@ -172,6 +182,31 @@ public class FileAttachmentService {
     if (!filePath.startsWith(publicBaseUrl)) {
       throw new BaseException(BaseResponseStatus.INVALID_REQUEST, "허용되지 않은 저장 위치입니다.");
     }
+  }
+
+  private void validateTargetManageable(FileTargetType targetType, UUID targetId) {
+    if (targetType != FileTargetType.PRODUCT) {
+      return;
+    }
+
+    Product product = findProductTarget(targetId);
+    UserRole currentRole = currentUserService.getCurrentUserRole();
+
+    if (product.getStatus() == ProductStatus.APPROVED && !currentUserService.isAdminOrOperator()) {
+      throw new BaseException(
+          BaseResponseStatus.FORBIDDEN, "승인 완료 상품의 파일은 관리자 또는 운영자만 변경할 수 있습니다.");
+    }
+
+    if (currentRole == UserRole.STAFF
+        && !productHistoryService.isProductOwner(targetId, currentUserService.getCurrentUserId())) {
+      throw new BaseException(BaseResponseStatus.FORBIDDEN, "본인이 등록한 상품의 파일만 변경할 수 있습니다.");
+    }
+  }
+
+  private Product findProductTarget(UUID productId) {
+    return productRepositoryQuery
+        .findById(productId)
+        .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "상품을 찾을 수 없습니다."));
   }
 
   private void validateSortOrderNotDuplicated(

@@ -52,7 +52,7 @@ class ProductOptionServiceTest {
   void createProductOptionRequiresExistingCategory() {
     UUID categoryId = UUID.randomUUID();
     ProductOptionCreateRequest request =
-        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE);
 
     when(categoryRepositoryQuery.findById(categoryId)).thenReturn(Optional.empty());
 
@@ -66,7 +66,7 @@ class ProductOptionServiceTest {
   void createProductOptionRejectsDuplicatedNameInCategory() {
     UUID categoryId = UUID.randomUUID();
     ProductOptionCreateRequest request =
-        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionCreateRequest("색상", ProductOptionStatus.ACTIVE);
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -85,7 +85,7 @@ class ProductOptionServiceTest {
     UUID productOptionId = UUID.randomUUID();
     ProductOption productOption =
         new ProductOption(categoryId, "색상", 1, ProductOptionStatus.ACTIVE);
-    ProductOptionUpdateRequest request = new ProductOptionUpdateRequest("컬러", UUID.randomUUID());
+    ProductOptionUpdateRequest request = new ProductOptionUpdateRequest("컬러");
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -106,7 +106,7 @@ class ProductOptionServiceTest {
     UUID categoryId = UUID.randomUUID();
     UUID productOptionId = UUID.randomUUID();
     ProductOptionItemCreateRequest request =
-        new ProductOptionItemCreateRequest("블랙", ProductOptionStatus.ACTIVE, UUID.randomUUID());
+        new ProductOptionItemCreateRequest("블랙", ProductOptionStatus.ACTIVE);
 
     when(categoryRepositoryQuery.findById(categoryId))
         .thenReturn(Optional.of(category(categoryId)));
@@ -147,8 +147,7 @@ class ProductOptionServiceTest {
             categoryId,
             productOptionId,
             productOptionItemId,
-            new ProductOptionItemStatusUpdateRequest(
-                ProductOptionStatus.INACTIVE, UUID.randomUUID()));
+            new ProductOptionItemStatusUpdateRequest(ProductOptionStatus.INACTIVE));
 
     assertThat(response.getStatus()).isEqualTo(ProductOptionStatus.INACTIVE);
     assertThat(response.getName()).isEqualTo("블랙");
@@ -180,7 +179,7 @@ class ProductOptionServiceTest {
             categoryId,
             productOptionId,
             productOptionItemId,
-            new ProductOptionItemUpdateRequest("블랙", UUID.randomUUID()));
+            new ProductOptionItemUpdateRequest("블랙"));
 
     assertThat(response.getName()).isEqualTo("블랙");
     assertThat(response.getSortOrder()).isEqualTo(1);

@@ -17,6 +17,11 @@ import com.hyeon.guardrail.file.dto.FileAttachmentUpdateRequest;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepository;
 import com.hyeon.guardrail.file.repository.FileAttachmentRepositoryQuery;
 import com.hyeon.guardrail.file.support.StoredFileResult;
+import com.hyeon.guardrail.product.domain.Product;
+import com.hyeon.guardrail.product.domain.ProductStatus;
+import com.hyeon.guardrail.product.repository.ProductRepositoryQuery;
+import com.hyeon.guardrail.product.service.ProductHistoryService;
+import com.hyeon.guardrail.user.domain.UserRole;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +42,8 @@ class FileAttachmentServiceTest {
   @Mock private FileAttachmentRepositoryQuery fileAttachmentRepositoryQuery;
   @Mock private CurrentUserService currentUserService;
   @Mock private FileStorageService fileStorageService;
+  @Mock private ProductRepositoryQuery productRepositoryQuery;
+  @Mock private ProductHistoryService productHistoryService;
 
   @InjectMocks private FileAttachmentService fileAttachmentService;
 
@@ -69,6 +76,7 @@ class FileAttachmentServiceTest {
             "image/jpeg",
             1);
 
+    mockProductTarget(targetId, ProductStatus.DRAFT);
     when(fileAttachmentRepository.existsByTargetTypeAndTargetIdAndSortOrderAndDeletedFalse(
             FileTargetType.PRODUCT, targetId, 1))
         .thenReturn(true);
@@ -218,6 +226,7 @@ class FileAttachmentServiceTest {
 
     when(fileAttachmentRepositoryQuery.findById(fileAttachmentId))
         .thenReturn(Optional.of(fileAttachment));
+    mockProductTarget(targetId, ProductStatus.DRAFT);
     when(fileAttachmentRepository.existsByTargetTypeAndTargetIdAndSortOrderAndDeletedFalseAndIdNot(
             FileTargetType.PRODUCT, targetId, 1, fileAttachmentId))
         .thenReturn(true);
@@ -244,6 +253,7 @@ class FileAttachmentServiceTest {
     ReflectionTestUtils.setField(fileAttachment, "id", fileAttachmentId);
     when(fileAttachmentRepositoryQuery.findById(fileAttachmentId))
         .thenReturn(Optional.of(fileAttachment));
+    mockProductTarget(fileAttachment.getTargetId(), ProductStatus.DRAFT);
 
     fileAttachmentService.deleteFileAttachment(fileAttachmentId);
 
@@ -256,6 +266,7 @@ class FileAttachmentServiceTest {
     UUID targetId = UUID.randomUUID();
     MockMultipartFile file =
         new MockMultipartFile("file", "main.jpg", "image/jpeg", "sample".getBytes());
+    mockProductTarget(targetId, ProductStatus.DRAFT);
     when(fileStorageService.upload(FileTargetType.PRODUCT, targetId, file))
         .thenReturn(
             new StoredFileResult(
@@ -275,5 +286,12 @@ class FileAttachmentServiceTest {
             "https://guardrail-test-assets.s3.ap-northeast-2.amazonaws.com/products/%s/stored-main.jpg"
                 .formatted(targetId));
     verify(fileStorageService).upload(FileTargetType.PRODUCT, targetId, file);
+  }
+
+  private void mockProductTarget(UUID targetId, ProductStatus status) {
+    Product product = new Product(UUID.randomUUID(), "상품", "설명", status);
+    ReflectionTestUtils.setField(product, "id", targetId);
+    when(productRepositoryQuery.findById(targetId)).thenReturn(Optional.of(product));
+    when(currentUserService.getCurrentUserRole()).thenReturn(UserRole.ADMIN);
   }
 }
