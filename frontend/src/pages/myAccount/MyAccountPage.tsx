@@ -3,7 +3,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { changePassword, getPasswordHistories, getUser, updateUser } from '@/entities/user/api/userApi';
-import type { UserRole } from '@/entities/user/model/types';
 import { authStorage } from '@/features/auth/model/authStorage';
 import {
   myAccountSchema,
@@ -59,8 +58,7 @@ export function MyAccountPage() {
     mutationFn: (values: MyAccountFormValues) =>
       updateUser(userId, {
         email: values.email,
-        name: values.name,
-        role: (userQuery.data?.role ?? (authStorage.getRole() as UserRole) ?? 'STAFF') as UserRole
+        name: values.name
       }),
     onSuccess: () => {
       window.location.reload();

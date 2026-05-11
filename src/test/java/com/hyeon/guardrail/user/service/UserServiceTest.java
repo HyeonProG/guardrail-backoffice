@@ -111,8 +111,7 @@ class UserServiceTest {
     UUID userId = UUID.randomUUID();
     User user = new User("staff@example.com", "홍길동", UserRole.STAFF, UserStatus.ACTIVE);
     ReflectionTestUtils.setField(user, "id", userId);
-    UserUpdateRequest request =
-        new UserUpdateRequest("operator@example.com", "운영자", UserRole.OPERATOR);
+    UserUpdateRequest request = new UserUpdateRequest("operator@example.com", "운영자");
 
     when(userRepository.existsByEmailAndDeletedFalseAndIdNot(request.getEmail(), userId))
         .thenReturn(false);

@@ -4,8 +4,7 @@ import { unwrapResult } from '@/shared/api/unwrap';
 import type {
   ChangePasswordResponse,
   PasswordHistory,
-  User,
-  UserRole
+  User
 } from '@/entities/user/model/types';
 
 export async function getUser(userId: string, config?: ApiRequestConfig) {
@@ -18,7 +17,6 @@ export async function updateUser(
   request: {
     email: string;
     name: string;
-    role: UserRole;
   }
 ) {
   const response = await apiClient.put(`/api/v1/users/${userId}`, request);

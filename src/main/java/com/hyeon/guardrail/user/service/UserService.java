@@ -79,6 +79,7 @@ public class UserService {
   /** 사용자 단건 조회 */
   @Transactional(readOnly = true)
   public UserResponse getUser(UUID userId) {
+    validateSelfOrAdminOperator(userId);
     return UserResponse.from(findActiveUser(userId));
   }
 
@@ -199,5 +200,13 @@ public class UserService {
     return userRepositoryQuery
         .findById(userId)
         .orElseThrow(() -> new BaseException(BaseResponseStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
+  }
+
+  private void validateSelfOrAdminOperator(UUID userId) {
+    if (currentUserService.isAdminOrOperator()) {
+      return;
+    }
+
+    currentUserService.validateActor(userId);
   }
 }
