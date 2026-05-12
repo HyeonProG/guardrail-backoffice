@@ -25,6 +25,10 @@ class ProductDescriptionPromptFactoryTest {
         .contains("상의")
         .contains("색상: 화이트, 네이비")
         .contains("시원함, 가벼움")
+        .contains("구매하고 싶어지도록")
+        .contains("짧은 키워드")
+        .contains("고객 관점의 사용 이유")
+        .contains("구매 설득 문장")
         .contains("과장 표현")
         .contains("허위 성능")
         .contains("확인되지 않은 효능 표현");
