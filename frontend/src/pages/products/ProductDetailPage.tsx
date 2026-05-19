@@ -21,7 +21,12 @@ import { ErrorMessage } from '@/shared/ui/ErrorMessage';
 import { Modal } from '@/shared/ui/Modal';
 import { TextField } from '@/shared/ui/TextField';
 
-const productStatuses: ProductStatus[] = ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'INACTIVE'];
+const allowedNextStatuses: Partial<Record<ProductStatus, ProductStatus[]>> = {
+  DRAFT: ['PENDING'],
+  PENDING: ['APPROVED', 'REJECTED'],
+  APPROVED: ['INACTIVE'],
+  REJECTED: ['PENDING']
+};
 
 export function ProductDetailPage() {
   const { productId = '' } = useParams();
@@ -89,6 +94,10 @@ export function ProductDetailPage() {
   const currentImage = attachments[imageIndex] ?? null;
   const currentCategoryName =
     categories.find((category) => category.id === productQuery.data?.categoryId)?.name ?? '-';
+  const statusOptions = useMemo(
+    () => (productQuery.data ? (allowedNextStatuses[productQuery.data.status] ?? []) : []),
+    [productQuery.data]
+  );
   const canDeleteProduct =
     productQuery.data?.status === 'DRAFT' ||
     productQuery.data?.status === 'PENDING' ||
@@ -100,6 +109,16 @@ export function ProductDetailPage() {
       setImageIndex(0);
     }
   }, [attachments.length, imageIndex]);
+
+  useEffect(() => {
+    if (statusOptions.length === 0) {
+      return;
+    }
+
+    if (!statusOptions.includes(nextStatus)) {
+      setNextStatus(statusOptions[0]);
+    }
+  }, [nextStatus, statusOptions]);
 
   return (
     <div className="space-y-6">
@@ -295,7 +314,7 @@ export function ProductDetailPage() {
                         value={nextStatus}
                         onChange={(event) => setNextStatus(event.target.value as ProductStatus)}
                       >
-                        {productStatuses.map((status) => (
+                        {statusOptions.map((status) => (
                           <option key={status} value={status}>
                             {getProductStatusLabel(status)}
                           </option>
@@ -305,7 +324,7 @@ export function ProductDetailPage() {
                       <ErrorMessage error={statusMutation.error} />
                       <Button
                         type="button"
-                        disabled={statusMutation.isPending}
+                        disabled={statusMutation.isPending || statusOptions.length === 0}
                         onClick={() => setStatusConfirmOpen(true)}
                       >
                         상태 변경
