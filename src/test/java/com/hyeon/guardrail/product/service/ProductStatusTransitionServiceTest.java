@@ -55,6 +55,21 @@ class ProductStatusTransitionServiceTest {
     assertThat(historyType).isEqualTo(ProductHistoryType.SUBMITTED);
   }
 
+  /** 승인 완료 상품은 운영자 또는 관리자 권한 검증 후 다시 승인 대기로 전이할 수 있다. */
+  @Test
+  void approvedCanBeResubmittedByAdminOrOperator() {
+    Product product = new Product(UUID.randomUUID(), "상품", "설명", ProductStatus.APPROVED);
+
+    ProductHistoryType historyType =
+        productStatusTransitionService.changeStatus(
+            product,
+            new ProductStatusUpdateRequest(ProductStatus.PENDING, UUID.randomUUID(), null));
+
+    verify(currentUserService).requireAdminOrOperator();
+    assertThat(product.getStatus()).isEqualTo(ProductStatus.PENDING);
+    assertThat(historyType).isEqualTo(ProductHistoryType.SUBMITTED);
+  }
+
   /** 승인 완료는 운영자 또는 관리자 권한 검증 후 처리한다. */
   @Test
   void approveRequiresAdminOrOperator() {
@@ -84,6 +99,22 @@ class ProductStatusTransitionServiceTest {
 
     verify(currentUserService).requireAdminOrOperator();
     assertThat(product.getStatus()).isEqualTo(ProductStatus.PENDING);
+  }
+
+  /** 승인 완료 상품도 운영자 또는 관리자 권한과 반려 사유 검증 후 반려할 수 있다. */
+  @Test
+  void approvedCanBeRejectedByAdminOrOperator() {
+    Product product = new Product(UUID.randomUUID(), "상품", "설명", ProductStatus.APPROVED);
+
+    ProductHistoryType historyType =
+        productStatusTransitionService.changeStatus(
+            product,
+            new ProductStatusUpdateRequest(
+                ProductStatus.REJECTED, UUID.randomUUID(), "승인 이후 보완 필요"));
+
+    verify(currentUserService).requireAdminOrOperator();
+    assertThat(product.getStatus()).isEqualTo(ProductStatus.REJECTED);
+    assertThat(historyType).isEqualTo(ProductHistoryType.REJECTED);
   }
 
   /** 승인 완료 상품 비활성화도 운영자 또는 관리자 권한 검증 후 처리한다. */

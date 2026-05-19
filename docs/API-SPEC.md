@@ -638,12 +638,13 @@ response result:
 - `ProductResponse`
 
 규칙:
-- `status`는 `DRAFT -> PENDING -> APPROVED`, `DRAFT -> PENDING -> REJECTED`, `REJECTED -> PENDING`, `APPROVED -> INACTIVE` 흐름만 허용한다.
+- `status`는 `DRAFT -> PENDING -> APPROVED`, `DRAFT -> PENDING -> REJECTED`, `REJECTED -> PENDING`, `APPROVED -> PENDING`, `APPROVED -> REJECTED`, `APPROVED -> INACTIVE` 흐름만 허용한다.
 - `REJECTED` 변경 시 `reason`은 필수다.
 - `SUBMITTED`, `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 저장한다.
 - `actorId`는 현재 단계에서 request body로 받는다.
 - 직원은 `DRAFT` 또는 `REJECTED` 상태에서 `PENDING`으로 승인 요청한다.
 - 관리자는 `PENDING` 상태 상품을 `APPROVED` 또는 `REJECTED`로 처리한다.
+- 관리자 또는 운영자는 `APPROVED` 상태 상품을 `PENDING`, `REJECTED`, `INACTIVE`로 처리할 수 있다.
 
 ### 상품 삭제 API
 ```http

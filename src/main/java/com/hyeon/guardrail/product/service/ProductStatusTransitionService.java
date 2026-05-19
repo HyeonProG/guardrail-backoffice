@@ -22,6 +22,9 @@ public class ProductStatusTransitionService {
     ProductStatus status = request.getStatus();
 
     if (status == ProductStatus.PENDING) {
+      if (product.getStatus() == ProductStatus.APPROVED) {
+        currentUserService.requireAdminOrOperator();
+      }
       product.submit();
       return ProductHistoryType.SUBMITTED;
     }

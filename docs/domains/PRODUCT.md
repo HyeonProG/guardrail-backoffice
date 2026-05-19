@@ -127,7 +127,7 @@
 - 카테고리와 상품 옵션 같은 기준 정보 관리는 `ADMIN`, `OPERATOR`만 수행한다.
 - 상품 기본 정보 수정에서 실제 변경이 없으면 `UPDATED` 이력을 남기지 않는다.
 - AI 설명 초안 생성으로 설명이 실제 변경되면 `UPDATED` 이력을 저장하고 `reason`은 `"AI 설명 초안 생성"`으로 기록한다.
-- 승인 완료 상품의 수정과 비활성화는 `ADMIN`, `OPERATOR`만 수행한다.
+- 승인 완료 상품의 수정, 재승인 대기, 반려, 비활성화는 `ADMIN`, `OPERATOR`만 수행한다.
 - `ProductService`는 유스케이스 오케스트레이션만 담당하고, 상태 전이는 `ProductStatusTransitionService`, 선택 옵션 동기화는 `ProductSelectedOptionService`, 이력 저장은 `ProductHistoryService`로 분리한다.
 
 ## 6. 상태 전이 규칙
@@ -137,6 +137,8 @@
 DRAFT -> PENDING -> APPROVED
 DRAFT -> PENDING -> REJECTED
 REJECTED -> PENDING
+APPROVED -> PENDING
+APPROVED -> REJECTED
 APPROVED -> INACTIVE
 ```
 
@@ -147,6 +149,7 @@ APPROVED -> INACTIVE
 - `REJECTED`는 관리자 반려 상태다.
 - `INACTIVE`는 승인 이후 비활성화된 상태다.
 - 반려된 상품은 기본 정보와 설명을 수정한 뒤 다시 `PENDING`으로 승인 요청할 수 있다.
+- 승인 완료 상품은 관리자 또는 운영자가 운영 검토를 위해 다시 `PENDING` 또는 `REJECTED`로 변경할 수 있다.
 
 ## 7. 백오피스 화면 흐름
 ### 상품 등록 페이지
@@ -164,6 +167,7 @@ APPROVED -> INACTIVE
 - 관리자는 `PENDING` 상태 상품 목록을 조회한다.
 - 관리자는 상품 기본 정보와 상세 설명을 검토한 뒤 승인 또는 반려한다.
 - 승인 시 `APPROVED`, 반려 시 `REJECTED`로 변경된다.
+- 승인 완료 상품은 관리자 또는 운영자가 재검토를 위해 다시 승인 대기 또는 반려 상태로 변경할 수 있다.
 
 ## 8. API 유스케이스
 ### 상품 생성
@@ -227,7 +231,8 @@ APPROVED -> INACTIVE
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
   - 직원은 `status = PENDING`으로 요청한다.
-  - `DRAFT`, `REJECTED` 상태에서만 승인 요청할 수 있다.
+  - 직원은 `DRAFT`, `REJECTED` 상태에서만 승인 요청할 수 있다.
+  - 관리자 또는 운영자는 `APPROVED` 상태 상품을 다시 `PENDING`으로 변경할 수 있다.
   - `SUBMITTED` 이력을 함께 저장한다.
 
 ### 상품 설명 AI 초안 생성
@@ -245,7 +250,8 @@ APPROVED -> INACTIVE
 - request: `ProductStatusUpdateRequest`
 - response: `BaseResponseEntity<ProductResponse>`
 - 규칙:
-  - 관리자는 `PENDING` 상태 상품만 `APPROVED` 또는 `REJECTED`로 처리할 수 있다.
+  - 관리자는 `PENDING` 상태 상품을 `APPROVED` 또는 `REJECTED`로 처리할 수 있다.
+  - 관리자 또는 운영자는 `APPROVED` 상태 상품을 `REJECTED`로 변경할 수 있다.
   - `REJECTED` 변경 시 `reason`은 필수다.
   - `APPROVED`, `REJECTED`, `INACTIVATED` 이력을 함께 저장한다.
 

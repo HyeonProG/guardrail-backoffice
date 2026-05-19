@@ -49,7 +49,9 @@ public class Product extends SoftDeleteEntity {
 
   /** 상품을 승인 대기 상태로 제출 */
   public void submit() {
-    if (status != ProductStatus.DRAFT && status != ProductStatus.REJECTED) {
+    if (status != ProductStatus.DRAFT
+        && status != ProductStatus.REJECTED
+        && status != ProductStatus.APPROVED) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "상품을 승인 대기 상태로 변경할 수 없습니다.");
     }
     this.status = ProductStatus.PENDING;
@@ -65,7 +67,7 @@ public class Product extends SoftDeleteEntity {
 
   /** 승인 대기 상품을 반려 상태로 변경 */
   public void reject() {
-    if (status != ProductStatus.PENDING) {
+    if (status != ProductStatus.PENDING && status != ProductStatus.APPROVED) {
       throw new BaseException(BaseResponseStatus.CONFLICT, "상품을 반려할 수 없습니다.");
     }
     this.status = ProductStatus.REJECTED;

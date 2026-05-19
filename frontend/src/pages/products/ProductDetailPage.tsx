@@ -24,7 +24,7 @@ import { TextField } from '@/shared/ui/TextField';
 const allowedNextStatuses: Partial<Record<ProductStatus, ProductStatus[]>> = {
   DRAFT: ['PENDING'],
   PENDING: ['APPROVED', 'REJECTED'],
-  APPROVED: ['INACTIVE'],
+  APPROVED: ['PENDING', 'REJECTED', 'INACTIVE'],
   REJECTED: ['PENDING']
 };
 
