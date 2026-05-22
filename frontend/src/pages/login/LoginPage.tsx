@@ -13,19 +13,24 @@ export function LoginPage() {
   const sessionExpired = searchParams.get('reason') === 'session-expired';
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.14),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.14),_transparent_28%),linear-gradient(180deg,#f8fafc_0%,#edf4f7_100%)] px-4 py-10">
-      <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(148,163,184,0.09)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.09)_1px,transparent_1px)] [background-size:32px_32px]" />
-      <section className="relative w-full max-w-[440px] overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] p-9 shadow-[0_38px_90px_rgba(15,23,42,0.14)]">
-        <div className="mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700">{env.appName}</p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-ink">관리자 로그인</h1>
-        </div>
-        {sessionExpired ? (
-          <div className="mb-6 rounded-[20px] border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fff7d6_100%)] px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
-            로그인 상태가 만료되었습니다. 다시 로그인해 주세요.
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[image:var(--gradient-app)] px-4 py-10 text-[color:var(--color-text)]">
+      <div className="absolute inset-0 opacity-70 [background-image:linear-gradient(rgba(79,209,197,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(79,209,197,0.08)_1px,transparent_1px)] [background-size:34px_34px]" />
+      <section className="relative w-full max-w-xl overflow-hidden rounded-[34px] border border-[color:var(--color-border)] bg-[color:var(--color-surface-alpha)] shadow-[var(--shadow-modal)] backdrop-blur-xl">
+        <div className="p-8 sm:p-10">
+          <div className="mb-8">
+            <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[image:var(--gradient-primary)] text-lg font-black text-white shadow-[0_16px_35px_rgba(79,209,197,0.3)]">
+              G
+            </div>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-[color:var(--color-primary)]">{env.appName}</p>
+            <h1 className="mt-4 text-3xl font-black tracking-tight text-[color:var(--color-text)]">관리자 로그인</h1>
           </div>
-        ) : null}
-        <LoginForm />
+          {sessionExpired ? (
+            <div className="mb-6 rounded-[20px] border border-amber-200 bg-[linear-gradient(180deg,#fffbeb_0%,#fff7d6_100%)] px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
+              로그인 상태가 만료되었습니다. 다시 로그인해 주세요.
+            </div>
+          ) : null}
+          <LoginForm />
+        </div>
       </section>
     </main>
   );

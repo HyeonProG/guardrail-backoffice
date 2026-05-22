@@ -74,7 +74,7 @@ export function UsersPage() {
         </div>
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[420px_1fr]">
+      <section className="grid gap-6 xl:grid-cols-[minmax(360px,420px)_minmax(0,1fr)]">
         <div className="surface-card p-6">
           <h2 className="text-lg font-semibold text-slate-950">사용자 추가</h2>
           <form
@@ -121,7 +121,7 @@ export function UsersPage() {
           ) : null}
         </div>
 
-        <div className="table-shell">
+        <div className="table-shell min-w-0 overflow-hidden">
           <div className="table-toolbar">
             <div>
               <h2 className="table-title">사용자 목록</h2>
@@ -140,71 +140,73 @@ export function UsersPage() {
             </select>
           </div>
 
-          <table className="table-base min-w-[820px]">
-            <thead>
-              <tr>
-                <th className="px-4 py-3">ID</th>
-                <th className="px-4 py-3">이메일</th>
-                <th className="px-4 py-3">이름</th>
-                <th className="px-4 py-3">역할</th>
-                <th className="px-4 py-3">상태</th>
-                <th className="px-4 py-3">액션</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user) => (
-                <tr key={user.userId}>
-                  <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(user.userId)}</td>
-                  <td className="px-4 py-3 text-slate-700">{user.email}</td>
-                  <td className="px-4 py-3 font-medium text-slate-950">{user.name}</td>
-                  <td className="px-4 py-3">{user.role}</td>
-                  <td className="px-4 py-3">{user.status}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      {user.status !== 'ACTIVE' ? (
-                        <button
-                          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-                          onClick={() =>
-                            setConfirmState({
-                              title: '사용자 활성화 확인',
-                              description: `${user.email} 계정을 활성화하시겠습니까?`,
-                              actionLabel: '활성화',
-                              onConfirm: () => statusMutation.mutate({ userId: user.userId, status: 'ACTIVE' })
-                            })
-                          }
-                          type="button"
-                        >
-                          활성화
-                        </button>
-                      ) : (
-                        <button
-                          className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-                          onClick={() =>
-                            setConfirmState({
-                              title: '사용자 비활성화 확인',
-                              description: `${user.email} 계정을 비활성화하시겠습니까?`,
-                              actionLabel: '비활성화',
-                              onConfirm: () => statusMutation.mutate({ userId: user.userId, status: 'INACTIVE' })
-                            })
-                          }
-                          type="button"
-                        >
-                          비활성화
-                        </button>
-                      )}
-                      <button
-                        className="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
-                        onClick={() => setTemporaryPasswordTarget(user)}
-                        type="button"
-                      >
-                        임시 비밀번호 발급
-                      </button>
-                    </div>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="table-base min-w-[980px]">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3">ID</th>
+                  <th className="px-4 py-3">이메일</th>
+                  <th className="px-4 py-3">이름</th>
+                  <th className="px-4 py-3">역할</th>
+                  <th className="px-4 py-3">상태</th>
+                  <th className="min-w-[260px] px-4 py-3">액션</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user.userId}>
+                    <td className="px-4 py-3 font-mono text-xs text-slate-600">{shortId(user.userId)}</td>
+                    <td className="px-4 py-3 text-slate-700">{user.email}</td>
+                    <td className="px-4 py-3 font-medium text-slate-950">{user.name}</td>
+                    <td className="px-4 py-3">{user.role}</td>
+                    <td className="px-4 py-3">{user.status}</td>
+                    <td className="min-w-[260px] px-4 py-3">
+                      <div className="flex min-w-max gap-2">
+                        {user.status !== 'ACTIVE' ? (
+                          <button
+                            className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                            onClick={() =>
+                              setConfirmState({
+                                title: '사용자 활성화 확인',
+                                description: `${user.email} 계정을 활성화하시겠습니까?`,
+                                actionLabel: '활성화',
+                                onConfirm: () => statusMutation.mutate({ userId: user.userId, status: 'ACTIVE' })
+                              })
+                            }
+                            type="button"
+                          >
+                            활성화
+                          </button>
+                        ) : (
+                          <button
+                            className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                            onClick={() =>
+                              setConfirmState({
+                                title: '사용자 비활성화 확인',
+                                description: `${user.email} 계정을 비활성화하시겠습니까?`,
+                                actionLabel: '비활성화',
+                                onConfirm: () => statusMutation.mutate({ userId: user.userId, status: 'INACTIVE' })
+                              })
+                            }
+                            type="button"
+                          >
+                            비활성화
+                          </button>
+                        )}
+                        <button
+                          className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-xl border border-slate-200 bg-white/90 px-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                          onClick={() => setTemporaryPasswordTarget(user)}
+                          type="button"
+                        >
+                          임시 비밀번호 발급
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {usersQuery.isLoading ? <div className="p-5 text-sm text-slate-600">조회 중입니다.</div> : null}
           {!usersQuery.isLoading && users.length === 0 ? <div className="p-5 text-sm text-slate-600">조회된 사용자가 없습니다.</div> : null}

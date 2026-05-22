@@ -28,6 +28,19 @@ const allowedNextStatuses: Partial<Record<ProductStatus, ProductStatus[]>> = {
   REJECTED: ['PENDING']
 };
 
+function statusBadgeClass(status: ProductStatus) {
+  if (status === 'APPROVED') {
+    return 'status-badge-success';
+  }
+  if (status === 'PENDING') {
+    return 'status-badge-warning';
+  }
+  if (status === 'REJECTED') {
+    return 'status-badge-danger';
+  }
+  return 'status-badge-muted';
+}
+
 export function ProductDetailPage() {
   const { productId = '' } = useParams();
   const navigate = useNavigate();
@@ -173,7 +186,7 @@ export function ProductDetailPage() {
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Product Overview</p>
                 <h3 className="mt-2 text-2xl font-semibold text-slate-950">{productQuery.data.name}</h3>
               </div>
-              <span className="rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold text-white">
+              <span className={statusBadgeClass(productQuery.data.status)}>
                 {getProductStatusLabel(productQuery.data.status)}
               </span>
             </div>
@@ -254,7 +267,7 @@ export function ProductDetailPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-sm">
+                <div className="surface-card-muted p-5">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-base font-semibold text-slate-950">선택 항목</h3>
                     <span className="text-xs font-medium text-slate-400">{productQuery.data.selectedOptions.length}개</span>
@@ -277,7 +290,7 @@ export function ProductDetailPage() {
                   )}
                 </div>
 
-                <div className="rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-sm">
+                <div className="surface-card-muted p-5">
                   <h3 className="text-base font-semibold text-slate-950">상품 설명</h3>
                   <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">
                     {productQuery.data.description?.trim() || '등록된 설명이 없습니다.'}
@@ -292,13 +305,13 @@ export function ProductDetailPage() {
               {canManageDangerousActions ? (
                 <>
                   <div className="surface-card p-6">
-                    <h3 className="text-base font-semibold text-ink">기본 정보 수정</h3>
+                    <h3 className="text-base font-semibold text-[color:var(--color-text)]">기본 정보 수정</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       운영자와 관리자는 별도 수정 페이지에서 상품명, 카테고리, 설명을 변경할 수 있습니다.
                     </p>
                     <div className="mt-4">
                       <Link
-                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-sky-900/90 bg-[linear-gradient(135deg,#0f172a_0%,#1e3a8a_100%)] px-4 text-sm font-semibold text-white shadow-lg hover:-translate-y-0.5"
+                        className="inline-flex h-11 items-center justify-center rounded-2xl border border-transparent bg-[color:var(--color-primary)] px-4 text-sm font-black text-[#172554] shadow-[0_12px_24px_rgba(79,209,197,0.26)] transition hover:-translate-y-0.5 hover:bg-[#3fc9bd] hover:shadow-[0_16px_32px_rgba(79,209,197,0.34)]"
                         to={`/products/${productId}/edit`}
                       >
                         수정 페이지로 이동
@@ -306,7 +319,7 @@ export function ProductDetailPage() {
                     </div>
                   </div>
                   <div className="surface-card p-6">
-                    <h3 className="text-base font-semibold text-ink">상태 변경</h3>
+                    <h3 className="text-base font-semibold text-[color:var(--color-text)]">상태 변경</h3>
                     <div className="mt-4 space-y-3">
                       <p className="text-sm text-slate-600">현재 상태: {getProductStatusLabel(productQuery.data.status)}</p>
                       <select
@@ -373,7 +386,7 @@ export function ProductDetailPage() {
         onClose={() => setStatusConfirmOpen(false)}
       >
         <div className="space-y-4">
-          <div className="rounded-[20px] border border-slate-200 bg-[linear-gradient(180deg,#f8fafc_0%,#ffffff_100%)] p-4 shadow-sm">
+          <div className="surface-card-muted p-4">
             <dl className="space-y-3 text-sm text-slate-700">
               <div className="flex items-center justify-between gap-4">
                 <dt className="font-medium text-slate-500">현재 상태</dt>

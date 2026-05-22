@@ -81,7 +81,7 @@ export function ApprovedProductsPage() {
               {productCards.map((product) => (
                 <article
                   key={product.id}
-                  className="overflow-hidden rounded-[24px] border border-white/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(248,250,252,0.94)_100%)] shadow-[0_18px_45px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(15,23,42,0.14)]"
+                  className="product-card"
                 >
                   <Link to={`/products/${product.id}`}>
                     <div className="aspect-[4/3] overflow-hidden bg-slate-100">

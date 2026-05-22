@@ -14,11 +14,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
 
   return (
     <label className="block" htmlFor={inputId}>
-      <span className="mb-2 block text-sm font-semibold tracking-[0.01em] text-slate-700">{label}</span>
+      <span className="mb-2 block text-sm font-semibold tracking-[0.01em] text-[color:var(--color-text)]">{label}</span>
       <input
         ref={ref}
         id={inputId}
-        className={`h-12 w-full rounded-2xl border border-slate-200 bg-white/90 px-4 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:ring-4 focus:ring-sky-100 ${className}`}
+        className={`h-12 w-full rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface-alpha)] px-4 text-sm text-[color:var(--color-text)] shadow-sm outline-none transition placeholder:text-[color:var(--color-muted)] focus:border-[color:var(--color-primary)] focus:bg-[color:var(--color-surface)] focus:ring-4 focus:ring-[color:var(--color-focus)] ${className}`}
         {...props}
       />
       {error ? <span className="mt-2 block text-xs font-semibold text-red-600">{error}</span> : null}

@@ -10,6 +10,7 @@ import { navigationGroups } from '@/widgets/layout/model/navigation';
 export function AppLayout() {
   const navigate = useNavigate();
   const [temporaryPasswordModalOpen, setTemporaryPasswordModalOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     if (authStorage.isTemporaryPassword() && !authStorage.isTemporaryPasswordPromptDismissed()) {
@@ -37,7 +38,7 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.12),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(251,191,36,0.14),_transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef4f8_100%)] text-ink">
+    <div className="min-h-screen bg-[image:var(--gradient-app)] text-[color:var(--color-text)]">
       <Modal
         open={temporaryPasswordModalOpen}
         title="임시 비밀번호 변경 필요"
@@ -58,9 +59,18 @@ export function AppLayout() {
           </div>
         </div>
       </Modal>
-      <Header groups={navigationGroups} onLogout={handleLogout} />
-      <main className="mx-auto max-w-[1480px] px-5 py-10 sm:px-6 lg:px-8">
-        <div className="animate-fade-up">
+      <Header
+        groups={navigationGroups}
+        sidebarCollapsed={sidebarCollapsed}
+        onLogout={handleLogout}
+        onToggleSidebar={() => setSidebarCollapsed((current) => !current)}
+      />
+      <main
+        className={`px-5 py-8 transition-[margin] duration-300 sm:px-6 lg:px-8 ${
+          sidebarCollapsed ? 'lg:ml-[88px]' : 'lg:ml-[272px]'
+        }`}
+      >
+        <div className="mx-auto max-w-[1480px] animate-fade-up">
           <Outlet />
         </div>
       </main>
